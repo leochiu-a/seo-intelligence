@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: MVP
 status: verifying
-stopped_at: Completed 03-01-PLAN.md
-last_updated: "2026-04-13T14:46:26.000Z"
+stopped_at: Completed 03-02-PLAN.md
+last_updated: "2026-04-13T14:48:56.912Z"
 last_activity: 2026-04-13
 progress:
   total_phases: 4
-  completed_phases: 3
+  completed_phases: 4
   total_plans: 8
-  completed_plans: 7
+  completed_plans: 8
   percent: 0
 ---
 
@@ -56,6 +56,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 01-canvas-editor P02 | 8 | 2 tasks | 3 files |
 | Phase 02-scoring-analysis P02 | 10 | 3 tasks | 3 files |
 | Phase 03-scenarios-export P01 | 1 min | 2 tasks | 1 files |
+| Phase 03-scenarios-export P02 | 525633min | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -75,6 +76,8 @@ Recent decisions affecting current work:
 - [Phase 02-scoring-analysis]: enrichedNodes memoized separately from raw nodes — skips object creation when scoreTier and isWeak are unchanged
 - [Phase 02-scoring-analysis]: ScoreSidebar receives raw nodes (not enrichedNodes) for URL template display while scores/weakNodes are separate props
 - [Phase 03-scenarios-export]: isRestoring ref mount-guard prevents save/restore loop; serializeGraph strips runtime callbacks before persisting — Without the guard, save effect fires before restore completes and overwrites localStorage with empty state
+- [Phase 03-scenarios-export]: URL templates in CSV wrapped in double-quotes always (handles commas in templates safely)
+- [Phase 03-scenarios-export]: Export callbacks read directly from nodes, edges, scores useMemo in AppInner — no additional computation needed
 
 ### Pending Todos
 
@@ -86,6 +89,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-13T14:46:25.997Z
-Stopped at: Completed 03-01-PLAN.md
+Last session: 2026-04-13T14:48:56.910Z
+Stopped at: Completed 03-02-PLAN.md
 Resume file: None
