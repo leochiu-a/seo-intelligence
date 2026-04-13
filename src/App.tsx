@@ -154,6 +154,39 @@ function AppInner() {
     [setEdges, onEdgeLinkCountChange],
   );
 
+  // Recalculate scores on every graph change (per D-13, SCORE-02)
+  const scores = useMemo(
+    () => calculatePageRank(nodes, edges),
+    [nodes, edges],
+  );
+
+  const weakNodes = useMemo(
+    () => identifyWeakNodes(scores),
+    [scores],
+  );
+
+  const allScoreValues = useMemo(
+    () => [...scores.values()],
+    [scores],
+  );
+
+  // Enrich nodes with score tier and weak flag for UrlNode rendering
+  const enrichedNodes = useMemo(() => {
+    return nodes.map((node) => {
+      const score = scores.get(node.id) ?? 0;
+      const scoreTier = classifyScoreTier(score, allScoreValues);
+      const isWeak = weakNodes.has(node.id);
+      // Only create new object if score data changed
+      if (node.data.scoreTier === scoreTier && node.data.isWeak === isWeak) {
+        return node;
+      }
+      return {
+        ...node,
+        data: { ...node.data, scoreTier, isWeak },
+      };
+    });
+  }, [nodes, scores, weakNodes, allScoreValues]);
+
   const onExportJson = useCallback(() => {
     const exportData = {
       nodes: nodes.map((n) => ({
@@ -249,39 +282,6 @@ function AppInner() {
     if (isRestoring.current) return;
     localStorage.setItem(STORAGE_KEY, JSON.stringify(serializeGraph(nodes, edges)));
   }, [nodes, edges]);
-
-  // Recalculate scores on every graph change (per D-13, SCORE-02)
-  const scores = useMemo(
-    () => calculatePageRank(nodes, edges),
-    [nodes, edges],
-  );
-
-  const weakNodes = useMemo(
-    () => identifyWeakNodes(scores),
-    [scores],
-  );
-
-  const allScoreValues = useMemo(
-    () => [...scores.values()],
-    [scores],
-  );
-
-  // Enrich nodes with score tier and weak flag for UrlNode rendering
-  const enrichedNodes = useMemo(() => {
-    return nodes.map((node) => {
-      const score = scores.get(node.id) ?? 0;
-      const scoreTier = classifyScoreTier(score, allScoreValues);
-      const isWeak = weakNodes.has(node.id);
-      // Only create new object if score data changed
-      if (node.data.scoreTier === scoreTier && node.data.isWeak === isWeak) {
-        return node;
-      }
-      return {
-        ...node,
-        data: { ...node.data, scoreTier, isWeak },
-      };
-    });
-  }, [nodes, scores, weakNodes, allScoreValues]);
 
   return (
     <div className="h-screen w-screen flex flex-col bg-gray-50">
