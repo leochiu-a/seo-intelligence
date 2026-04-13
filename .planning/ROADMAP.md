@@ -61,7 +61,7 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 02-01: Implement iterative PageRank algorithm (dampening factor, page count and link count weighting) that recalculates on every graph state change
+- [x] 02-01: Implement iterative PageRank algorithm (dampening factor, page count and link count weighting) that recalculates on every graph state change
 - [ ] 02-02: Implement score-driven node size/color scaling and ranked sidebar with weak-page flags and click-to-highlight
 
 **UI hint**: yes

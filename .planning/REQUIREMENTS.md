@@ -26,8 +26,8 @@
 
 ### PageRank Scoring
 
-- [ ] **SCORE-01**: System calculates an iterative PageRank-style score for each node, weighted by page count and link count
-- [ ] **SCORE-02**: Scores are recalculated automatically when the graph changes
+- [x] **SCORE-01**: System calculates an iterative PageRank-style score for each node, weighted by page count and link count
+- [x] **SCORE-02**: Scores are recalculated automatically when the graph changes
 - [ ] **SCORE-03**: Node visual size scales with its score
 - [ ] **SCORE-04**: Node color reflects score level (e.g. green = high, red/orange = low)
 
