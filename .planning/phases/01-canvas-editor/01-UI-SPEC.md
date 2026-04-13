@@ -94,6 +94,7 @@ Font weights are exactly 2: **400 (regular)** and **600 (semibold)**. No other w
 - Edge default stroke: `#9CA3AF` (gray-400)
 - Edge label background: `#FFFFFF` (white pill behind the count number)
 - Canvas grid dots: `#D1D5DB` (gray-300) — React Flow Background default
+- Inline validation error text: `#EF4444` (red-500)
 
 **Primary visual anchor:** the canvas area is the primary visual anchor; the indigo-500 left accent border on each node card is the focal color element that draws the eye.
 
@@ -197,7 +198,13 @@ Source: D-01, D-02, D-03, D-04, D-05.
 - Focus state: indigo-500 ring (ring-2 ring-indigo-500)
 - Field gap: 16px between fields
 
-**Dismiss behavior (D-07):** Click outside → save and close. No explicit save button. ESC key → discard changes and close.
+**Validation — URL Template field:**
+- When the URL Template input is empty on dismiss (click outside or blur): show inline error message directly below the input field.
+- Error message: "URL template cannot be empty"
+- Error text style: 12px / regular / red-500, margin-top 4px
+- The popover remains open until the field is non-empty (prevent save/close while invalid on outside-click dismiss; ESC still discards and closes regardless).
+
+**Dismiss behavior (D-07):** Click outside → validate then save and close (blocked if URL Template is empty — see Validation above). ESC key → discard changes and close.
 
 ---
 
@@ -212,7 +219,7 @@ Source: D-01, D-02, D-03, D-04, D-05.
 
 **Edge label (D-11, D-12):**
 - Content: link count number (e.g. "3")
-- Background: white pill — rounded-full, px-8px py-2px, border 1px gray-200
+- Background: white pill — rounded-full, px-8px py-4px, border 1px gray-200
 - Font: 12px / semibold / gray-700
 - Clickable region: entire pill
 - Editing state: `<input type="number">` replaces label text, same pill container, width 48px, indigo-500 ring-2
@@ -239,7 +246,7 @@ Source: D-11, D-12, D-13, D-14.
 | Multi-select nodes | Shift+click or drag selection box | React Flow native |
 | Delete node | Select → Delete or Backspace key | React Flow `onNodesDelete`; edges connected to node also removed |
 | Open edit popover | Click pencil icon (visible on hover) | Popover opens adjacent to node |
-| Dismiss popover | Click outside or press ESC | Save (outside click) or discard (ESC) |
+| Dismiss popover | Click outside or press ESC | Save (outside click, blocked if URL Template empty) or discard (ESC) |
 | Create edge | Drag from node connection handle to another node | React Flow native `onConnect`; edge spawns with link count 1 |
 | Select edge | Click edge line | React Flow native selection |
 | Edit edge label | Click edge label pill | Inline number input appears; Enter/blur confirms |
@@ -263,6 +270,7 @@ Source: D-11, D-12, D-13, D-14.
 | Popover field label — page count | "Page Count" |
 | Popover placeholder — URL template | `/page/<id>` |
 | Popover placeholder — page count | `1` |
+| Popover inline validation — URL template empty | "URL template cannot be empty" (shown below input on dismiss with empty field) |
 | Empty state heading | "Start mapping your link structure" |
 | Empty state body | "Drag a URL Node from the left panel onto the canvas, then connect nodes to model how pages link to each other." |
 | Empty state sub-hint | "Or use + Add Node above to place a node at canvas center." |
