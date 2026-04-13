@@ -28,14 +28,14 @@
 
 - [x] **SCORE-01**: System calculates an iterative PageRank-style score for each node, weighted by page count and link count
 - [x] **SCORE-02**: Scores are recalculated automatically when the graph changes
-- [ ] **SCORE-03**: Node visual size scales with its score
-- [ ] **SCORE-04**: Node color reflects score level (e.g. green = high, red/orange = low)
+- [x] **SCORE-03**: Node visual size scales with its score
+- [x] **SCORE-04**: Node color reflects score level (e.g. green = high, red/orange = low)
 
 ### Sidebar & Analysis
 
-- [ ] **SIDEBAR-01**: Sidebar lists all nodes ranked by score (descending)
-- [ ] **SIDEBAR-02**: Weak/isolated pages (below a threshold of inbound link equity) are flagged with a warning indicator
-- [ ] **SIDEBAR-03**: Clicking a sidebar item highlights/selects the corresponding node on canvas
+- [x] **SIDEBAR-01**: Sidebar lists all nodes ranked by score (descending)
+- [x] **SIDEBAR-02**: Weak/isolated pages (below a threshold of inbound link equity) are flagged with a warning indicator
+- [x] **SIDEBAR-03**: Clicking a sidebar item highlights/selects the corresponding node on canvas
 
 ### Scenario Comparison
 
