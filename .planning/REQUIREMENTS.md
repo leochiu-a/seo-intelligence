@@ -7,7 +7,7 @@
 
 ### Canvas Editor
 
-- [ ] **CANVAS-01**: User can add URL template nodes to a canvas by dragging from a sidebar or double-clicking on blank canvas
+- [x] **CANVAS-01**: User can add URL template nodes to a canvas by dragging from a sidebar or double-clicking on blank canvas
 - [ ] **CANVAS-02**: Nodes display the URL template string (e.g. `/category/<dest>/<cat>/list`)
 - [ ] **CANVAS-03**: User can connect two nodes with a directed edge by dragging from a node's edge handle or via right-click context menu
 - [ ] **CANVAS-04**: Nodes and edges can be selected, moved, and deleted
@@ -15,14 +15,14 @@
 
 ### Node Configuration
 
-- [ ] **NODE-01**: Each node has a configurable URL template string with `<placeholder>` syntax
-- [ ] **NODE-02**: Each node has a configurable **page count** representing how many real pages this template produces (e.g. 100 category pages)
-- [ ] **NODE-03**: Node label displays both the URL template and page count
+- [x] **NODE-01**: Each node has a configurable URL template string with `<placeholder>` syntax
+- [x] **NODE-02**: Each node has a configurable **page count** representing how many real pages this template produces (e.g. 100 category pages)
+- [x] **NODE-03**: Node label displays both the URL template and page count
 
 ### Edge Configuration
 
-- [ ] **EDGE-01**: Each directed edge has a configurable **link count** — average number of links a source page places to the destination template
-- [ ] **EDGE-02**: Edge label displays the link count
+- [x] **EDGE-01**: Each directed edge has a configurable **link count** — average number of links a source page places to the destination template
+- [x] **EDGE-02**: Edge label displays the link count
 
 ### PageRank Scoring
 
