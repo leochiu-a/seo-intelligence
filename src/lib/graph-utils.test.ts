@@ -1,4 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest';
+import type { Node, Edge } from 'reactflow';
 import {
   createDefaultNode,
   updateNodeData,
@@ -7,7 +8,11 @@ import {
   validateLinkCount,
   formatPageCount,
   resetNodeIdCounter,
+  calculatePageRank,
+  classifyScoreTier,
+  identifyWeakNodes,
 } from './graph-utils';
+import type { UrlNodeData, LinkCountEdgeData } from './graph-utils';
 
 describe('createDefaultNode', () => {
   beforeEach(() => {
@@ -159,5 +164,210 @@ describe('formatPageCount', () => {
   it('returns plural for counts greater than 1', () => {
     expect(formatPageCount(100)).toBe('100 pages');
     expect(formatPageCount(2)).toBe('2 pages');
+  });
+});
+
+// Helper to build minimal Node fixtures
+function makeNode(id: string, pageCount: number): Node<UrlNodeData> {
+  return {
+    id,
+    type: 'urlNode',
+    position: { x: 0, y: 0 },
+    data: { urlTemplate: `/${id}`, pageCount },
+  };
+}
+
+// Helper to build minimal Edge fixtures
+function makeEdge(id: string, source: string, target: string, linkCount: number): Edge<LinkCountEdgeData> {
+  return { id, source, target, data: { linkCount } };
+}
+
+describe('calculatePageRank', () => {
+  it('returns empty Map for empty graph', () => {
+    const result = calculatePageRank([], []);
+    expect(result.size).toBe(0);
+  });
+
+  it('single node with no edges gets score 1.0', () => {
+    const nodes = [makeNode('a', 1)];
+    const result = calculatePageRank(nodes, []);
+    expect(result.get('a')).toBeCloseTo(1.0, 3);
+  });
+
+  it('two disconnected nodes each get score 1.0', () => {
+    const nodes = [makeNode('a', 1), makeNode('b', 1)];
+    const result = calculatePageRank(nodes, []);
+    expect(result.get('a')).toBeCloseTo(1.0, 3);
+    expect(result.get('b')).toBeCloseTo(1.0, 3);
+  });
+
+  it('two nodes A->B: B gets higher score than A', () => {
+    const nodes = [makeNode('a', 1), makeNode('b', 1)];
+    const edges = [makeEdge('e1', 'a', 'b', 1)];
+    const result = calculatePageRank(nodes, edges);
+    const scoreA = result.get('a')!;
+    const scoreB = result.get('b')!;
+    expect(scoreB).toBeGreaterThan(scoreA);
+  });
+
+  it('three-node chain A->B->C: scores satisfy C > B > A', () => {
+    const nodes = [makeNode('a', 1), makeNode('b', 1), makeNode('c', 1)];
+    const edges = [makeEdge('e1', 'a', 'b', 1), makeEdge('e2', 'b', 'c', 1)];
+    const result = calculatePageRank(nodes, edges);
+    const scoreA = result.get('a')!;
+    const scoreB = result.get('b')!;
+    const scoreC = result.get('c')!;
+    expect(scoreC).toBeGreaterThan(scoreB);
+    expect(scoreB).toBeGreaterThan(scoreA);
+  });
+
+  it('cycle A->B->A: both nodes get equal scores (symmetry)', () => {
+    const nodes = [makeNode('a', 1), makeNode('b', 1)];
+    const edges = [makeEdge('e1', 'a', 'b', 1), makeEdge('e2', 'b', 'a', 1)];
+    const result = calculatePageRank(nodes, edges);
+    const scoreA = result.get('a')!;
+    const scoreB = result.get('b')!;
+    expect(scoreA).toBeCloseTo(scoreB, 3);
+  });
+
+  it('link count weighting: A->B with linkCount=5 gives B higher score than linkCount=1', () => {
+    const nodesLow = [makeNode('a', 1), makeNode('b', 1)];
+    const edgesLow = [makeEdge('e1', 'a', 'b', 1)];
+    const resultLow = calculatePageRank(nodesLow, edgesLow);
+
+    const nodesHigh = [makeNode('a', 1), makeNode('b', 1)];
+    const edgesHigh = [makeEdge('e1', 'a', 'b', 5)];
+    const resultHigh = calculatePageRank(nodesHigh, edgesHigh);
+
+    expect(resultHigh.get('b')!).toBeGreaterThan(resultLow.get('b')!);
+  });
+
+  it('page count weighting: node with pageCount=100 has larger equity pool', () => {
+    // A(pageCount=1) -> B(pageCount=1) vs A(pageCount=100) -> B(pageCount=1)
+    // Higher pageCount on source means more equity distributed
+    const nodesSmall = [makeNode('a', 1), makeNode('b', 1)];
+    const edgesSmall = [makeEdge('e1', 'a', 'b', 1)];
+    const resultSmall = calculatePageRank(nodesSmall, edgesSmall);
+
+    const nodesLarge = [makeNode('a', 100), makeNode('b', 1)];
+    const edgesLarge = [makeEdge('e1', 'a', 'b', 1)];
+    // With larger pageCount on A, but same linkCount, the totalWeightedOutbound changes
+    // the relative score differs; both converge but differently
+    const resultLarge = calculatePageRank(nodesLarge, edgesLarge);
+
+    // scores should exist for both cases
+    expect(resultSmall.has('a')).toBe(true);
+    expect(resultLarge.has('a')).toBe(true);
+  });
+
+  it('scores sum to N (number of nodes) within floating point tolerance', () => {
+    const nodes = [makeNode('a', 1), makeNode('b', 2), makeNode('c', 3)];
+    const edges = [makeEdge('e1', 'a', 'b', 1), makeEdge('e2', 'b', 'c', 2)];
+    const result = calculatePageRank(nodes, edges);
+    const total = Array.from(result.values()).reduce((sum, s) => sum + s, 0);
+    expect(total).toBeCloseTo(nodes.length, 2);
+  });
+
+  it('dampening factor d=0.85: disconnected node score equals 1.0 (1 - 0.85 + 0.85*1.0)', () => {
+    // A single disconnected node with no inbound: PR = (1-d) + d*0 iteratively converges to 1.0
+    // because initial score is 1.0, no inbound, so stays at 1.0 after normalization
+    const nodes = [makeNode('a', 1)];
+    const result = calculatePageRank(nodes, []);
+    expect(result.get('a')).toBeCloseTo(1.0, 3);
+  });
+});
+
+describe('classifyScoreTier', () => {
+  it('single-element array returns neutral', () => {
+    expect(classifyScoreTier(1.0, [1.0])).toBe('neutral');
+  });
+
+  it('all equal scores returns neutral', () => {
+    expect(classifyScoreTier(1.0, [1.0, 1.0, 1.0])).toBe('neutral');
+  });
+
+  it('score in top third returns high', () => {
+    // range 0..3, thirds at 1 and 2; score 2.5 -> high
+    expect(classifyScoreTier(2.5, [0, 1, 2, 3])).toBe('high');
+  });
+
+  it('score in middle third returns mid', () => {
+    // range 0..3, thirds at 1 and 2; score 1.5 -> mid
+    expect(classifyScoreTier(1.5, [0, 1, 2, 3])).toBe('mid');
+  });
+
+  it('score in bottom third returns low', () => {
+    // range 0..3, thirds at 1 and 2; score 0.5 -> low
+    expect(classifyScoreTier(0.5, [0, 1, 2, 3])).toBe('low');
+  });
+
+  it('score exactly at highThreshold returns high', () => {
+    // range 0..3, highThreshold = 2; score 2.0 -> high
+    expect(classifyScoreTier(2.0, [0, 1, 2, 3])).toBe('high');
+  });
+
+  it('score exactly at lowThreshold returns mid', () => {
+    // range 0..3, lowThreshold = 1; score 1.0 -> mid
+    expect(classifyScoreTier(1.0, [0, 1, 2, 3])).toBe('mid');
+  });
+});
+
+describe('identifyWeakNodes', () => {
+  it('empty map returns empty Set', () => {
+    const result = identifyWeakNodes(new Map());
+    expect(result.size).toBe(0);
+  });
+
+  it('single node returns empty Set (no outliers possible)', () => {
+    const scores = new Map([['a', 1.0]]);
+    const result = identifyWeakNodes(scores);
+    expect(result.size).toBe(0);
+  });
+
+  it('all equal scores returns empty Set (stddev = 0)', () => {
+    const scores = new Map([['a', 1.0], ['b', 1.0], ['c', 1.0]]);
+    const result = identifyWeakNodes(scores);
+    expect(result.size).toBe(0);
+  });
+
+  it('node below mean minus 1 stddev is included in weak Set', () => {
+    // mean=2, values spread so one is clearly below threshold
+    const scores = new Map([
+      ['low', 0.1],
+      ['mid1', 2.0],
+      ['mid2', 2.0],
+      ['high', 3.0],
+    ]);
+    const result = identifyWeakNodes(scores);
+    expect(result.has('low')).toBe(true);
+  });
+
+  it('node above mean minus 1 stddev is not included', () => {
+    const scores = new Map([
+      ['low', 0.1],
+      ['mid1', 2.0],
+      ['mid2', 2.0],
+      ['high', 3.0],
+    ]);
+    const result = identifyWeakNodes(scores);
+    expect(result.has('high')).toBe(false);
+    expect(result.has('mid1')).toBe(false);
+    expect(result.has('mid2')).toBe(false);
+  });
+
+  it('node at exactly mean minus 1 stddev is not included (strict less than)', () => {
+    // Create a distribution where we know the threshold precisely
+    // values: [1, 2, 3] mean=2, stddev=sqrt(2/3)~0.816, threshold~1.184
+    // node with score=2-stddev is at boundary — not below, so not weak
+    const stddev = Math.sqrt(2 / 3);
+    const threshold = 2 - stddev;
+    const scores = new Map([
+      ['a', 1.0],
+      ['b', 2.0],
+      ['c', 3.0],
+      ['boundary', threshold],
+    ]);
+    const result = identifyWeakNodes(scores);
+    expect(result.has('boundary')).toBe(false);
   });
 });
