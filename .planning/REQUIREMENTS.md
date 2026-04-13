@@ -8,10 +8,10 @@
 ### Canvas Editor
 
 - [x] **CANVAS-01**: User can add URL template nodes to a canvas by dragging from a sidebar or double-clicking on blank canvas
-- [ ] **CANVAS-02**: Nodes display the URL template string (e.g. `/category/<dest>/<cat>/list`)
+- [x] **CANVAS-02**: Nodes display the URL template string (e.g. `/category/<dest>/<cat>/list`)
 - [ ] **CANVAS-03**: User can connect two nodes with a directed edge by dragging from a node's edge handle or via right-click context menu
-- [ ] **CANVAS-04**: Nodes and edges can be selected, moved, and deleted
-- [ ] **CANVAS-05**: Canvas supports pan and zoom
+- [x] **CANVAS-04**: Nodes and edges can be selected, moved, and deleted
+- [x] **CANVAS-05**: Canvas supports pan and zoom
 
 ### Node Configuration
 
