@@ -6,6 +6,7 @@ import ReactFlow, {
   useNodesState,
   useEdgesState,
   addEdge,
+  MarkerType,
   type Node,
   type Edge,
   type Connection,
@@ -13,17 +14,19 @@ import ReactFlow, {
 } from 'reactflow';
 import 'reactflow/dist/style.css';
 import { UrlNode } from './components/UrlNode';
+import { LinkCountEdge } from './components/LinkCountEdge';
 import { Sidebar } from './components/Sidebar';
 import { Toolbar } from './components/Toolbar';
-import { createDefaultNode, updateNodeData, type UrlNodeData } from './lib/graph-utils';
+import { createDefaultNode, updateNodeData, updateEdgeLinkCount, type UrlNodeData } from './lib/graph-utils';
 
 // Extended node data type that includes the update callback for EditPopover wiring
 interface AppNodeData extends UrlNodeData {
   onUpdate: (id: string, data: Partial<UrlNodeData>) => void;
 }
 
-// Define nodeTypes outside the component to avoid infinite re-renders (React Flow docs requirement)
+// Define nodeTypes and edgeTypes outside the component to avoid infinite re-renders (React Flow docs requirement)
 const nodeTypes = { urlNode: UrlNode };
+const edgeTypes = { linkCountEdge: LinkCountEdge };
 
 const initialNodes: Node<AppNodeData>[] = [];
 const initialEdges: Edge[] = [];
@@ -85,11 +88,28 @@ export default function App() {
     addNode(position);
   }, [reactFlowInstance, addNode]);
 
-  const onConnect = useCallback(
-    (connection: Connection) => {
-      setEdges((eds) => addEdge({ ...connection, data: { linkCount: 1 } }, eds));
+  const onEdgeLinkCountChange = useCallback(
+    (edgeId: string, linkCount: number) => {
+      setEdges((eds) => updateEdgeLinkCount(eds, edgeId, linkCount));
     },
     [setEdges],
+  );
+
+  const onConnect = useCallback(
+    (connection: Connection) => {
+      setEdges((eds) =>
+        addEdge(
+          {
+            ...connection,
+            type: 'linkCountEdge',
+            markerEnd: { type: MarkerType.ArrowClosed, color: '#9CA3AF' },
+            data: { linkCount: 1, onLinkCountChange: onEdgeLinkCountChange },
+          },
+          eds,
+        ),
+      );
+    },
+    [setEdges, onEdgeLinkCountChange],
   );
 
   return (
@@ -108,6 +128,7 @@ export default function App() {
             onDrop={onDrop}
             onDragOver={onDragOver}
             nodeTypes={nodeTypes}
+            edgeTypes={edgeTypes}
             deleteKeyCode={['Backspace', 'Delete']}
             fitView
           >
