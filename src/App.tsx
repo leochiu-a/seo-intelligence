@@ -1,8 +1,9 @@
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback, useRef, useMemo } from 'react';
 import ReactFlow, {
   Background,
   Controls,
   MiniMap,
+  ReactFlowProvider,
   useNodesState,
   useEdgesState,
   addEdge,
@@ -17,11 +18,24 @@ import { UrlNode } from './components/UrlNode';
 import { LinkCountEdge } from './components/LinkCountEdge';
 import { Sidebar } from './components/Sidebar';
 import { Toolbar } from './components/Toolbar';
-import { createDefaultNode, updateNodeData, updateEdgeLinkCount, type UrlNodeData } from './lib/graph-utils';
+import { ScoreSidebar } from './components/ScoreSidebar';
+import {
+  createDefaultNode,
+  updateNodeData,
+  updateEdgeLinkCount,
+  calculatePageRank,
+  classifyScoreTier,
+  identifyWeakNodes,
+  type UrlNodeData,
+  type ScoreTier,
+} from './lib/graph-utils';
 
 // Extended node data type that includes the update callback for EditPopover wiring
+// and score fields for dynamic visual rendering
 interface AppNodeData extends UrlNodeData {
   onUpdate: (id: string, data: Partial<UrlNodeData>) => void;
+  scoreTier?: ScoreTier;
+  isWeak?: boolean;
 }
 
 // Define nodeTypes and edgeTypes outside the component to avoid infinite re-renders (React Flow docs requirement)
@@ -31,7 +45,7 @@ const edgeTypes = { linkCountEdge: LinkCountEdge };
 const initialNodes: Node<AppNodeData>[] = [];
 const initialEdges: Edge[] = [];
 
-export default function App() {
+function AppInner() {
   const [nodes, setNodes, onNodesChange] = useNodesState<AppNodeData>(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
   const reactFlowWrapper = useRef<HTMLDivElement>(null);
@@ -112,6 +126,39 @@ export default function App() {
     [setEdges, onEdgeLinkCountChange],
   );
 
+  // Recalculate scores on every graph change (per D-13, SCORE-02)
+  const scores = useMemo(
+    () => calculatePageRank(nodes, edges),
+    [nodes, edges],
+  );
+
+  const weakNodes = useMemo(
+    () => identifyWeakNodes(scores),
+    [scores],
+  );
+
+  const allScoreValues = useMemo(
+    () => [...scores.values()],
+    [scores],
+  );
+
+  // Enrich nodes with score tier and weak flag for UrlNode rendering
+  const enrichedNodes = useMemo(() => {
+    return nodes.map((node) => {
+      const score = scores.get(node.id) ?? 0;
+      const scoreTier = classifyScoreTier(score, allScoreValues);
+      const isWeak = weakNodes.has(node.id);
+      // Only create new object if score data changed
+      if (node.data.scoreTier === scoreTier && node.data.isWeak === isWeak) {
+        return node;
+      }
+      return {
+        ...node,
+        data: { ...node.data, scoreTier, isWeak },
+      };
+    });
+  }, [nodes, scores, weakNodes, allScoreValues]);
+
   return (
     <div className="h-screen w-screen flex flex-col bg-gray-50">
       <Toolbar onAddNode={onAddNode} />
@@ -119,7 +166,7 @@ export default function App() {
         <Sidebar />
         <div className="flex-1" ref={reactFlowWrapper}>
           <ReactFlow
-            nodes={nodes}
+            nodes={enrichedNodes}
             edges={edges}
             onNodesChange={onNodesChange}
             onEdgesChange={onEdgesChange}
@@ -153,7 +200,16 @@ export default function App() {
             )}
           </ReactFlow>
         </div>
+        <ScoreSidebar nodes={nodes} scores={scores} weakNodes={weakNodes} />
       </div>
     </div>
+  );
+}
+
+export default function App() {
+  return (
+    <ReactFlowProvider>
+      <AppInner />
+    </ReactFlowProvider>
   );
 }
