@@ -11,10 +11,15 @@ export interface LinkCountEdgeData {
 
 let nodeIdCounter = 0;
 
+/** Resets the node id counter to 0. Used in tests for deterministic ids. */
 export function resetNodeIdCounter(): void {
   nodeIdCounter = 0;
 }
 
+/**
+ * Creates a new URL node with default values and a unique auto-incremented id.
+ * Default urlTemplate: '/page/<id>', default pageCount: 1.
+ */
 export function createDefaultNode(position: { x: number; y: number }): Node<UrlNodeData> {
   nodeIdCounter += 1;
   return {
@@ -28,6 +33,10 @@ export function createDefaultNode(position: { x: number; y: number }): Node<UrlN
   };
 }
 
+/**
+ * Returns a new nodes array where the matching node's data is shallowly merged
+ * with newData. All other nodes are returned by reference (unchanged).
+ */
 export function updateNodeData(
   nodes: Node<UrlNodeData>[],
   nodeId: string,
@@ -38,6 +47,10 @@ export function updateNodeData(
   );
 }
 
+/**
+ * Returns a new edges array where the matching edge's linkCount is updated.
+ * All other edges are returned by reference (unchanged).
+ */
 export function updateEdgeLinkCount(
   edges: Edge<LinkCountEdgeData>[],
   edgeId: string,
@@ -48,6 +61,10 @@ export function updateEdgeLinkCount(
   );
 }
 
+/**
+ * Validates node form data.
+ * Returns an error string if invalid, null if valid.
+ */
 export function validateNodeData(data: {
   urlTemplate: string;
   pageCount: number;
@@ -61,6 +78,10 @@ export function validateNodeData(data: {
   return null;
 }
 
+/**
+ * Clamps a link count to a valid integer >= 1.
+ * NaN, negative values, and 0 all return 1. Decimals are floored.
+ */
 export function validateLinkCount(count: number): number {
   if (Number.isNaN(count) || count < 1) {
     return 1;
@@ -68,6 +89,10 @@ export function validateLinkCount(count: number): number {
   return Math.floor(count);
 }
 
+/**
+ * Formats a page count as a human-readable string.
+ * Returns "1 page" for 1, "{n} pages" for all other values.
+ */
 export function formatPageCount(n: number): string {
   return n === 1 ? '1 page' : `${n} pages`;
 }
