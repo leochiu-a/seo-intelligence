@@ -253,3 +253,58 @@ export function identifyWeakNodes(
 
   return weak;
 }
+
+/**
+ * Parses a JSON string produced by the export feature and returns
+ * ReactFlow-compatible nodes and edges arrays.
+ * Throws if the JSON is malformed or required fields are missing.
+ */
+export function parseImportJson(raw: string): {
+  nodes: Node<UrlNodeData>[];
+  edges: Edge<LinkCountEdgeData>[];
+} {
+  const data = JSON.parse(raw) as unknown;
+
+  if (
+    typeof data !== 'object' ||
+    data === null ||
+    !Array.isArray((data as Record<string, unknown>).nodes) ||
+    !Array.isArray((data as Record<string, unknown>).edges)
+  ) {
+    throw new Error('Import JSON must have "nodes" and "edges" arrays');
+  }
+
+  const { nodes: rawNodes, edges: rawEdges } = data as {
+    nodes: unknown[];
+    edges: unknown[];
+  };
+
+  const nodes: Node<UrlNodeData>[] = rawNodes.map((n, i) => {
+    const node = n as Record<string, unknown>;
+    if (typeof node.urlTemplate !== 'string') {
+      throw new Error(`Node at index ${i} is missing "urlTemplate"`);
+    }
+    if (typeof node.pageCount !== 'number') {
+      throw new Error(`Node at index ${i} is missing "pageCount"`);
+    }
+    return {
+      id: String(node.id),
+      type: 'urlNode',
+      position: { x: Number(node.x ?? 0), y: Number(node.y ?? 0) },
+      data: { urlTemplate: node.urlTemplate, pageCount: node.pageCount },
+    };
+  });
+
+  const edges: Edge<LinkCountEdgeData>[] = rawEdges.map((e) => {
+    const edge = e as Record<string, unknown>;
+    return {
+      id: String(edge.id),
+      source: String(edge.source),
+      target: String(edge.target),
+      type: 'linkCountEdge',
+      data: { linkCount: typeof edge.linkCount === 'number' ? edge.linkCount : 1 },
+    };
+  });
+
+  return { nodes, edges };
+}

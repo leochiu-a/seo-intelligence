@@ -26,6 +26,7 @@ import {
   calculatePageRank,
   classifyScoreTier,
   identifyWeakNodes,
+  parseImportJson,
   type UrlNodeData,
   type LinkCountEdgeData,
   type ScoreTier,
@@ -101,6 +102,13 @@ function AppInner() {
     [onNodeDataUpdate, setNodes],
   );
 
+  const onEdgeLinkCountChange = useCallback(
+    (edgeId: string, linkCount: number) => {
+      setEdges((eds) => updateEdgeLinkCount(eds, edgeId, linkCount));
+    },
+    [setEdges],
+  );
+
   const onDragOver = useCallback((event: React.DragEvent) => {
     event.preventDefault();
     event.dataTransfer.dropEffect = 'move';
@@ -109,6 +117,38 @@ function AppInner() {
   const onDrop = useCallback(
     (event: React.DragEvent) => {
       event.preventDefault();
+
+      // Handle JSON file import via drag-and-drop
+      const file = Array.from(event.dataTransfer.files).find((f) =>
+        f.name.endsWith('.json'),
+      );
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          try {
+            const { nodes: importedNodes, edges: importedEdges } = parseImportJson(
+              e.target?.result as string,
+            );
+            // Wire runtime callbacks into edges before setting state
+            const wiredEdges = importedEdges.map((edge) => ({
+              ...edge,
+              markerEnd: { type: MarkerType.ArrowClosed, color: '#9CA3AF' },
+              data: { ...edge.data, onLinkCountChange: onEdgeLinkCountChange },
+            }));
+            setNodes(importedNodes.map((n) => ({
+              ...n,
+              data: { ...n.data, onUpdate: onNodeDataUpdate },
+            })));
+            setEdges(wiredEdges);
+          } catch {
+            // Invalid JSON — silently ignore (file was dropped by mistake)
+          }
+        };
+        reader.readAsText(file);
+        return;
+      }
+
+      // Handle sidebar node drag onto canvas
       const type = event.dataTransfer.getData('application/reactflow');
       if (type !== 'urlNode' || !reactFlowInstance) return;
       const position = reactFlowInstance.screenToFlowPosition({
@@ -117,7 +157,7 @@ function AppInner() {
       });
       addNode(position);
     },
-    [reactFlowInstance, addNode],
+    [reactFlowInstance, addNode, setNodes, setEdges, onNodeDataUpdate, onEdgeLinkCountChange],
   );
 
   const onAddNode = useCallback(() => {
@@ -129,13 +169,6 @@ function AppInner() {
       : { x: 250, y: 250 };
     addNode(position);
   }, [reactFlowInstance, addNode]);
-
-  const onEdgeLinkCountChange = useCallback(
-    (edgeId: string, linkCount: number) => {
-      setEdges((eds) => updateEdgeLinkCount(eds, edgeId, linkCount));
-    },
-    [setEdges],
-  );
 
   const onConnect = useCallback(
     (connection: Connection) => {

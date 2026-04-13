@@ -11,6 +11,7 @@ import {
   calculatePageRank,
   classifyScoreTier,
   identifyWeakNodes,
+  parseImportJson,
 } from './graph-utils';
 import type { UrlNodeData, LinkCountEdgeData } from './graph-utils';
 
@@ -369,5 +370,81 @@ describe('identifyWeakNodes', () => {
     ]);
     const result = identifyWeakNodes(scores);
     expect(result.has('boundary')).toBe(false);
+  });
+});
+
+describe('parseImportJson', () => {
+  it('returns nodes and edges from a valid export JSON', () => {
+    const raw = JSON.stringify({
+      nodes: [{ id: 'n1', urlTemplate: '/blog', pageCount: 5, x: 100, y: 200 }],
+      edges: [{ id: 'e1', source: 'n1', target: 'n2', linkCount: 3 }],
+    });
+    const result = parseImportJson(raw);
+    expect(result.nodes).toHaveLength(1);
+    expect(result.nodes[0].id).toBe('n1');
+    expect(result.nodes[0].position).toEqual({ x: 100, y: 200 });
+    expect(result.nodes[0].data.urlTemplate).toBe('/blog');
+    expect(result.nodes[0].data.pageCount).toBe(5);
+    expect(result.nodes[0].type).toBe('urlNode');
+    expect(result.edges).toHaveLength(1);
+    expect(result.edges[0].id).toBe('e1');
+    expect(result.edges[0].source).toBe('n1');
+    expect(result.edges[0].target).toBe('n2');
+    expect((result.edges[0].data as LinkCountEdgeData).linkCount).toBe(3);
+  });
+
+  it('defaults linkCount to 1 when missing from edge', () => {
+    const raw = JSON.stringify({
+      nodes: [],
+      edges: [{ id: 'e1', source: 'a', target: 'b' }],
+    });
+    const result = parseImportJson(raw);
+    expect((result.edges[0].data as LinkCountEdgeData).linkCount).toBe(1);
+  });
+
+  it('throws when JSON is not valid', () => {
+    expect(() => parseImportJson('not json')).toThrow();
+  });
+
+  it('throws when nodes array is missing', () => {
+    const raw = JSON.stringify({ edges: [] });
+    expect(() => parseImportJson(raw)).toThrow();
+  });
+
+  it('throws when edges array is missing', () => {
+    const raw = JSON.stringify({ nodes: [] });
+    expect(() => parseImportJson(raw)).toThrow();
+  });
+
+  it('throws when a node is missing required urlTemplate field', () => {
+    const raw = JSON.stringify({
+      nodes: [{ id: 'n1', pageCount: 1, x: 0, y: 0 }],
+      edges: [],
+    });
+    expect(() => parseImportJson(raw)).toThrow();
+  });
+
+  it('throws when a node is missing required pageCount field', () => {
+    const raw = JSON.stringify({
+      nodes: [{ id: 'n1', urlTemplate: '/a', x: 0, y: 0 }],
+      edges: [],
+    });
+    expect(() => parseImportJson(raw)).toThrow();
+  });
+
+  it('handles multiple nodes and edges correctly', () => {
+    const raw = JSON.stringify({
+      nodes: [
+        { id: 'n1', urlTemplate: '/a', pageCount: 1, x: 0, y: 0 },
+        { id: 'n2', urlTemplate: '/b', pageCount: 2, x: 50, y: 50 },
+      ],
+      edges: [
+        { id: 'e1', source: 'n1', target: 'n2', linkCount: 2 },
+        { id: 'e2', source: 'n2', target: 'n1', linkCount: 1 },
+      ],
+    });
+    const result = parseImportJson(raw);
+    expect(result.nodes).toHaveLength(2);
+    expect(result.edges).toHaveLength(2);
   });
 });
