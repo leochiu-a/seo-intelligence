@@ -2,7 +2,7 @@
 
 ## Overview
 
-Four phases deliver a browser-based visual tool for modeling internal link structures. Phase 0 scaffolds the project; Phase 1 builds the interactive canvas; Phase 2 layers in PageRank scoring and analysis; Phase 3 adds scenario management and data export. All phases belong to Milestone 1: MVP.
+Four phases deliver a browser-based visual tool for modeling internal link structures. Phase 0 scaffolds the project; Phase 1 builds the interactive canvas; Phase 2 layers in PageRank scoring and analysis; Phase 3 adds localStorage persistence and data export. All phases belong to Milestone 1: MVP.
 
 ## Milestones
 
@@ -13,7 +13,7 @@ Four phases deliver a browser-based visual tool for modeling internal link struc
 - [x] **Phase 0: Project Setup** - Scaffold Vite + React + TypeScript project with Tailwind CSS and React Flow (completed 2026-04-13)
 - [x] **Phase 1: Canvas Editor** - Interactive canvas with URL template nodes, directed edges, and inline configuration (completed 2026-04-13)
 - [x] **Phase 2: Scoring & Analysis** - PageRank engine with visual node scoring and ranked sidebar (completed 2026-04-13)
-- [ ] **Phase 3: Scenarios & Export** - Named scenario management in localStorage plus CSV/JSON export
+- [ ] **Phase 3: Scenarios & Export** - localStorage graph persistence plus CSV/JSON export (scenarios dropped per D-01)
 
 ## Phase Details
 
@@ -67,19 +67,18 @@ Plans:
 **UI hint**: yes
 
 ### Phase 3: Scenarios & Export
-**Goal**: Users can maintain multiple named link structure scenarios and download graph data for external use
+**Goal**: Graph data persists across browser refresh and users can export data as JSON or CSV for external use
 **Depends on**: Phase 2
-**Requirements**: SCENARIO-01, SCENARIO-02, SCENARIO-03, EXPORT-01, EXPORT-02
+**Requirements**: EXPORT-01, EXPORT-02
 **Success Criteria** (what must be TRUE):
-  1. User can create a new named scenario (e.g. "Proposal A") and switch between scenarios without losing data
-  2. Scenarios persist across browser refresh (localStorage)
-  3. User can export the current graph as a JSON file containing nodes, edges, and scores
-  4. User can export the current score ranking as a CSV file with columns: url_template, page_count, score
+  1. Graph (nodes + edges) persists across browser refresh via localStorage
+  2. User can export the current graph as a JSON file containing nodes, edges, and scores
+  3. User can export the current score ranking as a CSV file with columns: url_template, page_count, score
 **Plans**: 2 plans
 
 Plans:
-- [ ] 03-01: Implement scenario management — create, rename, switch, and delete scenarios backed by localStorage
-- [ ] 03-02: Implement JSON and CSV export for the active scenario
+- [ ] 03-01-PLAN.md — localStorage graph persistence (save on change, restore on mount)
+- [ ] 03-02-PLAN.md — JSON and CSV export buttons in toolbar with file download
 
 **UI hint**: yes
 
