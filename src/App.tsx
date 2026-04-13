@@ -27,6 +27,7 @@ import {
   classifyScoreTier,
   identifyWeakNodes,
   type UrlNodeData,
+  type LinkCountEdgeData,
   type ScoreTier,
 } from './lib/graph-utils';
 
@@ -153,6 +154,54 @@ function AppInner() {
     [setEdges, onEdgeLinkCountChange],
   );
 
+  const onExportJson = useCallback(() => {
+    const exportData = {
+      nodes: nodes.map((n) => ({
+        id: n.id,
+        urlTemplate: n.data.urlTemplate,
+        pageCount: n.data.pageCount,
+        x: n.position.x,
+        y: n.position.y,
+      })),
+      edges: edges.map((e) => ({
+        id: e.id,
+        source: e.source,
+        target: e.target,
+        linkCount: (e.data as LinkCountEdgeData)?.linkCount ?? 1,
+      })),
+      scores: Object.fromEntries(scores),
+    };
+    const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'seo-planner-export.json';
+    a.click();
+    URL.revokeObjectURL(url);
+  }, [nodes, edges, scores]);
+
+  const onExportCsv = useCallback(() => {
+    const rows = nodes.map((n) => ({
+      urlTemplate: n.data.urlTemplate,
+      pageCount: n.data.pageCount,
+      score: scores.get(n.id) ?? 0,
+    }));
+    rows.sort((a, b) => b.score - a.score);
+    const lines = ['url_template,page_count,score'];
+    for (const row of rows) {
+      const quotedUrl = `"${row.urlTemplate.replace(/"/g, '""')}"`;
+      lines.push(`${quotedUrl},${row.pageCount},${row.score.toFixed(4)}`);
+    }
+    const csvContent = lines.join('\n');
+    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'seo-planner-scores.csv';
+    a.click();
+    URL.revokeObjectURL(url);
+  }, [nodes, scores]);
+
   // Restore graph from localStorage on mount (runs once — empty dep array)
   // Must be defined BEFORE the save effect so React processes restore before save.
   useEffect(() => {
@@ -236,7 +285,7 @@ function AppInner() {
 
   return (
     <div className="h-screen w-screen flex flex-col bg-gray-50">
-      <Toolbar onAddNode={onAddNode} />
+      <Toolbar onAddNode={onAddNode} onExportJson={onExportJson} onExportCsv={onExportCsv} isEmpty={nodes.length === 0} />
       <div className="flex flex-1 overflow-hidden">
         <Sidebar />
         <div className="flex-1" ref={reactFlowWrapper}>
