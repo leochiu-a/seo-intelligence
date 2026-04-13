@@ -40,11 +40,12 @@ Plans:
   3. User can select a node or edge and edit its URL template, page count, or link count via an inline panel or popover
   4. User can move, select, and delete nodes and edges
   5. Canvas supports pan (drag background) and zoom (scroll/pinch)
-**Plans**: 2 plans
+**Plans**: 3 plans
 
 Plans:
 - [ ] 01-01: Implement node component (URL template + page count display, inline edit popover) and canvas add/move/delete interactions
 - [ ] 01-02: Implement directed edge with link count label, edge creation by dragging from handles, and edge edit/delete
+- [ ] 01-03: TDD — Pure graph utility functions (node/edge factory, mutation, validation, formatting) with Vitest
 
 **UI hint**: yes
 
@@ -89,6 +90,6 @@ Plans:
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 0. Project Setup | 1/1 | Complete   | 2026-04-13 |
-| 1. Canvas Editor | 0/2 | Not started | - |
+| 1. Canvas Editor | 0/3 | Not started | - |
 | 2. Scoring & Analysis | 0/2 | Not started | - |
 | 3. Scenarios & Export | 0/2 | Not started | - |
