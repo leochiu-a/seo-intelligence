@@ -230,16 +230,16 @@ describe('calculatePageRank', () => {
     expect(scoreA).toBeCloseTo(scoreB, 3);
   });
 
-  it('link count weighting: A->B with linkCount=5 gives B higher score than linkCount=1', () => {
-    const nodesLow = [makeNode('a', 1), makeNode('b', 1)];
-    const edgesLow = [makeEdge('e1', 'a', 'b', 1)];
-    const resultLow = calculatePageRank(nodesLow, edgesLow);
-
-    const nodesHigh = [makeNode('a', 1), makeNode('b', 1)];
-    const edgesHigh = [makeEdge('e1', 'a', 'b', 5)];
-    const resultHigh = calculatePageRank(nodesHigh, edgesHigh);
-
-    expect(resultHigh.get('b')!).toBeGreaterThan(resultLow.get('b')!);
+  it('link count weighting: A->B with linkCount=5 passes more equity to B than A->C with linkCount=1', () => {
+    // A links to both B (linkCount=5) and C (linkCount=1), same pageCount
+    // B should receive more equity from A than C does
+    const nodes = [makeNode('a', 1), makeNode('b', 1), makeNode('c', 1)];
+    const edges = [
+      makeEdge('e1', 'a', 'b', 5),
+      makeEdge('e2', 'a', 'c', 1),
+    ];
+    const result = calculatePageRank(nodes, edges);
+    expect(result.get('b')!).toBeGreaterThan(result.get('c')!);
   });
 
   it('page count weighting: node with pageCount=100 has larger equity pool', () => {
