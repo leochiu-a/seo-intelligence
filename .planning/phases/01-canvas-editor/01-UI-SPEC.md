@@ -95,6 +95,8 @@ Font weights are exactly 2: **400 (regular)** and **600 (semibold)**. No other w
 - Edge label background: `#FFFFFF` (white pill behind the count number)
 - Canvas grid dots: `#D1D5DB` (gray-300) — React Flow Background default
 
+**Primary visual anchor:** the canvas area is the primary visual anchor; the indigo-500 left accent border on each node card is the focal color element that draws the eye.
+
 Source: D-04 (accent border color = indigo), App.tsx (`bg-gray-50` canvas background).
 
 ---
@@ -144,7 +146,7 @@ Source: D-08 (left sidebar palette), D-09 (toolbar button), CONTEXT.md § Integr
 - Border: 1px solid gray-200
 - Left accent border: 4px solid indigo-500 (implemented as border-l-4)
 - Box shadow: `shadow-sm` (default), `shadow-md` + indigo ring on selected
-- Padding: 12px top/bottom, 16px right, 12px left (accounts for accent border)
+- Padding: 8px 16px (8px top/bottom, 16px left/right)
 
 **Node content layout (top to bottom):**
 1. URL template string — 14px / semibold / gray-900 — single line, truncate with ellipsis
@@ -153,6 +155,7 @@ Source: D-08 (left sidebar palette), D-09 (toolbar button), CONTEXT.md § Integr
 **Pencil icon (hover state):**
 - Position: absolute, top-right corner (top: 8px, right: 8px)
 - Icon: `Pencil` from lucide-react, size 14px, color gray-400
+- Accessible label: `aria-label="Edit node"` on the button wrapping the icon
 - Visible only on node hover (opacity-0 default → opacity-100 on group-hover)
 - Click target: 28px × 28px (4px padding around 14px icon → rounds to 28px, acceptable for desktop PM tool)
 - Hover state on icon itself: gray-600
