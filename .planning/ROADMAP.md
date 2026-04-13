@@ -12,7 +12,7 @@ Four phases deliver a browser-based visual tool for modeling internal link struc
 
 - [x] **Phase 0: Project Setup** - Scaffold Vite + React + TypeScript project with Tailwind CSS and React Flow (completed 2026-04-13)
 - [x] **Phase 1: Canvas Editor** - Interactive canvas with URL template nodes, directed edges, and inline configuration (completed 2026-04-13)
-- [ ] **Phase 2: Scoring & Analysis** - PageRank engine with visual node scoring and ranked sidebar
+- [x] **Phase 2: Scoring & Analysis** - PageRank engine with visual node scoring and ranked sidebar (completed 2026-04-13)
 - [ ] **Phase 3: Scenarios & Export** - Named scenario management in localStorage plus CSV/JSON export
 
 ## Phase Details
@@ -62,7 +62,7 @@ Plans:
 
 Plans:
 - [x] 02-01: Implement iterative PageRank algorithm (dampening factor, page count and link count weighting) that recalculates on every graph state change
-- [ ] 02-02: Implement score-driven node size/color scaling and ranked sidebar with weak-page flags and click-to-highlight
+- [x] 02-02: Implement score-driven node size/color scaling and ranked sidebar with weak-page flags and click-to-highlight
 
 **UI hint**: yes
 
@@ -91,5 +91,5 @@ Plans:
 |-------|----------------|--------|-----------|
 | 0. Project Setup | 1/1 | Complete   | 2026-04-13 |
 | 1. Canvas Editor | 3/3 | Complete   | 2026-04-13 |
-| 2. Scoring & Analysis | 0/2 | Not started | - |
+| 2. Scoring & Analysis | 2/2 | Complete   | 2026-04-13 |
 | 3. Scenarios & Export | 0/2 | Not started | - |
