@@ -10,7 +10,7 @@ Four phases deliver a browser-based visual tool for modeling internal link struc
 
 ## Phases
 
-- [ ] **Phase 0: Project Setup** - Scaffold Vite + React + TypeScript project with Tailwind CSS and React Flow
+- [x] **Phase 0: Project Setup** - Scaffold Vite + React + TypeScript project with Tailwind CSS and React Flow (completed 2026-04-13)
 - [ ] **Phase 1: Canvas Editor** - Interactive canvas with URL template nodes, directed edges, and inline configuration
 - [ ] **Phase 2: Scoring & Analysis** - PageRank engine with visual node scoring and ranked sidebar
 - [ ] **Phase 3: Scenarios & Export** - Named scenario management in localStorage plus CSV/JSON export
@@ -28,7 +28,7 @@ Four phases deliver a browser-based visual tool for modeling internal link struc
 **Plans**: 1 plan
 
 Plans:
-- [ ] 00-01: Initialize Vite+React+TS project, install React Flow and Tailwind, wire up base App shell with empty canvas
+- [x] 00-01: Initialize Vite+React+TS project, install React Flow and Tailwind, wire up base App shell with empty canvas
 
 ### Phase 1: Canvas Editor
 **Goal**: Users can build a directed graph of URL template nodes and edges on a visual canvas
@@ -88,7 +88,7 @@ Plans:
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 0. Project Setup | 0/1 | Not started | - |
+| 0. Project Setup | 1/1 | Complete   | 2026-04-13 |
 | 1. Canvas Editor | 0/2 | Not started | - |
 | 2. Scoring & Analysis | 0/2 | Not started | - |
 | 3. Scenarios & Export | 0/2 | Not started | - |
