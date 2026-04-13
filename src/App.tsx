@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef, useMemo } from 'react';
+import { useState, useCallback, useRef, useMemo, useEffect } from 'react';
 import ReactFlow, {
   Background,
   Controls,
@@ -42,6 +42,31 @@ interface AppNodeData extends UrlNodeData {
 const nodeTypes = { urlNode: UrlNode };
 const edgeTypes = { linkCountEdge: LinkCountEdge };
 
+const STORAGE_KEY = 'seo-planner-graph';
+
+/** Strips runtime-only fields before writing to localStorage */
+function serializeGraph(
+  nodes: Node<AppNodeData>[],
+  edges: Edge[],
+): { nodes: Array<{ id: string; type?: string; position: { x: number; y: number }; data: { urlTemplate: string; pageCount: number } }>; edges: Array<{ id: string; source: string; target: string; type?: string; markerEnd?: unknown; data: { linkCount: number } }> } {
+  return {
+    nodes: nodes.map(({ id, type, position, data: { urlTemplate, pageCount } }) => ({
+      id,
+      type,
+      position,
+      data: { urlTemplate, pageCount },
+    })),
+    edges: edges.map(({ id, source, target, type, markerEnd, data }) => ({
+      id,
+      source,
+      target,
+      type,
+      markerEnd,
+      data: { linkCount: (data as { linkCount?: number })?.linkCount ?? 1 },
+    })),
+  };
+}
+
 const initialNodes: Node<AppNodeData>[] = [];
 const initialEdges: Edge[] = [];
 
@@ -50,6 +75,8 @@ function AppInner() {
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
   const reactFlowWrapper = useRef<HTMLDivElement>(null);
   const [reactFlowInstance, setReactFlowInstance] = useState<ReactFlowInstance | null>(null);
+  // Guard: prevents save effect from overwriting localStorage during the initial restore frame
+  const isRestoring = useRef(true);
 
   // Use a ref to hold the stable update callback so nodes don't need to be re-mapped
   const onNodeDataUpdate = useCallback(
@@ -125,6 +152,54 @@ function AppInner() {
     },
     [setEdges, onEdgeLinkCountChange],
   );
+
+  // Restore graph from localStorage on mount (runs once — empty dep array)
+  // Must be defined BEFORE the save effect so React processes restore before save.
+  useEffect(() => {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (!saved) {
+      // No saved graph: empty canvas is already in place via initialNodes/initialEdges
+      isRestoring.current = false;
+      return;
+    }
+    try {
+      const parsed = JSON.parse(saved) as {
+        nodes: Array<{ id: string; type?: string; position: { x: number; y: number }; data: { urlTemplate: string; pageCount: number } }>;
+        edges: Array<{ id: string; source: string; target: string; type?: string; markerEnd?: unknown; data: { linkCount: number } }>;
+      };
+      const restoredNodes: Node<AppNodeData>[] = parsed.nodes.map((n) => ({
+        ...n,
+        type: n.type ?? 'urlNode',
+        data: {
+          urlTemplate: n.data.urlTemplate,
+          pageCount: n.data.pageCount,
+          onUpdate: onNodeDataUpdate,
+        },
+      }));
+      const restoredEdges: Edge[] = parsed.edges.map((e) => ({
+        id: e.id,
+        source: e.source,
+        target: e.target,
+        type: e.type ?? 'linkCountEdge',
+        markerEnd: (e.markerEnd as import('reactflow').EdgeMarkerType | undefined) ?? { type: MarkerType.ArrowClosed, color: '#9CA3AF' },
+        data: {
+          linkCount: e.data?.linkCount ?? 1,
+          onLinkCountChange: onEdgeLinkCountChange,
+        },
+      }));
+      setNodes(restoredNodes);
+      setEdges(restoredEdges);
+    } catch {
+      // Corrupt data: fall back to empty canvas already in place
+    }
+    isRestoring.current = false;
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Save graph to localStorage on every change (skips the initial restore frame)
+  useEffect(() => {
+    if (isRestoring.current) return;
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(serializeGraph(nodes, edges)));
+  }, [nodes, edges]);
 
   // Recalculate scores on every graph change (per D-13, SCORE-02)
   const scores = useMemo(
