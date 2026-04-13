@@ -45,8 +45,8 @@
 
 ### Export
 
-- [ ] **EXPORT-01**: User can export current graph as JSON (nodes, edges, scores)
-- [ ] **EXPORT-02**: User can export score ranking as CSV (url_template, page_count, score)
+- [x] **EXPORT-01**: User can export current graph as JSON (nodes, edges, scores)
+- [x] **EXPORT-02**: User can export score ranking as CSV (url_template, page_count, score)
 
 ## v2 Requirements
 
