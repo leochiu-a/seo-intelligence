@@ -15,7 +15,7 @@ import {
   HANDLE_IDS,
   getClosestHandleIds,
 } from './graph-utils';
-import type { UrlNodeData, LinkCountEdgeData } from './graph-utils';
+import type { UrlNodeData, LinkCountEdgeData, Placement } from './graph-utils';
 
 describe('createDefaultNode', () => {
   beforeEach(() => {
@@ -171,12 +171,16 @@ describe('formatPageCount', () => {
 });
 
 // Helper to build minimal Node fixtures
-function makeNode(id: string, pageCount: number): Node<UrlNodeData> {
+function makeNode(
+  id: string,
+  pageCount: number,
+  opts?: { isGlobal?: boolean; placements?: Placement[] },
+): Node<UrlNodeData> {
   return {
     id,
     type: 'urlNode',
     position: { x: 0, y: 0 },
-    data: { urlTemplate: `/${id}`, pageCount },
+    data: { urlTemplate: `/${id}`, pageCount, ...opts },
   };
 }
 
@@ -277,6 +281,119 @@ describe('calculatePageRank', () => {
     const nodes = [makeNode('a', 1)];
     const result = calculatePageRank(nodes, []);
     expect(result.get('a')).toBeCloseTo(1.0, 3);
+  });
+});
+
+describe('calculatePageRank with global nodes', () => {
+  it('global node with placements receives higher score than an equivalent non-global node with no inbound', () => {
+    // Three non-global nodes + one global node with placements
+    // The global node should score higher than disconnected non-global nodes
+    const nodes = [
+      makeNode('a', 1),
+      makeNode('b', 1),
+      makeNode('c', 1),
+      makeNode('g', 1, { isGlobal: true, placements: [{ id: 'p1', name: 'Header', linkCount: 2 }] }),
+    ];
+    const result = calculatePageRank(nodes, []);
+    const scoreG = result.get('g')!;
+    const scoreA = result.get('a')!;
+    expect(scoreG).toBeGreaterThan(scoreA);
+  });
+
+  it('three non-global + one global with placements Header(lc=2) Footer(lc=1): global gets synthetic inbound from all 3 non-global nodes', () => {
+    const placements: Placement[] = [
+      { id: 'p1', name: 'Header', linkCount: 2 },
+      { id: 'p2', name: 'Footer', linkCount: 1 },
+    ];
+    const nodes = [
+      makeNode('a', 1),
+      makeNode('b', 1),
+      makeNode('c', 1),
+      makeNode('g', 1, { isGlobal: true, placements }),
+    ];
+    const result = calculatePageRank(nodes, []);
+    // Global node receives synthetic inbound of 3 links per non-global source (2+1)
+    // Its score should be substantially higher than non-global nodes
+    const scoreG = result.get('g')!;
+    const scoreA = result.get('a')!;
+    const scoreB = result.get('b')!;
+    const scoreC = result.get('c')!;
+    expect(scoreG).toBeGreaterThan(scoreA);
+    expect(scoreG).toBeGreaterThan(scoreB);
+    expect(scoreG).toBeGreaterThan(scoreC);
+  });
+
+  it('global nodes do NOT link to each other (two globals do not inflate each other via synthetic inbound)', () => {
+    const placements: Placement[] = [{ id: 'p1', name: 'Header', linkCount: 2 }];
+    const nodes = [
+      makeNode('a', 1),
+      makeNode('g1', 1, { isGlobal: true, placements }),
+      makeNode('g2', 1, { isGlobal: true, placements }),
+    ];
+    const result = calculatePageRank(nodes, []);
+    // Both globals get synthetic inbound only from node 'a' (the only non-global)
+    // They should score equally (symmetric)
+    const scoreG1 = result.get('g1')!;
+    const scoreG2 = result.get('g2')!;
+    expect(scoreG1).toBeCloseTo(scoreG2, 3);
+  });
+
+  it('global node with zero total placement linkCount gets no synthetic inbound (behaves like non-global)', () => {
+    const nodes = [
+      makeNode('a', 1),
+      makeNode('b', 1),
+      makeNode('g', 1, { isGlobal: true, placements: [{ id: 'p1', name: 'Header', linkCount: 0 }] }),
+    ];
+    const result = calculatePageRank(nodes, []);
+    // g has zero total placement linkCount — no synthetic links injected
+    // a, b, g are all disconnected → all should score ~1.0
+    expect(result.get('g')).toBeCloseTo(1.0, 2);
+    expect(result.get('a')).toBeCloseTo(1.0, 2);
+  });
+
+  it('scores still sum to N with global nodes present', () => {
+    const placements: Placement[] = [{ id: 'p1', name: 'Nav', linkCount: 3 }];
+    const nodes = [
+      makeNode('a', 1),
+      makeNode('b', 2),
+      makeNode('c', 1),
+      makeNode('g', 1, { isGlobal: true, placements }),
+    ];
+    const edges = [makeEdge('e1', 'a', 'b', 1)];
+    const result = calculatePageRank(nodes, edges);
+    const total = Array.from(result.values()).reduce((sum, s) => sum + s, 0);
+    expect(total).toBeCloseTo(nodes.length, 2);
+  });
+
+  it('global node with empty placements array behaves same as non-global node', () => {
+    const nodesWithGlobal = [
+      makeNode('a', 1),
+      makeNode('b', 1),
+      makeNode('g', 1, { isGlobal: true, placements: [] }),
+    ];
+    const nodesWithout = [
+      makeNode('a', 1),
+      makeNode('b', 1),
+      makeNode('g', 1),
+    ];
+    const resultWith = calculatePageRank(nodesWithGlobal, []);
+    const resultWithout = calculatePageRank(nodesWithout, []);
+    expect(resultWith.get('g')).toBeCloseTo(resultWithout.get('g')!, 3);
+    expect(resultWith.get('a')).toBeCloseTo(resultWithout.get('a')!, 3);
+  });
+
+  it('global node with no placements field (undefined) behaves same as non-global node', () => {
+    const nodesWithGlobal = [
+      makeNode('a', 1),
+      makeNode('g', 1, { isGlobal: true }),
+    ];
+    const nodesWithout = [
+      makeNode('a', 1),
+      makeNode('g', 1),
+    ];
+    const resultWith = calculatePageRank(nodesWithGlobal, []);
+    const resultWithout = calculatePageRank(nodesWithout, []);
+    expect(resultWith.get('g')).toBeCloseTo(resultWithout.get('g')!, 3);
   });
 });
 
