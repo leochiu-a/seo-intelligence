@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: MVP
 status: verifying
-stopped_at: Completed 04-02-PLAN.md
-last_updated: "2026-04-14T14:54:30.305Z"
+stopped_at: Completed 05-01-PLAN.md
+last_updated: "2026-04-14T15:10:42.216Z"
 last_activity: 2026-04-14
 progress:
   total_phases: 6
-  completed_phases: 5
-  total_plans: 10
-  completed_plans: 10
+  completed_phases: 6
+  total_plans: 11
+  completed_plans: 11
   percent: 0
 ---
 
@@ -21,12 +21,12 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-13)
 
 **Core value:** Let PMs visually plan and simulate internal link structures — and immediately see which pages will rank highest — before any code is written or deployed.
-**Current focus:** Phase 04 — global-nodes
+**Current focus:** Phase 05 — global-filter-panel
 
 ## Current Position
 
-Phase: 5
-Plan: Not started
+Phase: 05 (global-filter-panel) — EXECUTING
+Plan: 1 of 1
 Status: Phase complete — ready for verification
 Last activity: 2026-04-14
 
@@ -59,6 +59,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 03-scenarios-export P02 | 525633min | 2 tasks | 2 files |
 | Phase 04-global-nodes P01 | 2 | 3 tasks | 4 files |
 | Phase 04-global-nodes P02 | 2 | 2 tasks | 5 files |
+| Phase 05-global-filter-panel P01 | 2 min | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -86,6 +87,9 @@ Recent decisions affecting current work:
 - [Phase 04-global-nodes]: EditPopover widens to 320px only when global is active to save space for non-global nodes
 - [Phase 04-global-nodes]: Globe badge and tier badge share one flex wrapper — clean layout whether one or both badges present
 - [Phase 04-global-nodes]: Conditional spread in exports omits isGlobal/placements for non-global nodes to avoid false:noise in JSON
+- [Phase 05-global-filter-panel]: null sentinel for highlightedNodeIds when no filters active avoids unnecessary style recalculation
+- [Phase 05-global-filter-panel]: FilterPanel positioned left of canvas between Sidebar and canvas div for UX proximity
+- [Phase 05-global-filter-panel]: styledNodes separate from enrichedNodes memo keeps scoring concerns separate from UI dimming
 
 ### Pending Todos
 
@@ -107,6 +111,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-14T14:51:37.703Z
-Stopped at: Completed 04-02-PLAN.md
+Last session: 2026-04-14T15:10:42.213Z
+Stopped at: Completed 05-01-PLAN.md
 Resume file: None

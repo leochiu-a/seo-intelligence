@@ -110,7 +110,7 @@ Plans:
 **Plans**: 1 plan
 
 Plans:
-- [ ] 05-01-PLAN.md — FilterPanel component with useFilterState hook, canvas dimming via node.style.opacity
+- [x] 05-01-PLAN.md — FilterPanel component with useFilterState hook, canvas dimming via node.style.opacity
 
 ## Progress
 
@@ -123,4 +123,4 @@ Plans:
 | 2. Scoring & Analysis | 2/2 | Complete   | 2026-04-13 |
 | 3. Scenarios & Export | 0/2 | Not started | - |
 | 4. Global Nodes | 0/2 | Complete    | 2026-04-14 |
-| 5. Global Filter Panel | 0/1 | Not started | - |
+| 5. Global Filter Panel | 1/1 | Complete   | 2026-04-14 |

@@ -47,10 +47,10 @@
 
 ### Global Filter
 
-- [ ] **FILTER-01**: A filter panel lists all global nodes and their placements as checkboxes
-- [ ] **FILTER-02**: When one or more items are checked, the matching global nodes are highlighted on the canvas
-- [ ] **FILTER-03**: Nodes not related to any checked item are dimmed (reduced opacity) on the canvas
-- [ ] **FILTER-04**: When no filters are checked the canvas returns to full-opacity normal state
+- [x] **FILTER-01**: A filter panel lists all global nodes and their placements as checkboxes
+- [x] **FILTER-02**: When one or more items are checked, the matching global nodes are highlighted on the canvas
+- [x] **FILTER-03**: Nodes not related to any checked item are dimmed (reduced opacity) on the canvas
+- [x] **FILTER-04**: When no filters are checked the canvas returns to full-opacity normal state
 
 ### Scenario Comparison
 
