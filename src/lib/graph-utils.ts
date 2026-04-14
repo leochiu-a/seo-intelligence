@@ -254,6 +254,97 @@ export function identifyWeakNodes(
   return weak;
 }
 
+// ---------------------------------------------------------------------------
+// URL tree hierarchy
+// ---------------------------------------------------------------------------
+
+export interface UrlTreeNode {
+  id: string;
+  urlTemplate: string;
+  score: number;
+  /** 0 = root level, 1 = child, 2 = grandchild, … */
+  depth: number;
+  children: UrlTreeNode[];
+}
+
+/**
+ * Builds a tree of URL nodes based on path-prefix relationships.
+ *
+ * Rules:
+ * - A node A is the parent of node B iff A's path segments are a strict prefix
+ *   of B's path segments and A has the most specific match (longest prefix).
+ * - The "/" node (empty segments) is never treated as a parent of anything.
+ * - Within each level, nodes are sorted by score descending.
+ */
+export function buildUrlTree(
+  nodes: Node<UrlNodeData>[],
+  scores: Map<string, number>,
+): UrlTreeNode[] {
+  // Parse each node into a flat record with its path segments
+  const flat = nodes.map((n) => ({
+    id: n.id,
+    urlTemplate: n.data.urlTemplate,
+    score: scores.get(n.id) ?? 0,
+    segments: n.data.urlTemplate
+      .split('/')
+      .filter((s) => s.length > 0),
+  }));
+
+  // Sort by segment count ascending so potential parents come first
+  flat.sort((a, b) => a.segments.length - b.segments.length);
+
+  // Build UrlTreeNode map (id → node)
+  const nodeMap = new Map<string, UrlTreeNode>();
+  for (const item of flat) {
+    nodeMap.set(item.id, {
+      id: item.id,
+      urlTemplate: item.urlTemplate,
+      score: item.score,
+      depth: 0,
+      children: [],
+    });
+  }
+
+  const roots: UrlTreeNode[] = [];
+
+  for (const item of flat) {
+    const treeNode = nodeMap.get(item.id)!;
+
+    // Find best parent: longest strict-prefix match with segments.length > 0
+    let bestParent: (typeof flat)[number] | null = null;
+    for (const candidate of flat) {
+      if (candidate.id === item.id) continue;
+      const cs = candidate.segments;
+      // Candidate must have fewer segments than item (strict prefix)
+      // AND candidate segments must not be empty (prevent "/" from parenting)
+      if (cs.length === 0 || cs.length >= item.segments.length) continue;
+      // Check prefix
+      if (!cs.every((seg, i) => seg === item.segments[i])) continue;
+      // Keep the most specific (longest) prefix
+      if (bestParent === null || cs.length > bestParent.segments.length) {
+        bestParent = candidate;
+      }
+    }
+
+    if (bestParent) {
+      const parentNode = nodeMap.get(bestParent.id)!;
+      treeNode.depth = parentNode.depth + 1;
+      parentNode.children.push(treeNode);
+    } else {
+      roots.push(treeNode);
+    }
+  }
+
+  // Sort children and roots by score descending
+  function sortByScore(arr: UrlTreeNode[]): void {
+    arr.sort((a, b) => b.score - a.score);
+    for (const node of arr) sortByScore(node.children);
+  }
+  sortByScore(roots);
+
+  return roots;
+}
+
 /**
  * Parses a JSON string produced by the export feature and returns
  * ReactFlow-compatible nodes and edges arrays.
