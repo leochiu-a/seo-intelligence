@@ -335,8 +335,8 @@ function AppInner() {
             edgeTypes={edgeTypes}
             deleteKeyCode={['Backspace', 'Delete']}
             fitView
-            fitViewOptions={{ maxZoom: 0.75 }}
-            defaultViewport={{ x: 0, y: 0, zoom: 0.75 }}
+            fitViewOptions={{ maxZoom: 0.9 }}
+            defaultViewport={{ x: 0, y: 0, zoom: 0.9 }}
           >
             <Background />
             <Controls />
