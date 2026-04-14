@@ -1,13 +1,14 @@
-import { Plus, Download, Upload } from 'lucide-react';
+import { Plus, Download, Upload, Trash2 } from 'lucide-react';
 
 interface ToolbarProps {
   onAddNode: () => void;
   onImportJson: () => void;
   onExportJson: () => void;
+  onClearCanvas: () => void;
   isEmpty: boolean;
 }
 
-export function Toolbar({ onAddNode, onImportJson, onExportJson, isEmpty }: ToolbarProps) {
+export function Toolbar({ onAddNode, onImportJson, onExportJson, onClearCanvas, isEmpty }: ToolbarProps) {
   return (
     <header className="flex h-12 shrink-0 items-center border-b border-border bg-white px-4 shadow-sm">
       <span className="text-sm font-bold tracking-wide text-pink">SEO INTELLIGENCE</span>
@@ -34,6 +35,14 @@ export function Toolbar({ onAddNode, onImportJson, onExportJson, isEmpty }: Tool
         >
           <Download size={14} />
           Export JSON
+        </button>
+        <button
+          onClick={onClearCanvas}
+          disabled={isEmpty}
+          className="flex items-center gap-1.5 rounded-md border border-red-200 bg-white px-3 py-1.5 text-sm font-medium text-red-600 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50 transition-colors"
+        >
+          <Trash2 size={14} />
+          Clear Canvas
         </button>
       </div>
     </header>

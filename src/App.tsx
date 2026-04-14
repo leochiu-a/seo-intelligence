@@ -267,6 +267,12 @@ function AppInner() {
     URL.revokeObjectURL(url);
   }, [nodes, edges, scores]);
 
+  const handleClearCanvas = useCallback(() => {
+    setNodes([]);
+    setEdges([]);
+    localStorage.removeItem(STORAGE_KEY);
+  }, [setNodes, setEdges]);
+
   // Restore graph from localStorage on mount (runs once — empty dep array)
   // Must be defined BEFORE the save effect so React processes restore before save.
   useEffect(() => {
@@ -317,7 +323,7 @@ function AppInner() {
 
   return (
     <div className="h-screen w-screen flex flex-col bg-canvas text-dark">
-      <Toolbar onAddNode={onAddNode} onImportJson={() => setShowImportDialog(true)} onExportJson={onExportJson} isEmpty={nodes.length === 0} />
+      <Toolbar onAddNode={onAddNode} onImportJson={() => setShowImportDialog(true)} onExportJson={onExportJson} onClearCanvas={handleClearCanvas} isEmpty={nodes.length === 0} />
       <div className="flex flex-1 overflow-hidden">
         <Sidebar />
         <div className="flex-1" ref={reactFlowWrapper}>
