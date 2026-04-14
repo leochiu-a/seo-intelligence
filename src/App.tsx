@@ -317,7 +317,7 @@ function AppInner() {
   }, [nodes, edges]);
 
   return (
-    <div className="h-screen w-screen flex flex-col bg-gray-50">
+    <div className="h-screen w-screen flex flex-col bg-canvas text-dark">
       <Toolbar onAddNode={onAddNode} onExportJson={onExportJson} onExportCsv={onExportCsv} isEmpty={nodes.length === 0} />
       <div className="flex flex-1 overflow-hidden">
         <Sidebar />
@@ -342,15 +342,15 @@ function AppInner() {
             {nodes.length === 0 && (
               <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
                 <div className="text-center">
-                  <p className="text-lg font-semibold text-gray-400">
+                  <p className="text-lg font-semibold text-muted-fg">
                     Start mapping your link structure
                   </p>
-                  <p className="text-sm text-gray-400 mt-2 max-w-sm">
+                  <p className="text-sm text-muted-fg mt-2 max-w-sm">
                     Drag a URL Node from the left panel onto the canvas, then connect nodes to model
                     how pages link to each other.
                   </p>
-                  <p className="text-xs text-gray-400 mt-1">
-                    Or use + Add Node above to place a node at canvas center.
+                  <p className="text-xs text-muted-fg mt-1">
+                    Or use Add Node above to place a node at canvas center.
                   </p>
                 </div>
               </div>

@@ -9,19 +9,21 @@ interface ToolbarProps {
 
 export function Toolbar({ onAddNode, onExportJson, onExportCsv, isEmpty }: ToolbarProps) {
   return (
-    <div className="h-12 bg-white border-b border-gray-200 flex items-center px-4">
-      <button
-        onClick={onAddNode}
-        className="bg-indigo-500 hover:bg-indigo-600 text-white text-sm font-semibold px-4 py-1.5 rounded-md flex items-center gap-1.5"
-      >
-        <Plus size={16} />
-        + Add Node
-      </button>
+    <header className="flex h-12 shrink-0 items-center border-b border-border bg-white px-4 shadow-sm">
+      <span className="text-sm font-bold tracking-wide text-pink">SEO INTELLIGENCE</span>
+
       <div className="ml-auto flex items-center gap-2">
+        <button
+          onClick={onAddNode}
+          className="flex items-center gap-1.5 rounded-md bg-dark px-4 py-1.5 text-sm font-semibold text-white hover:bg-ink transition-colors"
+        >
+          <Plus size={16} />
+          Add Node
+        </button>
         <button
           onClick={onExportJson}
           disabled={isEmpty}
-          className="border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium px-3 py-1.5 rounded-md flex items-center gap-1.5"
+          className="flex items-center gap-1.5 rounded-md border border-border bg-white px-3 py-1.5 text-sm font-medium text-ink hover:bg-surface disabled:cursor-not-allowed disabled:opacity-50 transition-colors"
         >
           <Download size={14} />
           Export JSON
@@ -29,12 +31,12 @@ export function Toolbar({ onAddNode, onExportJson, onExportCsv, isEmpty }: Toolb
         <button
           onClick={onExportCsv}
           disabled={isEmpty}
-          className="border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium px-3 py-1.5 rounded-md flex items-center gap-1.5"
+          className="flex items-center gap-1.5 rounded-md border border-border bg-white px-3 py-1.5 text-sm font-medium text-ink hover:bg-surface disabled:cursor-not-allowed disabled:opacity-50 transition-colors"
         >
           <Download size={14} />
           Export CSV
         </button>
       </div>
-    </div>
+    </header>
   );
 }

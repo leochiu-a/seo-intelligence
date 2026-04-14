@@ -18,29 +18,29 @@ export function ScoreSidebar({ nodes, scores, weakNodes }: ScoreSidebarProps) {
     .sort((a, b) => b.score - a.score);
 
   const handleClick = (nodeId: string) => {
-    // Select the node and fitView to it
     setNodes((nds) => nds.map((n) => ({ ...n, selected: n.id === nodeId })));
-    // Small timeout to let selection state propagate, then fitView
     setTimeout(() => {
       fitView({ nodes: [{ id: nodeId }], duration: 300, padding: 0.5 });
     }, 50);
   };
 
   return (
-    <aside className="w-60 border-l border-gray-200 bg-white overflow-y-auto flex-shrink-0">
-      <div className="px-3 py-2 border-b border-gray-200">
-        <h2 className="text-sm font-semibold text-gray-700">Score Ranking</h2>
+    <aside className="w-60 shrink-0 border-l border-border bg-white overflow-y-auto">
+      <div className="px-3 py-2.5 border-b border-border">
+        <h2 className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-fg">
+          Score Ranking
+        </h2>
       </div>
-      <ul className="divide-y divide-gray-100">
+      <ul className="divide-y divide-border">
         {ranked.map((item) => (
           <li key={item.id}>
             <button
-              className="w-full text-left px-3 py-2 hover:bg-gray-50 transition-colors flex items-start gap-2"
+              className="w-full text-left px-3 py-2.5 hover:bg-surface transition-colors flex items-start gap-2"
               onClick={() => handleClick(item.id)}
             >
               <div className="flex-1 min-w-0">
-                <p className="text-sm text-gray-900 truncate">{item.urlTemplate}</p>
-                <p className="text-xs text-gray-500 font-mono">{item.score.toFixed(4)}</p>
+                <p className="text-sm text-dark truncate">{item.urlTemplate}</p>
+                <p className="text-[11px] text-muted-fg font-mono">{item.score.toFixed(4)}</p>
               </div>
               {weakNodes.has(item.id) && (
                 <TriangleAlert size={14} className="text-amber-500 mt-0.5 flex-shrink-0" aria-label="Weak page" />
@@ -50,7 +50,9 @@ export function ScoreSidebar({ nodes, scores, weakNodes }: ScoreSidebarProps) {
         ))}
       </ul>
       {ranked.length === 0 && (
-        <p className="px-3 py-4 text-xs text-gray-400 text-center">Add nodes to see scores</p>
+        <p className="px-3 py-4 text-[11px] text-muted-fg text-center">
+          Add nodes to see scores
+        </p>
       )}
     </aside>
   );

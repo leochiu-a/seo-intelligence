@@ -3,9 +3,17 @@
 @tailwind utilities;
 
 :root {
+  /* Base tokens — mirrored from agent-flow */
+  --color-pink: #ea4b71;
   --color-dark: #1f2937;
+  --color-ink: #374151;
+  --color-secondary: #6b7280;
   --color-muted-fg: #9ca3af;
   --color-placeholder: #d1d5db;
+  --color-border: #e5e7eb;
+  --color-disabled: #f3f4f6;
+  --color-surface: #f9fafb;
+  --color-canvas: #f8f9fa;
 
   /* Score tier glow colors (rgba values for box-shadow) */
   --color-tier-high: #22c55e;
@@ -23,4 +31,22 @@
   --color-tier-neutral: #6366f1;
   --color-tier-neutral-glow: rgba(99, 102, 241, 0.6);
   --color-tier-neutral-ambient: rgba(99, 102, 241, 0.15);
+}
+
+body {
+  background: var(--color-canvas);
+  color: var(--color-dark);
+}
+
+/* React Flow controls styling — mirrored from agent-flow */
+.react-flow__controls-button {
+  background: #ffffff !important;
+  border: none !important;
+  color: var(--color-ink) !important;
+  fill: var(--color-ink) !important;
+  border-radius: 8px !important;
+}
+
+.react-flow__controls-button:hover {
+  background: var(--color-disabled) !important;
 }
