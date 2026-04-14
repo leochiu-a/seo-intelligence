@@ -9,16 +9,18 @@ function makeJsonFile(content: string, name = 'test.json'): File {
 
 // Helper to mock FileReader for a given result
 function mockFileReader(result: string) {
-  const mockReader = {
-    onload: null as ((e: ProgressEvent<FileReader>) => void) | null,
-    readAsText(this: typeof mockReader) {
+  const MockFileReader = function (this: {
+    onload: ((e: ProgressEvent<FileReader>) => void) | null;
+    readAsText: () => void;
+  }) {
+    this.onload = null;
+    this.readAsText = () => {
       if (this.onload) {
         this.onload({ target: { result } } as ProgressEvent<FileReader>);
       }
-    },
+    };
   };
-  vi.spyOn(globalThis, 'FileReader').mockImplementation(() => mockReader as unknown as FileReader);
-  return mockReader;
+  vi.stubGlobal('FileReader', MockFileReader);
 }
 
 const validJson = JSON.stringify({
@@ -29,6 +31,7 @@ const validJson = JSON.stringify({
 describe('ImportDialog', () => {
   afterEach(() => {
     vi.restoreAllMocks();
+    vi.unstubAllGlobals();
   });
 
   it('renders nothing when open=false', () => {
