@@ -92,9 +92,10 @@ None yet.
 | # | Description | Date | Commit | Directory |
 |---|-------------|------|--------|-----------|
 | 260414-deh | Restyle canvas nodes to match agent-flow StepNode design | 2026-04-14 | 932e901 | [260414-deh-restyle-canvas-nodes-to-match-agent-flow](./quick/260414-deh-restyle-canvas-nodes-to-match-agent-flow/) |
+| 260414-igw | Import JSON feature: toolbar button with drag-and-drop/file-select dialog | 2026-04-14 | 3d1304a | [260414-igw-import-json-feature-with-drag-and-drop-f](./quick/260414-igw-import-json-feature-with-drag-and-drop-f/) |
 
 ## Session Continuity
 
-Last session: 2026-04-14T01:38:58.380Z
-Stopped at: Completed quick task 260414-deh: Restyle canvas nodes to match agent-flow StepNode design
+Last session: 2026-04-14T05:33:00.000Z
+Stopped at: Completed quick task 260414-igw: Import JSON feature with drag-and-drop/file-select dialog button
 Resume file: None
