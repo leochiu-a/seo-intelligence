@@ -20,6 +20,7 @@ import { LinkCountEdge } from './components/LinkCountEdge';
 import { Sidebar } from './components/Sidebar';
 import { Toolbar } from './components/Toolbar';
 import { ScoreSidebar } from './components/ScoreSidebar';
+import { ImportDialog } from './components/ImportDialog';
 import {
   createDefaultNode,
   updateNodeData,
@@ -78,6 +79,7 @@ function AppInner() {
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
   const reactFlowWrapper = useRef<HTMLDivElement>(null);
   const [reactFlowInstance, setReactFlowInstance] = useState<ReactFlowInstance | null>(null);
+  const [showImportDialog, setShowImportDialog] = useState(false);
   // Guard: prevents save effect from overwriting localStorage during the initial restore frame
   const isRestoring = useRef(true);
 
@@ -108,6 +110,24 @@ function AppInner() {
       setEdges((eds) => updateEdgeLinkCount(eds, edgeId, linkCount));
     },
     [setEdges],
+  );
+
+  const handleImportFromDialog = useCallback(
+    (importedNodes: Node<UrlNodeData>[], importedEdges: Edge<LinkCountEdgeData>[]) => {
+      // Wire runtime callbacks into imported data (same pattern as onDrop handler)
+      const wiredNodes = importedNodes.map((n) => ({
+        ...n,
+        data: { ...n.data, onUpdate: onNodeDataUpdate },
+      }));
+      const wiredEdges = importedEdges.map((edge) => ({
+        ...edge,
+        markerEnd: { type: MarkerType.ArrowClosed, color: '#9CA3AF' },
+        data: { ...edge.data, onLinkCountChange: onEdgeLinkCountChange },
+      }));
+      setNodes(wiredNodes as Node<AppNodeData>[]);
+      setEdges(wiredEdges);
+    },
+    [onNodeDataUpdate, onEdgeLinkCountChange, setNodes, setEdges],
   );
 
   const onDragOver = useCallback((event: React.DragEvent) => {
@@ -319,7 +339,7 @@ function AppInner() {
 
   return (
     <div className="h-screen w-screen flex flex-col bg-canvas text-dark">
-      <Toolbar onAddNode={onAddNode} onExportJson={onExportJson} onExportCsv={onExportCsv} isEmpty={nodes.length === 0} />
+      <Toolbar onAddNode={onAddNode} onImportJson={() => setShowImportDialog(true)} onExportJson={onExportJson} onExportCsv={onExportCsv} isEmpty={nodes.length === 0} />
       <div className="flex flex-1 overflow-hidden">
         <Sidebar />
         <div className="flex-1" ref={reactFlowWrapper}>
@@ -377,6 +397,11 @@ function AppInner() {
         </div>
         <ScoreSidebar nodes={nodes} scores={scores} weakNodes={weakNodes} />
       </div>
+      <ImportDialog
+        open={showImportDialog}
+        onClose={() => setShowImportDialog(false)}
+        onImport={handleImportFromDialog}
+      />
     </div>
   );
 }

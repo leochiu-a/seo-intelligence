@@ -1,13 +1,14 @@
-import { Plus, Download } from 'lucide-react';
+import { Plus, Download, Upload } from 'lucide-react';
 
 interface ToolbarProps {
   onAddNode: () => void;
+  onImportJson: () => void;
   onExportJson: () => void;
   onExportCsv: () => void;
   isEmpty: boolean;
 }
 
-export function Toolbar({ onAddNode, onExportJson, onExportCsv, isEmpty }: ToolbarProps) {
+export function Toolbar({ onAddNode, onImportJson, onExportJson, onExportCsv, isEmpty }: ToolbarProps) {
   return (
     <header className="flex h-12 shrink-0 items-center border-b border-border bg-white px-4 shadow-sm">
       <span className="text-sm font-bold tracking-wide text-pink">SEO INTELLIGENCE</span>
@@ -19,6 +20,13 @@ export function Toolbar({ onAddNode, onExportJson, onExportCsv, isEmpty }: Toolb
         >
           <Plus size={16} />
           Add Node
+        </button>
+        <button
+          onClick={onImportJson}
+          className="flex items-center gap-1.5 rounded-md border border-border bg-white px-3 py-1.5 text-sm font-medium text-ink hover:bg-surface transition-colors"
+        >
+          <Upload size={14} />
+          Import JSON
         </button>
         <button
           onClick={onExportJson}
