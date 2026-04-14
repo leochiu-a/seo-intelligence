@@ -102,7 +102,7 @@ function UrlNodeComponent({ id, data, selected }: NodeProps<UrlNodeExtendedData>
       )}
 
       {/* Title */}
-      <div className="mb-1 truncate pr-6 text-xs font-semibold text-dark">
+      <div className="mb-1 break-all pr-6 text-xs font-semibold text-dark">
         {data.urlTemplate || <span className="text-placeholder">No URL template</span>}
       </div>
 
