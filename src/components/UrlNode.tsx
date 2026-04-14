@@ -12,17 +12,38 @@ interface UrlNodeExtendedData extends UrlNodeData {
   isWeak?: boolean;
 }
 
-const TIER_BORDER_CLASS: Record<ScoreTier, string> = {
-  high: 'border-l-green-500',
-  mid: 'border-l-amber-500',
-  low: 'border-l-red-400',
-  neutral: 'border-l-indigo-500',
+const TONE_MAP: Record<ScoreTier, { card: string; focus: string; badge: string; badgeLabel: string }> = {
+  high: {
+    card: 'bg-white border-tier-high/40',
+    focus: 'border-tier-high shadow-[0_0_0_1px_var(--color-tier-high-glow),0_0_24px_var(--color-tier-high-ambient)]',
+    badge: 'bg-green-100 text-green-700',
+    badgeLabel: 'High',
+  },
+  mid: {
+    card: 'bg-white border-tier-mid/40',
+    focus: 'border-tier-mid shadow-[0_0_0_1px_var(--color-tier-mid-glow),0_0_24px_var(--color-tier-mid-ambient)]',
+    badge: 'bg-amber-100 text-amber-700',
+    badgeLabel: 'Mid',
+  },
+  low: {
+    card: 'bg-white border-tier-low/40',
+    focus: 'border-tier-low shadow-[0_0_0_1px_var(--color-tier-low-glow),0_0_24px_var(--color-tier-low-ambient)]',
+    badge: 'bg-red-100 text-red-700',
+    badgeLabel: 'Low',
+  },
+  neutral: {
+    card: 'bg-white border-tier-neutral/40',
+    focus: 'border-tier-neutral shadow-[0_0_0_1px_var(--color-tier-neutral-glow),0_0_24px_var(--color-tier-neutral-ambient)]',
+    badge: 'bg-indigo-100 text-indigo-700',
+    badgeLabel: 'Neutral',
+  },
 };
 
-function UrlNodeComponent({ id, data }: NodeProps<UrlNodeExtendedData>) {
+function UrlNodeComponent({ id, data, selected }: NodeProps<UrlNodeExtendedData>) {
   const [showPopover, setShowPopover] = useState(false);
 
-  const borderClass = TIER_BORDER_CLASS[data.scoreTier ?? 'neutral'];
+  const tier = data.scoreTier ?? 'neutral';
+  const tone = TONE_MAP[tier];
 
   const handleSave = (urlTemplate: string, pageCount: number) => {
     if (data.onUpdate) {
@@ -31,35 +52,57 @@ function UrlNodeComponent({ id, data }: NodeProps<UrlNodeExtendedData>) {
   };
 
   return (
-    <div className={`group relative min-w-[200px] max-w-[280px] min-h-[64px] bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md border-l-4 ${borderClass} px-4 py-2`}>
-      <Handle type="target" position={Position.Left} className="!bg-indigo-500 !w-2.5 !h-2.5" />
-      <Handle type="source" position={Position.Right} className="!bg-indigo-500 !w-2.5 !h-2.5" />
+    <div
+      className={`w-[280px] rounded-xl border-2 p-3.5 shadow-md shadow-black/8 transition ${tone.card} ${selected ? tone.focus : ''}`}
+    >
+      <Handle
+        type="target"
+        position={Position.Left}
+        style={{ background: '#ffffff', border: '2px solid var(--color-placeholder)', width: 12, height: 12 }}
+      />
 
-      {data.isWeak && (
-        <TriangleAlert
-          size={14}
-          className="absolute top-1.5 left-5 text-amber-500"
-          aria-label="Weak page"
-        />
-      )}
+      {/* Header: badge + edit button */}
+      <div className="mb-2.5 flex items-center gap-2">
+        <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-semibold ${tone.badge}`}>
+          {tone.badgeLabel}
+        </span>
 
-      <p className={`text-sm font-semibold text-gray-900 leading-tight truncate pr-6${data.isWeak ? ' pl-5' : ''}`}>
-        {data.urlTemplate}
-      </p>
-      <p className="text-xs text-gray-500 leading-snug mt-1">
-        {formatPageCount(data.pageCount)}
-      </p>
+        <div className="ml-auto flex items-center gap-1">
+          <button
+            className="nodrag p-1 rounded hover:bg-gray-100 transition-colors"
+            aria-label="Edit node"
+            onClick={(e) => {
+              e.stopPropagation();
+              setShowPopover((prev) => !prev);
+            }}
+          >
+            <Pencil size={14} className="text-muted-fg hover:text-dark" />
+          </button>
+        </div>
+      </div>
 
-      <button
-        className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity p-1.5 rounded hover:bg-gray-100"
-        aria-label="Edit node"
-        onClick={(e) => {
-          e.stopPropagation();
-          setShowPopover((prev) => !prev);
-        }}
-      >
-        <Pencil size={14} className="text-gray-400 hover:text-gray-600" />
-      </button>
+      {/* Title */}
+      <div className="mb-1 truncate text-sm font-semibold text-dark">
+        {data.urlTemplate || <span className="text-placeholder">No URL template</span>}
+      </div>
+
+      {/* Subtitle */}
+      <div className="flex items-center gap-1.5 text-[11px] text-muted-fg">
+        <span>{formatPageCount(data.pageCount)}</span>
+        {data.isWeak && (
+          <>
+            <span>·</span>
+            <TriangleAlert size={11} className="text-amber-500" aria-label="Weak page" />
+            <span className="text-amber-500">Weak</span>
+          </>
+        )}
+      </div>
+
+      <Handle
+        type="source"
+        position={Position.Right}
+        style={{ background: '#ffffff', border: '2px solid var(--color-placeholder)', width: 12, height: 12 }}
+      />
 
       {showPopover && (
         <EditPopover
