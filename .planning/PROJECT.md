@@ -26,6 +26,8 @@ Let PMs visually plan and simulate internal link structures — and immediately 
 - [ ] Weak/isolated pages (low inbound links) are automatically flagged
 - [ ] Multiple graph scenarios can be created and compared side-by-side
 - [ ] Export graph data as CSV and JSON
+- [ ] Nodes can be designated as "global" with named placements (Header Nav, Footer, etc.) and per-placement link counts; all other nodes auto-contribute inbound links without manual edges
+- [ ] A filter panel lets users highlight global nodes and their placements on the canvas, dimming unrelated nodes
 
 ### Out of Scope
 
@@ -73,4 +75,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-13 after initialization*
+*Last updated: 2026-04-14 after v1.1 milestone initialization*

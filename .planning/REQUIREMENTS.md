@@ -37,6 +37,21 @@
 - [x] **SIDEBAR-02**: Weak/isolated pages (below a threshold of inbound link equity) are flagged with a warning indicator
 - [x] **SIDEBAR-03**: Clicking a sidebar item highlights/selects the corresponding node on canvas
 
+### Global Nodes
+
+- [ ] **GLOB-01**: User can mark any node as "global" via the node edit popover
+- [ ] **GLOB-02**: Global nodes display a visible indicator (e.g. badge or icon) that distinguishes them from regular nodes on the canvas
+- [ ] **GLOB-03**: A global node has one or more named placements (e.g. "Header Nav", "Footer"), each with its own link count
+- [ ] **GLOB-04**: User can add, edit, and delete placements on a global node
+- [ ] **GLOB-05**: PageRank algorithm treats every non-global node as implicitly linking to all global nodes; the effective inbound link count per page equals the sum of that global node's placement link counts
+
+### Global Filter
+
+- [ ] **FILTER-01**: A filter panel lists all global nodes and their placements as checkboxes
+- [ ] **FILTER-02**: When one or more items are checked, the matching global nodes are highlighted on the canvas
+- [ ] **FILTER-03**: Nodes not related to any checked item are dimmed (reduced opacity) on the canvas
+- [ ] **FILTER-04**: When no filters are checked the canvas returns to full-opacity normal state
+
 ### Scenario Comparison
 
 - [ ] **SCENARIO-01**: User can create multiple named graph scenarios (e.g. "Current", "Proposal A")
@@ -78,19 +93,21 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| CANVAS-01 ~ CANVAS-05 | Phase 1 | Pending |
-| NODE-01 ~ NODE-03 | Phase 1 | Pending |
-| EDGE-01 ~ EDGE-02 | Phase 1 | Pending |
-| SCORE-01 ~ SCORE-04 | Phase 2 | Pending |
-| SIDEBAR-01 ~ SIDEBAR-03 | Phase 2 | Pending |
+| CANVAS-01 ~ CANVAS-05 | Phase 1 | Complete |
+| NODE-01 ~ NODE-03 | Phase 1 | Complete |
+| EDGE-01 ~ EDGE-02 | Phase 1 | Complete |
+| SCORE-01 ~ SCORE-04 | Phase 2 | Complete |
+| SIDEBAR-01 ~ SIDEBAR-03 | Phase 2 | Complete |
 | SCENARIO-01 ~ SCENARIO-03 | Phase 3 | Pending |
-| EXPORT-01 ~ EXPORT-02 | Phase 3 | Pending |
+| EXPORT-01 ~ EXPORT-02 | Phase 3 | Complete |
+| GLOB-01 ~ GLOB-05 | Phase 4 | Pending |
+| FILTER-01 ~ FILTER-04 | Phase 5 | Pending |
 
 **Coverage:**
-- v1 requirements: 22 total
-- Mapped to phases: 22
-- Unmapped: 0
+- v1 requirements: 31 total
+- Mapped to phases: 31
+- Unmapped: 0 ✓
 
 ---
 *Requirements defined: 2026-04-13*
-*Last updated: 2026-04-13 after initialization*
+*Last updated: 2026-04-14 after v1.1 milestone initialization*
