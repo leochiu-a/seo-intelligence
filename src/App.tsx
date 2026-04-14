@@ -336,7 +336,7 @@ function AppInner() {
             edgeTypes={edgeTypes}
             deleteKeyCode={['Backspace', 'Delete']}
             fitView
-            fitViewOptions={{ padding: 0.4, maxZoom: 1 }}
+            fitViewOptions={{ padding: 0.2, maxZoom: 1 }}
             minZoom={0.3}
             style={{ background: 'var(--color-canvas)' }}
           >
