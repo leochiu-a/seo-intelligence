@@ -1,8 +1,8 @@
 import { memo, useState } from 'react';
 import { Handle, Position, type NodeProps } from 'reactflow';
-import { Pencil, TriangleAlert } from 'lucide-react';
+import { Pencil, TriangleAlert, Globe } from 'lucide-react';
 import { EditPopover } from './EditPopover';
-import { formatPageCount, type UrlNodeData, type ScoreTier, HANDLE_IDS } from '../lib/graph-utils';
+import { formatPageCount, type UrlNodeData, type ScoreTier, type Placement, HANDLE_IDS } from '../lib/graph-utils';
 
 export type { UrlNodeData } from '../lib/graph-utils';
 
@@ -45,9 +45,9 @@ function UrlNodeComponent({ id, data, selected }: NodeProps<UrlNodeExtendedData>
   const tier = data.scoreTier ?? 'neutral';
   const tone = TONE_MAP[tier];
 
-  const handleSave = (urlTemplate: string, pageCount: number) => {
+  const handleSave = (urlTemplate: string, pageCount: number, isGlobal: boolean, placements: Placement[]) => {
     if (data.onUpdate) {
-      data.onUpdate(id, { urlTemplate, pageCount });
+      data.onUpdate(id, { urlTemplate, pageCount, isGlobal, placements });
     }
   };
 
@@ -80,12 +80,20 @@ function UrlNodeComponent({ id, data, selected }: NodeProps<UrlNodeExtendedData>
         <Pencil size={13} className="text-muted-fg hover:text-dark" />
       </button>
 
-      {/* Badge — only when scored */}
-      {tier !== 'neutral' && (
-        <div className="mb-2">
-          <span className={`inline-flex items-center rounded-full px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${tone.badge}`}>
-            {tone.badgeLabel}
-          </span>
+      {/* Badges — tier and/or global */}
+      {(tier !== 'neutral' || data.isGlobal) && (
+        <div className="mb-2 flex flex-wrap items-center gap-1">
+          {tier !== 'neutral' && (
+            <span className={`inline-flex items-center rounded-full px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${tone.badge}`}>
+              {tone.badgeLabel}
+            </span>
+          )}
+          {data.isGlobal && (
+            <span className="inline-flex items-center gap-1 rounded-full px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide bg-blue-100 text-blue-700">
+              <Globe size={9} />
+              Global
+            </span>
+          )}
         </div>
       )}
 
@@ -124,6 +132,8 @@ function UrlNodeComponent({ id, data, selected }: NodeProps<UrlNodeExtendedData>
           nodeId={id}
           urlTemplate={data.urlTemplate}
           pageCount={data.pageCount}
+          isGlobal={data.isGlobal ?? false}
+          placements={data.placements ?? []}
           onSave={handleSave}
           onClose={() => setShowPopover(false)}
         />

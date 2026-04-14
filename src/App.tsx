@@ -34,6 +34,7 @@ import {
   type UrlNodeData,
   type LinkCountEdgeData,
   type ScoreTier,
+  type Placement,
 } from './lib/graph-utils';
 
 // Extended node data type that includes the update callback for EditPopover wiring
@@ -54,13 +55,13 @@ const STORAGE_KEY = 'seo-planner-graph';
 function serializeGraph(
   nodes: Node<AppNodeData>[],
   edges: Edge[],
-): { nodes: Array<{ id: string; type?: string; position: { x: number; y: number }; data: { urlTemplate: string; pageCount: number } }>; edges: Array<{ id: string; source: string; target: string; sourceHandle?: string | null; targetHandle?: string | null; type?: string; markerEnd?: unknown; data: { linkCount: number } }> } {
+): { nodes: Array<{ id: string; type?: string; position: { x: number; y: number }; data: { urlTemplate: string; pageCount: number; isGlobal?: boolean; placements?: Placement[] } }>; edges: Array<{ id: string; source: string; target: string; sourceHandle?: string | null; targetHandle?: string | null; type?: string; markerEnd?: unknown; data: { linkCount: number } }> } {
   return {
-    nodes: nodes.map(({ id, type, position, data: { urlTemplate, pageCount } }) => ({
+    nodes: nodes.map(({ id, type, position, data: { urlTemplate, pageCount, isGlobal, placements } }) => ({
       id,
       type,
       position,
-      data: { urlTemplate, pageCount },
+      data: { urlTemplate, pageCount, ...(isGlobal && { isGlobal }), ...(placements?.length && { placements }) },
     })),
     edges: edges.map(({ id, source, target, sourceHandle, targetHandle, type, markerEnd, data }) => ({
       id,
@@ -260,6 +261,8 @@ function AppInner() {
         id: n.id,
         urlTemplate: n.data.urlTemplate,
         pageCount: n.data.pageCount,
+        ...(n.data.isGlobal && { isGlobal: n.data.isGlobal }),
+        ...(n.data.placements?.length && { placements: n.data.placements }),
         x: n.position.x,
         y: n.position.y,
       })),
@@ -296,7 +299,7 @@ function AppInner() {
     }
     try {
       const parsed = JSON.parse(saved) as {
-        nodes: Array<{ id: string; type?: string; position: { x: number; y: number }; data: { urlTemplate: string; pageCount: number } }>;
+        nodes: Array<{ id: string; type?: string; position: { x: number; y: number }; data: { urlTemplate: string; pageCount: number; isGlobal?: boolean; placements?: Placement[] } }>;
         edges: Array<{ id: string; source: string; target: string; sourceHandle?: string | null; targetHandle?: string | null; type?: string; markerEnd?: unknown; data: { linkCount: number } }>;
       };
       const restoredNodes: Node<AppNodeData>[] = parsed.nodes.map((n) => ({
@@ -305,6 +308,8 @@ function AppInner() {
         data: {
           urlTemplate: n.data.urlTemplate,
           pageCount: n.data.pageCount,
+          ...(n.data.isGlobal != null && { isGlobal: n.data.isGlobal }),
+          ...(n.data.placements != null && { placements: n.data.placements }),
           onUpdate: onNodeDataUpdate,
         },
       }));
