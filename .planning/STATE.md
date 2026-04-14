@@ -75,7 +75,7 @@ Recent decisions affecting current work:
 - [Phase 02-scoring-analysis]: ReactFlowProvider wrapper added around AppInner so ScoreSidebar can call useReactFlow() as sibling of ReactFlow
 - [Phase 02-scoring-analysis]: enrichedNodes memoized separately from raw nodes — skips object creation when scoreTier and isWeak are unchanged
 - [Phase 02-scoring-analysis]: ScoreSidebar receives raw nodes (not enrichedNodes) for URL template display while scores/weakNodes are separate props
-- [Phase 03-scenarios-export]: isRestoring ref mount-guard prevents save/restore loop; serializeGraph strips runtime callbacks before persisting — Without the guard, save effect fires before restore completes and overwrites localStorage with empty state
+- [Phase 03-scenarios-export]: isFirstRender ref skips the save effect on first mount so the re-render triggered by setNodes(restoredNodes) is the first real save; serializeGraph strips runtime callbacks before persisting
 - [Phase 03-scenarios-export]: URL templates in CSV wrapped in double-quotes always (handles commas in templates safely)
 - [Phase 03-scenarios-export]: Export callbacks read directly from nodes, edges, scores useMemo in AppInner — no additional computation needed
 
