@@ -7,6 +7,7 @@ Four phases deliver a browser-based visual tool for modeling internal link struc
 ## Milestones
 
 - 🚧 **v1.0 MVP** - Phases 0-3 (in progress)
+- 📋 **v1.1 Global Navigation** - Phases 4-5 (planned)
 
 ## Phases
 
@@ -82,9 +83,34 @@ Plans:
 
 **UI hint**: yes
 
+### Phase 4: Global Nodes
+**Goal**: Users can designate any node as "global" — meaning every other node automatically links to it — and configure named placements with per-placement link counts that feed the PageRank calculation
+**Depends on**: Phase 3
+**Requirements**: GLOB-01, GLOB-02, GLOB-03, GLOB-04, GLOB-05
+**Success Criteria** (what must be TRUE):
+  1. User can toggle any node as "global" from the edit popover; global nodes show a visible badge/indicator on canvas
+  2. User can add, rename, and delete placements (e.g. "Header Nav", "Footer") on a global node, each with its own link count
+  3. PageRank recalculates correctly: every non-global node contributes inbound links to all global nodes equal to the sum of that global node's placement link counts
+  4. Scores and sidebar rankings update immediately when a node is toggled global or its placements change
+**Plans**: 2 plans
+
+Plans:
+- [ ] 04-01-PLAN.md — Placement interface, UrlNodeData extension, PageRank global injection, parseImportJson update
+- [ ] 04-02-PLAN.md — EditPopover global toggle + placement CRUD, UrlNode Globe badge, App.tsx serialization/restore/export
+
+### Phase 5: Global Filter Panel
+**Goal**: Users can filter the canvas view by global nodes and their placements, highlighting relevant nodes and dimming the rest to stay oriented in complex graphs
+**Depends on**: Phase 4
+**Requirements**: FILTER-01, FILTER-02, FILTER-03, FILTER-04
+**Success Criteria** (what must be TRUE):
+  1. A filter panel lists all global nodes with their placements as toggleable checkboxes
+  2. Checking a global node or placement highlights that node on the canvas (full opacity, distinct style)
+  3. All other nodes are dimmed (reduced opacity) when at least one filter is active
+  4. Unchecking all filters restores the canvas to full-opacity normal state
+
 ## Progress
 
-**Execution Order:** 0 → 1 → 2 → 3
+**Execution Order:** 0 → 1 → 2 → 3 → 4 → 5
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
@@ -92,3 +118,5 @@ Plans:
 | 1. Canvas Editor | 3/3 | Complete   | 2026-04-13 |
 | 2. Scoring & Analysis | 2/2 | Complete   | 2026-04-13 |
 | 3. Scenarios & Export | 0/2 | Not started | - |
+| 4. Global Nodes | 0/2 | Planning complete | - |
+| 5. Global Filter Panel | 0/? | Not started | - |
