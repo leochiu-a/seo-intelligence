@@ -80,8 +80,8 @@ function AppInner() {
   const reactFlowWrapper = useRef<HTMLDivElement>(null);
   const [reactFlowInstance, setReactFlowInstance] = useState<ReactFlowInstance | null>(null);
   const [showImportDialog, setShowImportDialog] = useState(false);
-  // Guard: prevents save effect from overwriting localStorage during the initial restore frame
-  const isRestoring = useRef(true);
+  // Guard: save effect skips its first invocation (regardless of restore timing), then saves on all subsequent renders
+  const isFirstRender = useRef(true);
 
   // Use a ref to hold the stable update callback so nodes don't need to be re-mapped
   const onNodeDataUpdate = useCallback(
@@ -279,7 +279,6 @@ function AppInner() {
     const saved = localStorage.getItem(STORAGE_KEY);
     if (!saved) {
       // No saved graph: empty canvas is already in place via initialNodes/initialEdges
-      isRestoring.current = false;
       return;
     }
     try {
@@ -312,12 +311,14 @@ function AppInner() {
     } catch {
       // Corrupt data: fall back to empty canvas already in place
     }
-    isRestoring.current = false;
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Save graph to localStorage on every change (skips the initial restore frame)
+  // Save graph to localStorage on every change (skips the very first render)
   useEffect(() => {
-    if (isRestoring.current) return;
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      return;
+    }
     localStorage.setItem(STORAGE_KEY, JSON.stringify(serializeGraph(nodes, edges)));
   }, [nodes, edges]);
 
