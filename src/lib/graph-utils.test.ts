@@ -12,6 +12,8 @@ import {
   classifyScoreTier,
   identifyWeakNodes,
   parseImportJson,
+  HANDLE_IDS,
+  getClosestHandleIds,
 } from './graph-utils';
 import type { UrlNodeData, LinkCountEdgeData } from './graph-utils';
 
@@ -446,5 +448,56 @@ describe('parseImportJson', () => {
     const result = parseImportJson(raw);
     expect(result.nodes).toHaveLength(2);
     expect(result.edges).toHaveLength(2);
+  });
+});
+
+describe('HANDLE_IDS', () => {
+  it('exports HANDLE_IDS with topSource, topTarget, rightSource, rightTarget, bottomSource, bottomTarget, leftSource, leftTarget', () => {
+    expect(HANDLE_IDS.topSource).toBe('handle-top-source');
+    expect(HANDLE_IDS.topTarget).toBe('handle-top-target');
+    expect(HANDLE_IDS.rightSource).toBe('handle-right-source');
+    expect(HANDLE_IDS.rightTarget).toBe('handle-right-target');
+    expect(HANDLE_IDS.bottomSource).toBe('handle-bottom-source');
+    expect(HANDLE_IDS.bottomTarget).toBe('handle-bottom-target');
+    expect(HANDLE_IDS.leftSource).toBe('handle-left-source');
+    expect(HANDLE_IDS.leftTarget).toBe('handle-left-target');
+  });
+});
+
+describe('getClosestHandleIds', () => {
+  it('returns handle-right-source and handle-left-target when target is directly to the right', () => {
+    const result = getClosestHandleIds({ x: 0, y: 0 }, { x: 300, y: 0 });
+    expect(result.sourceHandle).toBe('handle-right-source');
+    expect(result.targetHandle).toBe('handle-left-target');
+  });
+
+  it('returns handle-left-source and handle-right-target when target is directly to the left', () => {
+    const result = getClosestHandleIds({ x: 300, y: 0 }, { x: 0, y: 0 });
+    expect(result.sourceHandle).toBe('handle-left-source');
+    expect(result.targetHandle).toBe('handle-right-target');
+  });
+
+  it('returns handle-bottom-source and handle-top-target when target is directly below', () => {
+    const result = getClosestHandleIds({ x: 0, y: 0 }, { x: 0, y: 300 });
+    expect(result.sourceHandle).toBe('handle-bottom-source');
+    expect(result.targetHandle).toBe('handle-top-target');
+  });
+
+  it('returns handle-top-source and handle-bottom-target when target is directly above', () => {
+    const result = getClosestHandleIds({ x: 0, y: 300 }, { x: 0, y: 0 });
+    expect(result.sourceHandle).toBe('handle-top-source');
+    expect(result.targetHandle).toBe('handle-bottom-target');
+  });
+
+  it('returns right/left handles for diagonal when dx >= dy (horizontal dominates)', () => {
+    const result = getClosestHandleIds({ x: 0, y: 0 }, { x: 200, y: 200 });
+    expect(result.sourceHandle).toBe('handle-right-source');
+    expect(result.targetHandle).toBe('handle-left-target');
+  });
+
+  it('returns bottom/top handles for diagonal when dy > dx (vertical dominates)', () => {
+    const result = getClosestHandleIds({ x: 0, y: 0 }, { x: 100, y: 200 });
+    expect(result.sourceHandle).toBe('handle-bottom-source');
+    expect(result.targetHandle).toBe('handle-top-target');
   });
 });

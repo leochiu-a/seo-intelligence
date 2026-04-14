@@ -95,9 +95,10 @@ None yet.
 | 260414-igw | Import JSON feature: toolbar button with drag-and-drop/file-select dialog | 2026-04-14 | 3d1304a | [260414-igw-import-json-feature-with-drag-and-drop-f](./quick/260414-igw-import-json-feature-with-drag-and-drop-f/) |
 | 260414-sk5 | Add Clear Canvas button + confirm localStorage persistence for JSON import | 2026-04-14 | 54fe534 | [260414-sk5-add-localstorage-persistence-for-json-im](./quick/260414-sk5-add-localstorage-persistence-for-json-im/) |
 | 260414-t72 | Fix canvas disappearing after page refresh (isFirstRender save guard) | 2026-04-14 | 1693672 | [260414-t72-fix-canvas-disappearing-after-page-refre](./quick/260414-t72-fix-canvas-disappearing-after-page-refre/) |
+| 260414-tkz | Add multiple handles to UrlNode for graph routing (8 handles + getClosestHandleIds) | 2026-04-14 | 7cde4b7 | [260414-tkz-add-multiple-handles-to-urlnode-for-grap](./quick/260414-tkz-add-multiple-handles-to-urlnode-for-grap/) |
 
 ## Session Continuity
 
-Last session: 2026-04-14T13:06:00.000Z
-Stopped at: Completed quick task 260414-t72: Fix canvas disappearing after page refresh (isFirstRender save guard)
+Last session: 2026-04-14T13:22:00.000Z
+Stopped at: Completed quick task 260414-tkz: Add multiple handles to UrlNode for graph routing
 Resume file: None

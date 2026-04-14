@@ -346,6 +346,49 @@ export function buildUrlTree(
 }
 
 /**
+ * Handle IDs for UrlNode's 8 handles (source+target on each of 4 sides).
+ */
+export const HANDLE_IDS = {
+  topSource: 'handle-top-source',
+  topTarget: 'handle-top-target',
+  rightSource: 'handle-right-source',
+  rightTarget: 'handle-right-target',
+  bottomSource: 'handle-bottom-source',
+  bottomTarget: 'handle-bottom-target',
+  leftSource: 'handle-left-source',
+  leftTarget: 'handle-left-target',
+} as const;
+
+/**
+ * Computes the closest handle pair given source and target node positions.
+ * Uses absolute dx/dy to determine whether horizontal or vertical axis dominates.
+ * When |dx| >= |dy|, horizontal wins; otherwise vertical wins.
+ */
+export function getClosestHandleIds(
+  sourcePos: { x: number; y: number },
+  targetPos: { x: number; y: number },
+): { sourceHandle: string; targetHandle: string } {
+  const dx = targetPos.x - sourcePos.x;
+  const dy = targetPos.y - sourcePos.y;
+
+  if (Math.abs(dx) >= Math.abs(dy)) {
+    // Horizontal dominates
+    if (dx >= 0) {
+      return { sourceHandle: HANDLE_IDS.rightSource, targetHandle: HANDLE_IDS.leftTarget };
+    } else {
+      return { sourceHandle: HANDLE_IDS.leftSource, targetHandle: HANDLE_IDS.rightTarget };
+    }
+  } else {
+    // Vertical dominates
+    if (dy >= 0) {
+      return { sourceHandle: HANDLE_IDS.bottomSource, targetHandle: HANDLE_IDS.topTarget };
+    } else {
+      return { sourceHandle: HANDLE_IDS.topSource, targetHandle: HANDLE_IDS.bottomTarget };
+    }
+  }
+}
+
+/**
  * Parses a JSON string produced by the export feature and returns
  * ReactFlow-compatible nodes and edges arrays.
  * Throws if the JSON is malformed or required fields are missing.
