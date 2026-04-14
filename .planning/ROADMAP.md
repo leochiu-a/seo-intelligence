@@ -107,10 +107,14 @@ Plans:
   2. Checking a global node or placement highlights that node on the canvas (full opacity, distinct style)
   3. All other nodes are dimmed (reduced opacity) when at least one filter is active
   4. Unchecking all filters restores the canvas to full-opacity normal state
+**Plans**: 1 plan
+
+Plans:
+- [ ] 05-01-PLAN.md — FilterPanel component with useFilterState hook, canvas dimming via node.style.opacity
 
 ## Progress
 
-**Execution Order:** 0 → 1 → 2 → 3 → 4 → 5
+**Execution Order:** 0 -> 1 -> 2 -> 3 -> 4 -> 5
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
@@ -119,4 +123,4 @@ Plans:
 | 2. Scoring & Analysis | 2/2 | Complete   | 2026-04-13 |
 | 3. Scenarios & Export | 0/2 | Not started | - |
 | 4. Global Nodes | 0/2 | Complete    | 2026-04-14 |
-| 5. Global Filter Panel | 0/? | Not started | - |
+| 5. Global Filter Panel | 0/1 | Not started | - |
