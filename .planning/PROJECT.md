@@ -12,21 +12,20 @@ Let PMs visually plan and simulate internal link structures — and immediately 
 
 ### Validated
 
-(None yet — ship to validate)
+- [x] PM can create URL template nodes on a canvas — Validated in Phase 1: Canvas Editor
+- [x] Each node has a configurable **page count** — Validated in Phase 1: Canvas Editor
+- [x] Directed edges with configurable **link count** — Validated in Phase 1: Canvas Editor
+- [x] Canvas supports drag-to-create and connect nodes — Validated in Phase 1: Canvas Editor
+- [x] PageRank-style score calculated per node — Validated in Phase 2: Scoring & Analysis
+- [x] Nodes visually sized and colored by score — Validated in Phase 2: Scoring & Analysis
+- [x] Sidebar shows all pages ranked by score — Validated in Phase 2: Scoring & Analysis
+- [x] Weak/isolated pages automatically flagged — Validated in Phase 2: Scoring & Analysis
+- [x] Export graph data as CSV and JSON — Validated in Phase 3: Scenarios & Export
+- [x] Nodes can be designated as "global" with named placements and per-placement link counts — Validated in Phase 4: Global Nodes
 
 ### Active
 
-- [ ] PM can create URL template nodes on a canvas (e.g. `/category/<dest>/<cat>/list`)
-- [ ] Each node has a configurable **page count** (how many real pages this template represents)
-- [ ] Directed edges between nodes represent internal links; each edge has a configurable **link count** (average links per source page pointing to destination)
-- [ ] Canvas supports drag-to-create nodes and right-click / drag-from-edge to connect nodes
-- [ ] PageRank-style score calculated per node, weighted by page count and link count
-- [ ] Nodes are visually sized and colored by their score (larger + greener = higher score)
-- [ ] Sidebar shows all pages ranked by score (high → low)
-- [ ] Weak/isolated pages (low inbound links) are automatically flagged
 - [ ] Multiple graph scenarios can be created and compared side-by-side
-- [ ] Export graph data as CSV and JSON
-- [ ] Nodes can be designated as "global" with named placements (Header Nav, Footer, etc.) and per-placement link counts; all other nodes auto-contribute inbound links without manual edges
 - [ ] A filter panel lets users highlight global nodes and their placements on the canvas, dimming unrelated nodes
 
 ### Out of Scope
@@ -75,4 +74,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-14 after v1.1 milestone initialization*
+*Last updated: 2026-04-14 after Phase 4: Global Nodes complete*
