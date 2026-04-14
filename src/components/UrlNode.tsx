@@ -53,7 +53,7 @@ function UrlNodeComponent({ id, data, selected }: NodeProps<UrlNodeExtendedData>
 
   return (
     <div
-      className={`w-[280px] rounded-xl border-2 p-3.5 shadow-md shadow-black/8 transition ${tone.card} ${selected ? tone.focus : ''}`}
+      className={`w-[200px] rounded-xl border-2 p-2.5 shadow-md shadow-black/8 transition ${tone.card} ${selected ? tone.focus : ''}`}
     >
       <Handle
         type="target"
@@ -62,8 +62,8 @@ function UrlNodeComponent({ id, data, selected }: NodeProps<UrlNodeExtendedData>
       />
 
       {/* Header: badge + edit button */}
-      <div className="mb-2.5 flex items-center gap-2">
-        <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-semibold ${tone.badge}`}>
+      <div className="mb-2 flex items-center gap-2">
+        <span className={`inline-flex items-center rounded-full px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${tone.badge}`}>
           {tone.badgeLabel}
         </span>
 
@@ -82,7 +82,7 @@ function UrlNodeComponent({ id, data, selected }: NodeProps<UrlNodeExtendedData>
       </div>
 
       {/* Title */}
-      <div className="mb-1 truncate text-sm font-semibold text-dark">
+      <div className="mb-1 truncate text-xs font-semibold text-dark">
         {data.urlTemplate || <span className="text-placeholder">No URL template</span>}
       </div>
 
