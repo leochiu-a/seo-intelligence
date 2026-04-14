@@ -4,11 +4,10 @@ interface ToolbarProps {
   onAddNode: () => void;
   onImportJson: () => void;
   onExportJson: () => void;
-  onExportCsv: () => void;
   isEmpty: boolean;
 }
 
-export function Toolbar({ onAddNode, onImportJson, onExportJson, onExportCsv, isEmpty }: ToolbarProps) {
+export function Toolbar({ onAddNode, onImportJson, onExportJson, isEmpty }: ToolbarProps) {
   return (
     <header className="flex h-12 shrink-0 items-center border-b border-border bg-white px-4 shadow-sm">
       <span className="text-sm font-bold tracking-wide text-pink">SEO INTELLIGENCE</span>
@@ -35,14 +34,6 @@ export function Toolbar({ onAddNode, onImportJson, onExportJson, onExportCsv, is
         >
           <Download size={14} />
           Export JSON
-        </button>
-        <button
-          onClick={onExportCsv}
-          disabled={isEmpty}
-          className="flex items-center gap-1.5 rounded-md border border-border bg-white px-3 py-1.5 text-sm font-medium text-ink hover:bg-surface disabled:cursor-not-allowed disabled:opacity-50 transition-colors"
-        >
-          <Download size={14} />
-          Export CSV
         </button>
       </div>
     </header>

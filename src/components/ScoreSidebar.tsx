@@ -90,7 +90,7 @@ export function ScoreSidebar({ nodes, scores, weakNodes }: ScoreSidebarProps) {
           <li key={item.id}>
             <button
               className="w-full text-left py-2.5 pr-3 hover:bg-surface transition-colors flex items-start gap-2"
-              style={{ paddingLeft: item.depth * 16 }}
+              style={{ paddingLeft: 12 + item.depth * 16 }}
               onClick={() => handleClick(item.id)}
             >
               <div className="flex-1 min-w-0">

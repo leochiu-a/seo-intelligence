@@ -219,12 +219,12 @@ describe('ScoreSidebar hierarchy rendering', () => {
     expect(catPadding).toBeGreaterThan(blogPadding);
   });
 
-  it('root nodes have no extra left padding', () => {
+  it('root node button has 12px base left padding', () => {
     const about = makeNode('n1', '/about');
     const scores = new Map([['n1', 0.5]]);
     renderSidebar([about], scores);
     const [btn] = screen.getAllByRole('button');
-    expect(btn.style.paddingLeft).toBe('0px');
+    expect(btn.style.paddingLeft).toBe('12px');
   });
 
   it('weak node icon appears on child nodes too', () => {

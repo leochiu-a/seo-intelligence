@@ -267,28 +267,6 @@ function AppInner() {
     URL.revokeObjectURL(url);
   }, [nodes, edges, scores]);
 
-  const onExportCsv = useCallback(() => {
-    const rows = nodes.map((n) => ({
-      urlTemplate: n.data.urlTemplate,
-      pageCount: n.data.pageCount,
-      score: scores.get(n.id) ?? 0,
-    }));
-    rows.sort((a, b) => b.score - a.score);
-    const lines = ['url_template,page_count,score'];
-    for (const row of rows) {
-      const quotedUrl = `"${row.urlTemplate.replace(/"/g, '""')}"`;
-      lines.push(`${quotedUrl},${row.pageCount},${row.score.toFixed(4)}`);
-    }
-    const csvContent = lines.join('\n');
-    const blob = new Blob([csvContent], { type: 'text/csv' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'seo-planner-scores.csv';
-    a.click();
-    URL.revokeObjectURL(url);
-  }, [nodes, scores]);
-
   // Restore graph from localStorage on mount (runs once — empty dep array)
   // Must be defined BEFORE the save effect so React processes restore before save.
   useEffect(() => {
@@ -339,7 +317,7 @@ function AppInner() {
 
   return (
     <div className="h-screen w-screen flex flex-col bg-canvas text-dark">
-      <Toolbar onAddNode={onAddNode} onImportJson={() => setShowImportDialog(true)} onExportJson={onExportJson} onExportCsv={onExportCsv} isEmpty={nodes.length === 0} />
+      <Toolbar onAddNode={onAddNode} onImportJson={() => setShowImportDialog(true)} onExportJson={onExportJson} isEmpty={nodes.length === 0} />
       <div className="flex flex-1 overflow-hidden">
         <Sidebar />
         <div className="flex-1" ref={reactFlowWrapper}>
