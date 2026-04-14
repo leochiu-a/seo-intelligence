@@ -1,6 +1,7 @@
 import { useState, useCallback, useRef, useMemo, useEffect } from 'react';
 import ReactFlow, {
   Background,
+  BackgroundVariant,
   Controls,
   MiniMap,
   ReactFlowProvider,
@@ -335,11 +336,26 @@ function AppInner() {
             edgeTypes={edgeTypes}
             deleteKeyCode={['Backspace', 'Delete']}
             fitView
-            fitViewOptions={{ maxZoom: 0.9 }}
-            defaultViewport={{ x: 0, y: 0, zoom: 0.9 }}
+            fitViewOptions={{ padding: 0.4, maxZoom: 1 }}
+            minZoom={0.3}
+            style={{ background: 'var(--color-canvas)' }}
           >
-            <Background />
-            <Controls />
+            <Background
+              color="var(--color-border)"
+              variant={BackgroundVariant.Dots}
+              gap={28}
+              size={1.5}
+            />
+            <Controls
+              showInteractive={false}
+              orientation="horizontal"
+              style={{
+                background: '#ffffff',
+                border: '1px solid var(--color-border)',
+                borderRadius: 12,
+                padding: 4,
+              }}
+            />
             <MiniMap />
             {nodes.length === 0 && (
               <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
