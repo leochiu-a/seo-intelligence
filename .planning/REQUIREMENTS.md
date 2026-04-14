@@ -39,11 +39,11 @@
 
 ### Global Nodes
 
-- [ ] **GLOB-01**: User can mark any node as "global" via the node edit popover
+- [x] **GLOB-01**: User can mark any node as "global" via the node edit popover
 - [ ] **GLOB-02**: Global nodes display a visible indicator (e.g. badge or icon) that distinguishes them from regular nodes on the canvas
-- [ ] **GLOB-03**: A global node has one or more named placements (e.g. "Header Nav", "Footer"), each with its own link count
+- [x] **GLOB-03**: A global node has one or more named placements (e.g. "Header Nav", "Footer"), each with its own link count
 - [ ] **GLOB-04**: User can add, edit, and delete placements on a global node
-- [ ] **GLOB-05**: PageRank algorithm treats every non-global node as implicitly linking to all global nodes; the effective inbound link count per page equals the sum of that global node's placement link counts
+- [x] **GLOB-05**: PageRank algorithm treats every non-global node as implicitly linking to all global nodes; the effective inbound link count per page equals the sum of that global node's placement link counts
 
 ### Global Filter
 

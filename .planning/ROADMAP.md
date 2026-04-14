@@ -95,7 +95,7 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 04-01-PLAN.md — Placement interface, UrlNodeData extension, PageRank global injection, parseImportJson update
+- [x] 04-01-PLAN.md — Placement interface, UrlNodeData extension, PageRank global injection, parseImportJson update
 - [ ] 04-02-PLAN.md — EditPopover global toggle + placement CRUD, UrlNode Globe badge, App.tsx serialization/restore/export
 
 ### Phase 5: Global Filter Panel

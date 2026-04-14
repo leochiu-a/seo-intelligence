@@ -1,16 +1,16 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.1
-milestone_name: Global Navigation
-status: planning
-stopped_at: Completed 03-02-PLAN.md
-last_updated: "2026-04-14T12:33:47.653Z"
+milestone: v1.0
+milestone_name: MVP
+status: executing
+stopped_at: Completed 04-01-PLAN.md
+last_updated: "2026-04-14T14:47:21.084Z"
 last_activity: 2026-04-14
 progress:
-  total_phases: 4
+  total_phases: 6
   completed_phases: 4
-  total_plans: 8
-  completed_plans: 8
+  total_plans: 10
+  completed_plans: 9
   percent: 0
 ---
 
@@ -21,14 +21,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-13)
 
 **Core value:** Let PMs visually plan and simulate internal link structures — and immediately see which pages will rank highest — before any code is written or deployed.
-**Current focus:** Phase 2 — scoring-analysis
+**Current focus:** Phase 04 — global-nodes
 
 ## Current Position
 
-Phase: 2 (scoring-analysis) — EXECUTING
+Phase: 04 (global-nodes) — EXECUTING
 Plan: 2 of 2
-Status: Phase complete — ready for verification
-Last activity: 2026-04-13
+Status: Ready to execute
+Last activity: 2026-04-14
 
 Progress: [░░░░░░░░░░] 0%
 
@@ -57,6 +57,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 02-scoring-analysis P02 | 10 | 3 tasks | 3 files |
 | Phase 03-scenarios-export P01 | 1 min | 2 tasks | 1 files |
 | Phase 03-scenarios-export P02 | 525633min | 2 tasks | 2 files |
+| Phase 04-global-nodes P01 | 2 | 3 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -78,6 +79,9 @@ Recent decisions affecting current work:
 - [Phase 03-scenarios-export]: isFirstRender ref skips the save effect on first mount so the re-render triggered by setNodes(restoredNodes) is the first real save; serializeGraph strips runtime callbacks before persisting
 - [Phase 03-scenarios-export]: URL templates in CSV wrapped in double-quotes always (handles commas in templates safely)
 - [Phase 03-scenarios-export]: Export callbacks read directly from nodes, edges, scores useMemo in AppInner — no additional computation needed
+- [Phase 04-global-nodes]: Global nodes do NOT receive synthetic inbound from other global nodes — only non-global nodes are synthetic sources
+- [Phase 04-global-nodes]: calculatePageRank synthetic injection placed BEFORE totalWeightedOut computation so non-global outbound denominators include global links
+- [Phase 04-global-nodes]: parseImportJson uses conditional spread to keep isGlobal/placements absent (not undefined) when missing from imported JSON — backward compatible
 
 ### Pending Todos
 
@@ -99,6 +103,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-14T13:22:00.000Z
-Stopped at: Completed quick task 260414-tkz: Add multiple handles to UrlNode for graph routing
+Last session: 2026-04-14T14:47:21.082Z
+Stopped at: Completed 04-01-PLAN.md
 Resume file: None
