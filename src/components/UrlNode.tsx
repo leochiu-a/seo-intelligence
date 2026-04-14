@@ -2,7 +2,7 @@ import { memo, useState } from 'react';
 import { Handle, Position, type NodeProps } from 'reactflow';
 import { Pencil, TriangleAlert } from 'lucide-react';
 import { EditPopover } from './EditPopover';
-import { formatPageCount, type UrlNodeData, type ScoreTier } from '../lib/graph-utils';
+import { formatPageCount, type UrlNodeData, type ScoreTier, HANDLE_IDS } from '../lib/graph-utils';
 
 export type { UrlNodeData } from '../lib/graph-utils';
 
@@ -56,7 +56,26 @@ function UrlNodeComponent({ id, data, selected }: NodeProps<UrlNodeExtendedData>
       className={`relative w-[200px] rounded-xl border-2 p-2.5 shadow-md shadow-black/8 transition ${tone.card} ${selected ? tone.focus : ''}`}
     >
       <Handle
+        type="source"
+        id={HANDLE_IDS.topSource}
+        position={Position.Top}
+        style={{ background: '#ffffff', border: '2px solid var(--color-placeholder)', width: 12, height: 12 }}
+      />
+      <Handle
         type="target"
+        id={HANDLE_IDS.topTarget}
+        position={Position.Top}
+        style={{ background: '#ffffff', border: '2px solid var(--color-placeholder)', width: 12, height: 12 }}
+      />
+      <Handle
+        type="source"
+        id={HANDLE_IDS.leftSource}
+        position={Position.Left}
+        style={{ background: '#ffffff', border: '2px solid var(--color-placeholder)', width: 12, height: 12 }}
+      />
+      <Handle
+        type="target"
+        id={HANDLE_IDS.leftTarget}
         position={Position.Left}
         style={{ background: '#ffffff', border: '2px solid var(--color-placeholder)', width: 12, height: 12 }}
       />
@@ -101,7 +120,26 @@ function UrlNodeComponent({ id, data, selected }: NodeProps<UrlNodeExtendedData>
 
       <Handle
         type="source"
+        id={HANDLE_IDS.rightSource}
         position={Position.Right}
+        style={{ background: '#ffffff', border: '2px solid var(--color-placeholder)', width: 12, height: 12 }}
+      />
+      <Handle
+        type="target"
+        id={HANDLE_IDS.rightTarget}
+        position={Position.Right}
+        style={{ background: '#ffffff', border: '2px solid var(--color-placeholder)', width: 12, height: 12 }}
+      />
+      <Handle
+        type="source"
+        id={HANDLE_IDS.bottomSource}
+        position={Position.Bottom}
+        style={{ background: '#ffffff', border: '2px solid var(--color-placeholder)', width: 12, height: 12 }}
+      />
+      <Handle
+        type="target"
+        id={HANDLE_IDS.bottomTarget}
+        position={Position.Bottom}
         style={{ background: '#ffffff', border: '2px solid var(--color-placeholder)', width: 12, height: 12 }}
       />
 
