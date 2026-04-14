@@ -29,6 +29,7 @@ import {
   classifyScoreTier,
   identifyWeakNodes,
   parseImportJson,
+  getClosestHandleIds,
   type UrlNodeData,
   type LinkCountEdgeData,
   type ScoreTier,
@@ -52,7 +53,7 @@ const STORAGE_KEY = 'seo-planner-graph';
 function serializeGraph(
   nodes: Node<AppNodeData>[],
   edges: Edge[],
-): { nodes: Array<{ id: string; type?: string; position: { x: number; y: number }; data: { urlTemplate: string; pageCount: number } }>; edges: Array<{ id: string; source: string; target: string; type?: string; markerEnd?: unknown; data: { linkCount: number } }> } {
+): { nodes: Array<{ id: string; type?: string; position: { x: number; y: number }; data: { urlTemplate: string; pageCount: number } }>; edges: Array<{ id: string; source: string; target: string; sourceHandle?: string | null; targetHandle?: string | null; type?: string; markerEnd?: unknown; data: { linkCount: number } }> } {
   return {
     nodes: nodes.map(({ id, type, position, data: { urlTemplate, pageCount } }) => ({
       id,
@@ -60,10 +61,12 @@ function serializeGraph(
       position,
       data: { urlTemplate, pageCount },
     })),
-    edges: edges.map(({ id, source, target, type, markerEnd, data }) => ({
+    edges: edges.map(({ id, source, target, sourceHandle, targetHandle, type, markerEnd, data }) => ({
       id,
       source,
       target,
+      sourceHandle,
+      targetHandle,
       type,
       markerEnd,
       data: { linkCount: (data as { linkCount?: number })?.linkCount ?? 1 },
@@ -193,10 +196,19 @@ function AppInner() {
 
   const onConnect = useCallback(
     (connection: Connection) => {
+      let conn = connection;
+      if (!conn.sourceHandle) {
+        const sourceNode = nodes.find((n) => n.id === conn.source);
+        const targetNode = nodes.find((n) => n.id === conn.target);
+        if (sourceNode && targetNode) {
+          const handles = getClosestHandleIds(sourceNode.position, targetNode.position);
+          conn = { ...conn, ...handles };
+        }
+      }
       setEdges((eds) =>
         addEdge(
           {
-            ...connection,
+            ...conn,
             type: 'linkCountEdge',
             markerEnd: { type: MarkerType.ArrowClosed, color: '#9CA3AF' },
             data: { linkCount: 1, onLinkCountChange: onEdgeLinkCountChange },
@@ -205,7 +217,7 @@ function AppInner() {
         ),
       );
     },
-    [setEdges, onEdgeLinkCountChange],
+    [nodes, setEdges, onEdgeLinkCountChange],
   );
 
   // Recalculate scores on every graph change (per D-13, SCORE-02)
@@ -279,7 +291,7 @@ function AppInner() {
     try {
       const parsed = JSON.parse(saved) as {
         nodes: Array<{ id: string; type?: string; position: { x: number; y: number }; data: { urlTemplate: string; pageCount: number } }>;
-        edges: Array<{ id: string; source: string; target: string; type?: string; markerEnd?: unknown; data: { linkCount: number } }>;
+        edges: Array<{ id: string; source: string; target: string; sourceHandle?: string | null; targetHandle?: string | null; type?: string; markerEnd?: unknown; data: { linkCount: number } }>;
       };
       const restoredNodes: Node<AppNodeData>[] = parsed.nodes.map((n) => ({
         ...n,
@@ -294,6 +306,8 @@ function AppInner() {
         id: e.id,
         source: e.source,
         target: e.target,
+        ...(e.sourceHandle != null ? { sourceHandle: e.sourceHandle } : {}),
+        ...(e.targetHandle != null ? { targetHandle: e.targetHandle } : {}),
         type: e.type ?? 'linkCountEdge',
         markerEnd: (e.markerEnd as import('reactflow').EdgeMarkerType | undefined) ?? { type: MarkerType.ArrowClosed, color: '#9CA3AF' },
         data: {
