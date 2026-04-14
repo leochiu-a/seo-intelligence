@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: MVP
-status: executing
-stopped_at: Completed 04-01-PLAN.md
-last_updated: "2026-04-14T14:47:21.084Z"
+status: verifying
+stopped_at: Completed 04-02-PLAN.md
+last_updated: "2026-04-14T14:51:37.706Z"
 last_activity: 2026-04-14
 progress:
   total_phases: 6
-  completed_phases: 4
+  completed_phases: 5
   total_plans: 10
-  completed_plans: 9
+  completed_plans: 10
   percent: 0
 ---
 
@@ -27,7 +27,7 @@ See: .planning/PROJECT.md (updated 2026-04-13)
 
 Phase: 04 (global-nodes) — EXECUTING
 Plan: 2 of 2
-Status: Ready to execute
+Status: Phase complete — ready for verification
 Last activity: 2026-04-14
 
 Progress: [░░░░░░░░░░] 0%
@@ -58,6 +58,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 03-scenarios-export P01 | 1 min | 2 tasks | 1 files |
 | Phase 03-scenarios-export P02 | 525633min | 2 tasks | 2 files |
 | Phase 04-global-nodes P01 | 2 | 3 tasks | 4 files |
+| Phase 04-global-nodes P02 | 2 | 2 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -82,6 +83,9 @@ Recent decisions affecting current work:
 - [Phase 04-global-nodes]: Global nodes do NOT receive synthetic inbound from other global nodes — only non-global nodes are synthetic sources
 - [Phase 04-global-nodes]: calculatePageRank synthetic injection placed BEFORE totalWeightedOut computation so non-global outbound denominators include global links
 - [Phase 04-global-nodes]: parseImportJson uses conditional spread to keep isGlobal/placements absent (not undefined) when missing from imported JSON — backward compatible
+- [Phase 04-global-nodes]: EditPopover widens to 320px only when global is active to save space for non-global nodes
+- [Phase 04-global-nodes]: Globe badge and tier badge share one flex wrapper — clean layout whether one or both badges present
+- [Phase 04-global-nodes]: Conditional spread in exports omits isGlobal/placements for non-global nodes to avoid false:noise in JSON
 
 ### Pending Todos
 
@@ -103,6 +107,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-14T14:47:21.082Z
-Stopped at: Completed 04-01-PLAN.md
+Last session: 2026-04-14T14:51:37.703Z
+Stopped at: Completed 04-02-PLAN.md
 Resume file: None

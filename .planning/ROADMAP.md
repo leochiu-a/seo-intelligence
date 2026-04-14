@@ -96,7 +96,7 @@ Plans:
 
 Plans:
 - [x] 04-01-PLAN.md — Placement interface, UrlNodeData extension, PageRank global injection, parseImportJson update
-- [ ] 04-02-PLAN.md — EditPopover global toggle + placement CRUD, UrlNode Globe badge, App.tsx serialization/restore/export
+- [x] 04-02-PLAN.md — EditPopover global toggle + placement CRUD, UrlNode Globe badge, App.tsx serialization/restore/export
 
 ### Phase 5: Global Filter Panel
 **Goal**: Users can filter the canvas view by global nodes and their placements, highlighting relevant nodes and dimming the rest to stay oriented in complex graphs
