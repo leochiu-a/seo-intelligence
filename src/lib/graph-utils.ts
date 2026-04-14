@@ -1,8 +1,16 @@
 import type { Node, Edge } from 'reactflow';
 
+export interface Placement {
+  id: string;
+  name: string;
+  linkCount: number;
+}
+
 export interface UrlNodeData {
   urlTemplate: string;
   pageCount: number;
+  isGlobal?: boolean;
+  placements?: Placement[];
 }
 
 export interface LinkCountEdgeData {
@@ -143,6 +151,28 @@ export function calculatePageRank(
     const lc = e.data?.linkCount ?? 1;
     inbound.get(e.target)?.push({ sourceId: e.source, linkCount: lc });
     outbound.get(e.source)?.push({ targetId: e.target, linkCount: lc });
+  }
+
+  // Global node injection: every non-global node implicitly links to each global node
+  const globalNodes = nodes.filter((n) => n.data.isGlobal);
+  const nonGlobalNodes = nodes.filter((n) => !n.data.isGlobal);
+  for (const globalNode of globalNodes) {
+    const totalPlacementLinks = (globalNode.data.placements ?? []).reduce(
+      (sum, p) => sum + p.linkCount,
+      0,
+    );
+    if (totalPlacementLinks <= 0) continue;
+
+    for (const sourceNode of nonGlobalNodes) {
+      inbound.get(globalNode.id)?.push({
+        sourceId: sourceNode.id,
+        linkCount: totalPlacementLinks,
+      });
+      outbound.get(sourceNode.id)?.push({
+        targetId: globalNode.id,
+        linkCount: totalPlacementLinks,
+      });
+    }
   }
 
   // Precompute totalWeightedOutbound for each node
