@@ -63,9 +63,11 @@ function UrlNodeComponent({ id, data, selected }: NodeProps<UrlNodeExtendedData>
 
       {/* Header: badge + edit button */}
       <div className="mb-2 flex items-center gap-2">
-        <span className={`inline-flex items-center rounded-full px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${tone.badge}`}>
-          {tone.badgeLabel}
-        </span>
+        {tier !== 'neutral' && (
+          <span className={`inline-flex items-center rounded-full px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${tone.badge}`}>
+            {tone.badgeLabel}
+          </span>
+        )}
 
         <div className="ml-auto flex items-center gap-1">
           <button
