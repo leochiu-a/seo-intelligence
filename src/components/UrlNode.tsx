@@ -57,25 +57,13 @@ function UrlNodeComponent({ id, data, selected }: NodeProps<UrlNodeExtendedData>
     >
       <Handle
         type="source"
-        id={HANDLE_IDS.topSource}
-        position={Position.Top}
-        style={{ background: '#ffffff', border: '2px solid var(--color-placeholder)', width: 12, height: 12 }}
-      />
-      <Handle
-        type="target"
-        id={HANDLE_IDS.topTarget}
+        id={HANDLE_IDS.top}
         position={Position.Top}
         style={{ background: '#ffffff', border: '2px solid var(--color-placeholder)', width: 12, height: 12 }}
       />
       <Handle
         type="source"
-        id={HANDLE_IDS.leftSource}
-        position={Position.Left}
-        style={{ background: '#ffffff', border: '2px solid var(--color-placeholder)', width: 12, height: 12 }}
-      />
-      <Handle
-        type="target"
-        id={HANDLE_IDS.leftTarget}
+        id={HANDLE_IDS.left}
         position={Position.Left}
         style={{ background: '#ffffff', border: '2px solid var(--color-placeholder)', width: 12, height: 12 }}
       />
@@ -120,25 +108,13 @@ function UrlNodeComponent({ id, data, selected }: NodeProps<UrlNodeExtendedData>
 
       <Handle
         type="source"
-        id={HANDLE_IDS.rightSource}
-        position={Position.Right}
-        style={{ background: '#ffffff', border: '2px solid var(--color-placeholder)', width: 12, height: 12 }}
-      />
-      <Handle
-        type="target"
-        id={HANDLE_IDS.rightTarget}
+        id={HANDLE_IDS.right}
         position={Position.Right}
         style={{ background: '#ffffff', border: '2px solid var(--color-placeholder)', width: 12, height: 12 }}
       />
       <Handle
         type="source"
-        id={HANDLE_IDS.bottomSource}
-        position={Position.Bottom}
-        style={{ background: '#ffffff', border: '2px solid var(--color-placeholder)', width: 12, height: 12 }}
-      />
-      <Handle
-        type="target"
-        id={HANDLE_IDS.bottomTarget}
+        id={HANDLE_IDS.bottom}
         position={Position.Bottom}
         style={{ background: '#ffffff', border: '2px solid var(--color-placeholder)', width: 12, height: 12 }}
       />

@@ -33,6 +33,7 @@ vi.mock('reactflow', async () => {
     Controls: () => null,
     MiniMap: () => null,
     BackgroundVariant: { Dots: 'dots' },
+    ConnectionMode: { Loose: 'loose' },
     MarkerType: { ArrowClosed: 'arrowclosed' },
     useNodesState,
     useEdgesState,

@@ -3,6 +3,7 @@ import ReactFlow, {
   Background,
   BackgroundVariant,
   Controls,
+  ConnectionMode,
   MiniMap,
   ReactFlowProvider,
   useNodesState,
@@ -348,6 +349,7 @@ function AppInner() {
             onNodesChange={onNodesChange}
             onEdgesChange={onEdgesChange}
             onConnect={onConnect}
+            connectionMode={ConnectionMode.Loose}
             onInit={setReactFlowInstance}
             onDrop={onDrop}
             onDragOver={onDragOver}

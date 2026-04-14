@@ -346,17 +346,14 @@ export function buildUrlTree(
 }
 
 /**
- * Handle IDs for UrlNode's 8 handles (source+target on each of 4 sides).
+ * Handle IDs for UrlNode's 4 handles (one per side).
+ * With ConnectionMode.Loose, each handle acts as both source and target.
  */
 export const HANDLE_IDS = {
-  topSource: 'handle-top-source',
-  topTarget: 'handle-top-target',
-  rightSource: 'handle-right-source',
-  rightTarget: 'handle-right-target',
-  bottomSource: 'handle-bottom-source',
-  bottomTarget: 'handle-bottom-target',
-  leftSource: 'handle-left-source',
-  leftTarget: 'handle-left-target',
+  top: 'handle-top',
+  right: 'handle-right',
+  bottom: 'handle-bottom',
+  left: 'handle-left',
 } as const;
 
 /**
@@ -374,16 +371,16 @@ export function getClosestHandleIds(
   if (Math.abs(dx) >= Math.abs(dy)) {
     // Horizontal dominates
     if (dx >= 0) {
-      return { sourceHandle: HANDLE_IDS.rightSource, targetHandle: HANDLE_IDS.leftTarget };
+      return { sourceHandle: HANDLE_IDS.right, targetHandle: HANDLE_IDS.left };
     } else {
-      return { sourceHandle: HANDLE_IDS.leftSource, targetHandle: HANDLE_IDS.rightTarget };
+      return { sourceHandle: HANDLE_IDS.left, targetHandle: HANDLE_IDS.right };
     }
   } else {
     // Vertical dominates
     if (dy >= 0) {
-      return { sourceHandle: HANDLE_IDS.bottomSource, targetHandle: HANDLE_IDS.topTarget };
+      return { sourceHandle: HANDLE_IDS.bottom, targetHandle: HANDLE_IDS.top };
     } else {
-      return { sourceHandle: HANDLE_IDS.topSource, targetHandle: HANDLE_IDS.bottomTarget };
+      return { sourceHandle: HANDLE_IDS.top, targetHandle: HANDLE_IDS.bottom };
     }
   }
 }
