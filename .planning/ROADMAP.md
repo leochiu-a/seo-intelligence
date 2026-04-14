@@ -118,5 +118,5 @@ Plans:
 | 1. Canvas Editor | 3/3 | Complete   | 2026-04-13 |
 | 2. Scoring & Analysis | 2/2 | Complete   | 2026-04-13 |
 | 3. Scenarios & Export | 0/2 | Not started | - |
-| 4. Global Nodes | 0/2 | Planning complete | - |
+| 4. Global Nodes | 0/2 | Complete    | 2026-04-14 |
 | 5. Global Filter Panel | 0/? | Not started | - |
