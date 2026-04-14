@@ -53,7 +53,7 @@ function UrlNodeComponent({ id, data, selected }: NodeProps<UrlNodeExtendedData>
 
   return (
     <div
-      className={`w-[200px] rounded-xl border-2 p-2.5 shadow-md shadow-black/8 transition ${tone.card} ${selected ? tone.focus : ''}`}
+      className={`relative w-[200px] rounded-xl border-2 p-2.5 shadow-md shadow-black/8 transition ${tone.card} ${selected ? tone.focus : ''}`}
     >
       <Handle
         type="target"
@@ -61,30 +61,29 @@ function UrlNodeComponent({ id, data, selected }: NodeProps<UrlNodeExtendedData>
         style={{ background: '#ffffff', border: '2px solid var(--color-placeholder)', width: 12, height: 12 }}
       />
 
-      {/* Header: badge + edit button */}
-      <div className="mb-2 flex items-center gap-2">
-        {tier !== 'neutral' && (
+      {/* Edit button — always absolute top-right */}
+      <button
+        className="nodrag absolute top-2 right-2 p-1 rounded hover:bg-gray-100 transition-colors"
+        aria-label="Edit node"
+        onClick={(e) => {
+          e.stopPropagation();
+          setShowPopover((prev) => !prev);
+        }}
+      >
+        <Pencil size={13} className="text-muted-fg hover:text-dark" />
+      </button>
+
+      {/* Badge — only when scored */}
+      {tier !== 'neutral' && (
+        <div className="mb-2">
           <span className={`inline-flex items-center rounded-full px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${tone.badge}`}>
             {tone.badgeLabel}
           </span>
-        )}
-
-        <div className="ml-auto flex items-center gap-1">
-          <button
-            className="nodrag p-1 rounded hover:bg-gray-100 transition-colors"
-            aria-label="Edit node"
-            onClick={(e) => {
-              e.stopPropagation();
-              setShowPopover((prev) => !prev);
-            }}
-          >
-            <Pencil size={14} className="text-muted-fg hover:text-dark" />
-          </button>
         </div>
-      </div>
+      )}
 
       {/* Title */}
-      <div className="mb-1 truncate text-xs font-semibold text-dark">
+      <div className="mb-1 truncate pr-6 text-xs font-semibold text-dark">
         {data.urlTemplate || <span className="text-placeholder">No URL template</span>}
       </div>
 
