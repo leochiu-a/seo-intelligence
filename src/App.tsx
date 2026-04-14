@@ -21,7 +21,9 @@ import { LinkCountEdge } from './components/LinkCountEdge';
 import { Sidebar } from './components/Sidebar';
 import { Toolbar } from './components/Toolbar';
 import { ScoreSidebar } from './components/ScoreSidebar';
+import { FilterPanel } from './components/FilterPanel';
 import { ImportDialog } from './components/ImportDialog';
+import { useFilterState } from './hooks/useFilterState';
 import {
   createDefaultNode,
   updateNodeData,
@@ -87,6 +89,8 @@ function AppInner() {
   const [showImportDialog, setShowImportDialog] = useState(false);
   // Guard: save effect skips its first invocation (regardless of restore timing), then saves on all subsequent renders
   const isFirstRender = useRef(true);
+
+  const { activeFilters, toggle: toggleFilter, clear: clearFilters } = useFilterState();
 
   // Use a ref to hold the stable update callback so nodes don't need to be re-mapped
   const onNodeDataUpdate = useCallback(
@@ -255,6 +259,49 @@ function AppInner() {
     });
   }, [nodes, scores, weakNodes, allScoreValues]);
 
+  // Derive highlighted node IDs from active filter keys
+  const highlightedNodeIds = useMemo(() => {
+    if (activeFilters.size === 0) return null; // null means "no filtering active"
+
+    const ids = new Set<string>();
+    for (const key of activeFilters) {
+      if (key.startsWith('node:')) {
+        // "node:{nodeId}" — highlight the global node itself
+        ids.add(key.slice(5));
+      } else if (key.startsWith('placement:')) {
+        // "placement:{nodeId}:{placementId}" — highlight the global node
+        const nodeId = key.split(':')[1];
+        ids.add(nodeId);
+      }
+    }
+    return ids;
+  }, [activeFilters]);
+
+  // Apply opacity styles based on active filters
+  const styledNodes = useMemo(() => {
+    if (highlightedNodeIds === null) {
+      // No filter active: strip any leftover opacity style
+      return enrichedNodes.map((node) =>
+        node.style?.opacity != null
+          ? { ...node, style: { ...node.style, opacity: undefined } }
+          : node,
+      );
+    }
+    return enrichedNodes.map((node) => {
+      const isHighlighted = highlightedNodeIds.has(node.id);
+      const targetOpacity = isHighlighted ? 1 : 0.2;
+      if (node.style?.opacity === targetOpacity) return node;
+      return {
+        ...node,
+        style: {
+          ...node.style,
+          opacity: targetOpacity,
+          ...(isHighlighted ? { filter: 'drop-shadow(0 0 6px rgba(59, 130, 246, 0.5))' } : {}),
+        },
+      };
+    });
+  }, [enrichedNodes, highlightedNodeIds]);
+
   const onExportJson = useCallback(() => {
     const exportData = {
       nodes: nodes.map((n) => ({
@@ -347,9 +394,15 @@ function AppInner() {
       <Toolbar onAddNode={onAddNode} onImportJson={() => setShowImportDialog(true)} onExportJson={onExportJson} onClearCanvas={handleClearCanvas} isEmpty={nodes.length === 0} />
       <div className="flex flex-1 overflow-hidden">
         <Sidebar />
+        <FilterPanel
+          nodes={nodes}
+          activeFilters={activeFilters}
+          onToggle={toggleFilter}
+          onClear={clearFilters}
+        />
         <div className="flex-1" ref={reactFlowWrapper}>
           <ReactFlow
-            nodes={enrichedNodes}
+            nodes={styledNodes}
             edges={edges}
             onNodesChange={onNodesChange}
             onEdgesChange={onEdgesChange}
