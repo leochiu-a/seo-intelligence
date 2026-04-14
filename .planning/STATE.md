@@ -93,9 +93,10 @@ None yet.
 |---|-------------|------|--------|-----------|
 | 260414-deh | Restyle canvas nodes to match agent-flow StepNode design | 2026-04-14 | 932e901 | [260414-deh-restyle-canvas-nodes-to-match-agent-flow](./quick/260414-deh-restyle-canvas-nodes-to-match-agent-flow/) |
 | 260414-igw | Import JSON feature: toolbar button with drag-and-drop/file-select dialog | 2026-04-14 | 3d1304a | [260414-igw-import-json-feature-with-drag-and-drop-f](./quick/260414-igw-import-json-feature-with-drag-and-drop-f/) |
+| 260414-tkz | Add multiple handles to UrlNode for graph routing (8 handles + getClosestHandleIds) | 2026-04-14 | 7cde4b7 | [260414-tkz-add-multiple-handles-to-urlnode-for-grap](./quick/260414-tkz-add-multiple-handles-to-urlnode-for-grap/) |
 
 ## Session Continuity
 
-Last session: 2026-04-14T05:33:00.000Z
-Stopped at: Completed quick task 260414-igw: Import JSON feature with drag-and-drop/file-select dialog button
+Last session: 2026-04-14T13:22:00.000Z
+Stopped at: Completed quick task 260414-tkz: Add multiple handles to UrlNode for graph routing
 Resume file: None
