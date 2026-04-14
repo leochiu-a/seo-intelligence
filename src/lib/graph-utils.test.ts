@@ -449,6 +449,47 @@ describe('parseImportJson', () => {
     expect(result.nodes).toHaveLength(2);
     expect(result.edges).toHaveLength(2);
   });
+
+  it('assigns sourceHandle/targetHandle based on node positions when missing from edge', () => {
+    // source at left (x=0), target at right (x=400) → horizontal → right/left handles
+    const raw = JSON.stringify({
+      nodes: [
+        { id: 'left',  urlTemplate: '/a', pageCount: 1, x: 0,   y: 100 },
+        { id: 'right', urlTemplate: '/b', pageCount: 1, x: 400, y: 100 },
+      ],
+      edges: [{ id: 'e1', source: 'left', target: 'right', linkCount: 1 }],
+    });
+    const result = parseImportJson(raw);
+    expect(result.edges[0].sourceHandle).toBe(HANDLE_IDS.rightSource);
+    expect(result.edges[0].targetHandle).toBe(HANDLE_IDS.leftTarget);
+  });
+
+  it('assigns top/bottom handles when source is directly above target', () => {
+    const raw = JSON.stringify({
+      nodes: [
+        { id: 'top',    urlTemplate: '/a', pageCount: 1, x: 100, y: 0   },
+        { id: 'bottom', urlTemplate: '/b', pageCount: 1, x: 100, y: 400 },
+      ],
+      edges: [{ id: 'e1', source: 'top', target: 'bottom', linkCount: 1 }],
+    });
+    const result = parseImportJson(raw);
+    expect(result.edges[0].sourceHandle).toBe(HANDLE_IDS.bottomSource);
+    expect(result.edges[0].targetHandle).toBe(HANDLE_IDS.topTarget);
+  });
+
+  it('preserves existing sourceHandle/targetHandle when already set in JSON', () => {
+    const raw = JSON.stringify({
+      nodes: [
+        { id: 'a', urlTemplate: '/a', pageCount: 1, x: 0,   y: 0 },
+        { id: 'b', urlTemplate: '/b', pageCount: 1, x: 400, y: 0 },
+      ],
+      edges: [{ id: 'e1', source: 'a', target: 'b', linkCount: 1,
+        sourceHandle: 'handle-top-source', targetHandle: 'handle-bottom-target' }],
+    });
+    const result = parseImportJson(raw);
+    expect(result.edges[0].sourceHandle).toBe('handle-top-source');
+    expect(result.edges[0].targetHandle).toBe('handle-bottom-target');
+  });
 });
 
 describe('HANDLE_IDS', () => {

@@ -429,14 +429,34 @@ export function parseImportJson(raw: string): {
     };
   });
 
+  const posById = new Map(nodes.map((n) => [n.id, n.position]));
+
   const edges: Edge<LinkCountEdgeData>[] = rawEdges.map((e) => {
     const edge = e as Record<string, unknown>;
+    const sourceHandle = typeof edge.sourceHandle === 'string' ? edge.sourceHandle : undefined;
+    const targetHandle = typeof edge.targetHandle === 'string' ? edge.targetHandle : undefined;
+
+    let resolvedSourceHandle = sourceHandle;
+    let resolvedTargetHandle = targetHandle;
+
+    if (!resolvedSourceHandle || !resolvedTargetHandle) {
+      const srcPos = posById.get(String(edge.source));
+      const tgtPos = posById.get(String(edge.target));
+      if (srcPos && tgtPos) {
+        const handles = getClosestHandleIds(srcPos, tgtPos);
+        resolvedSourceHandle = resolvedSourceHandle ?? handles.sourceHandle;
+        resolvedTargetHandle = resolvedTargetHandle ?? handles.targetHandle;
+      }
+    }
+
     return {
       id: String(edge.id),
       source: String(edge.source),
       target: String(edge.target),
       type: 'linkCountEdge',
       data: { linkCount: typeof edge.linkCount === 'number' ? edge.linkCount : 1 },
+      ...(resolvedSourceHandle && { sourceHandle: resolvedSourceHandle }),
+      ...(resolvedTargetHandle && { targetHandle: resolvedTargetHandle }),
     };
   });
 
