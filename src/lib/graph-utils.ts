@@ -448,11 +448,18 @@ export function parseImportJson(raw: string): {
     if (typeof node.pageCount !== 'number') {
       throw new Error(`Node at index ${i} is missing "pageCount"`);
     }
+    const isGlobal = typeof node.isGlobal === 'boolean' ? node.isGlobal : undefined;
+    const placements = Array.isArray(node.placements) ? (node.placements as Placement[]) : undefined;
     return {
       id: String(node.id),
       type: 'urlNode',
       position: { x: Number(node.x ?? 0), y: Number(node.y ?? 0) },
-      data: { urlTemplate: node.urlTemplate, pageCount: node.pageCount },
+      data: {
+        urlTemplate: node.urlTemplate,
+        pageCount: node.pageCount,
+        ...(isGlobal != null && { isGlobal }),
+        ...(placements != null && { placements }),
+      },
     };
   });
 

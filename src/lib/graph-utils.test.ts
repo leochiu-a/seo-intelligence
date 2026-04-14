@@ -594,6 +594,45 @@ describe('parseImportJson', () => {
     expect(result.edges[0].targetHandle).toBe(HANDLE_IDS.top);
   });
 
+  it('preserves isGlobal=true and placements when present in imported JSON', () => {
+    const raw = JSON.stringify({
+      nodes: [
+        {
+          id: 'n1',
+          urlTemplate: '/nav',
+          pageCount: 1,
+          x: 0,
+          y: 0,
+          isGlobal: true,
+          placements: [{ id: 'p1', name: 'Header', linkCount: 2 }],
+        },
+      ],
+      edges: [],
+    });
+    const result = parseImportJson(raw);
+    expect(result.nodes[0].data.isGlobal).toBe(true);
+    expect(result.nodes[0].data.placements).toEqual([{ id: 'p1', name: 'Header', linkCount: 2 }]);
+  });
+
+  it('does not add isGlobal to node data when absent from imported JSON (backward compatible)', () => {
+    const raw = JSON.stringify({
+      nodes: [{ id: 'n1', urlTemplate: '/blog', pageCount: 5, x: 0, y: 0 }],
+      edges: [],
+    });
+    const result = parseImportJson(raw);
+    expect(result.nodes[0].data.isGlobal).toBeUndefined();
+    expect(result.nodes[0].data.placements).toBeUndefined();
+  });
+
+  it('preserves isGlobal=false when explicitly set in imported JSON', () => {
+    const raw = JSON.stringify({
+      nodes: [{ id: 'n1', urlTemplate: '/blog', pageCount: 5, x: 0, y: 0, isGlobal: false }],
+      edges: [],
+    });
+    const result = parseImportJson(raw);
+    expect(result.nodes[0].data.isGlobal).toBe(false);
+  });
+
   it('preserves existing sourceHandle/targetHandle when already set in JSON', () => {
     const raw = JSON.stringify({
       nodes: [
