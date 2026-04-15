@@ -42,6 +42,7 @@ import {
 // and score fields for dynamic visual rendering
 interface AppNodeData extends UrlNodeData {
   onUpdate: (id: string, data: Partial<UrlNodeData>) => void;
+  onZIndexChange: (id: string, zIndex: number) => void;
   scoreTier?: ScoreTier;
   isWeak?: boolean;
 }
@@ -100,17 +101,30 @@ function AppInner() {
     [setNodes],
   );
 
+  // Route node.zIndex updates through the same setNodes used for data updates.
+  // This prevents a race where UrlNode's zIndex effect (previously using
+  // useReactFlow().setNodes) read a stale nodes snapshot and clobbered freshly
+  // saved data from EditPopover's Confirm handler.
+  const onNodeZIndexChange = useCallback(
+    (nodeId: string, zIndex: number) => {
+      setNodes((nds) =>
+        nds.map((n) => (n.id === nodeId && n.zIndex !== zIndex ? { ...n, zIndex } : n)),
+      );
+    },
+    [setNodes],
+  );
+
   const addNode = useCallback(
     (position: { x: number; y: number }) => {
       const newNode = createDefaultNode(position);
       setNodes((nds) =>
         nds.concat({
           ...newNode,
-          data: { ...newNode.data, onUpdate: onNodeDataUpdate },
+          data: { ...newNode.data, onUpdate: onNodeDataUpdate, onZIndexChange: onNodeZIndexChange },
         }),
       );
     },
-    [onNodeDataUpdate, setNodes],
+    [onNodeDataUpdate, onNodeZIndexChange, setNodes],
   );
 
   const onEdgeLinkCountChange = useCallback(
@@ -125,7 +139,7 @@ function AppInner() {
       // Wire runtime callbacks into imported data (same pattern as onDrop handler)
       const wiredNodes = importedNodes.map((n) => ({
         ...n,
-        data: { ...n.data, onUpdate: onNodeDataUpdate },
+        data: { ...n.data, onUpdate: onNodeDataUpdate, onZIndexChange: onNodeZIndexChange },
       }));
       const wiredEdges = importedEdges.map((edge) => ({
         ...edge,
@@ -135,7 +149,7 @@ function AppInner() {
       setNodes(wiredNodes as Node<AppNodeData>[]);
       setEdges(wiredEdges);
     },
-    [onNodeDataUpdate, onEdgeLinkCountChange, setNodes, setEdges],
+    [onNodeDataUpdate, onNodeZIndexChange, onEdgeLinkCountChange, setNodes, setEdges],
   );
 
   const onDragOver = useCallback((event: React.DragEvent) => {
@@ -166,7 +180,7 @@ function AppInner() {
             }));
             setNodes(importedNodes.map((n) => ({
               ...n,
-              data: { ...n.data, onUpdate: onNodeDataUpdate },
+              data: { ...n.data, onUpdate: onNodeDataUpdate, onZIndexChange: onNodeZIndexChange },
             })));
             setEdges(wiredEdges);
           } catch {
@@ -186,7 +200,7 @@ function AppInner() {
       });
       addNode(position);
     },
-    [reactFlowInstance, addNode, setNodes, setEdges, onNodeDataUpdate, onEdgeLinkCountChange],
+    [reactFlowInstance, addNode, setNodes, setEdges, onNodeDataUpdate, onNodeZIndexChange, onEdgeLinkCountChange],
   );
 
   const onAddNode = useCallback(() => {
@@ -361,6 +375,7 @@ function AppInner() {
           ...(n.data.isGlobal != null && { isGlobal: n.data.isGlobal }),
           ...(n.data.placements != null && { placements: n.data.placements }),
           onUpdate: onNodeDataUpdate,
+          onZIndexChange: onNodeZIndexChange,
         },
       }));
       const restoredEdges: Edge[] = parsed.edges.map((e) => ({

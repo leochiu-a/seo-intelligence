@@ -8,6 +8,7 @@ export type { UrlNodeData } from '../lib/graph-utils';
 
 interface UrlNodeExtendedData extends UrlNodeData {
   onUpdate?: (id: string, data: Partial<UrlNodeData>) => void;
+  onZIndexChange?: (id: string, zIndex: number) => void;
   scoreTier?: ScoreTier;
   isWeak?: boolean;
 }
@@ -41,14 +42,17 @@ const TONE_MAP: Record<ScoreTier, { card: string; focus: string; badge: string; 
 
 function UrlNodeComponent({ id, data, selected }: NodeProps<UrlNodeExtendedData>) {
   const [showPopover, setShowPopover] = useState(false);
-  const { setNodes, getNodes } = useReactFlow();
+  const { getNodes } = useReactFlow();
 
-  // Elevate this node's z-index when popover is open so it renders above siblings
+  // Elevate this node's z-index when popover is open so it renders above siblings.
+  // Goes through App's setNodes (useNodesState) via data.onZIndexChange to avoid
+  // racing with data updates made in the same batch (see App.onNodeZIndexChange).
+  const onZIndexChange = data.onZIndexChange;
   useEffect(() => {
-    setNodes((nds) =>
-      nds.map((n) => (n.id === id ? { ...n, zIndex: showPopover ? 1000 : 0 } : n))
-    );
-  }, [showPopover, id, setNodes]);
+    if (onZIndexChange) {
+      onZIndexChange(id, showPopover ? 1000 : 0);
+    }
+  }, [showPopover, id, onZIndexChange]);
 
   const placementSuggestions = useMemo(
     () => collectPlacementSuggestions(getNodes() as Node<UrlNodeData>[], id),
