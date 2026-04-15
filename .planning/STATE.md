@@ -28,7 +28,7 @@ See: .planning/PROJECT.md (updated 2026-04-13)
 Phase: 05 (global-filter-panel) — EXECUTING
 Plan: 1 of 1
 Status: Phase complete — ready for verification
-Last activity: 2026-04-14
+Last activity: 2026-04-15 - Completed quick task 260415-m0h: fix popover z-index covered by step node and remove redundant right node sidebar
 
 Progress: [░░░░░░░░░░] 0%
 
@@ -108,6 +108,7 @@ None yet.
 | 260414-sk5 | Add Clear Canvas button + confirm localStorage persistence for JSON import | 2026-04-14 | 54fe534 | [260414-sk5-add-localstorage-persistence-for-json-im](./quick/260414-sk5-add-localstorage-persistence-for-json-im/) |
 | 260414-t72 | Fix canvas disappearing after page refresh (isFirstRender save guard) | 2026-04-14 | 1693672 | [260414-t72-fix-canvas-disappearing-after-page-refre](./quick/260414-t72-fix-canvas-disappearing-after-page-refre/) |
 | 260414-tkz | Add multiple handles to UrlNode for graph routing (8 handles + getClosestHandleIds) | 2026-04-14 | 7cde4b7 | [260414-tkz-add-multiple-handles-to-urlnode-for-grap](./quick/260414-tkz-add-multiple-handles-to-urlnode-for-grap/) |
+| 260415-m0h | fix popover z-index covered by step node and remove redundant right node sidebar | 2026-04-15 | — | [260415-m0h-fix-popover-z-index-covered-by-step-node](./quick/260415-m0h-fix-popover-z-index-covered-by-step-node/) |
 
 ## Session Continuity
 
