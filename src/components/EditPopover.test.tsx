@@ -123,4 +123,27 @@ describe('EditPopover', () => {
     fireEvent.change(combobox, { target: { value: 'Custom Name' } });
     expect(combobox).toHaveValue('Custom Name');
   });
+
+  it('saves freeform-typed placement name on Confirm when suggestions exist (PLACE-05)', () => {
+    const onSave = vi.fn();
+    const placement: Placement = { id: 'p-1', name: '', linkCount: 1 };
+    render(
+      <EditPopover
+        {...defaultProps}
+        isGlobal={true}
+        placements={[placement]}
+        placementSuggestions={['Header Nav', 'Footer']}
+        onSave={onSave}
+      />,
+    );
+    const combobox = screen.getByRole('combobox');
+    fireEvent.change(combobox, { target: { value: 'home' } });
+    fireEvent.click(screen.getByText('Confirm'));
+    expect(onSave).toHaveBeenCalledWith(
+      '/page/<id>',
+      5,
+      true,
+      [{ id: 'p-1', name: 'home', linkCount: 1 }],
+    );
+  });
 });

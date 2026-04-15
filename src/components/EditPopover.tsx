@@ -154,6 +154,11 @@ export function EditPopover({ nodeId: _nodeId, urlTemplate, pageCount, isGlobal,
                       <Autocomplete.Input
                         className="flex-1 h-7 text-sm text-dark border border-border rounded-lg px-2 focus:outline-none focus:ring-2 focus:ring-tier-neutral/50 focus:border-tier-neutral transition"
                         placeholder="e.g. Header Nav"
+                        onChange={(e) =>
+                          setLocalPlacements((prev) =>
+                            prev.map((pl) => (pl.id === p.id ? { ...pl, name: e.target.value } : pl))
+                          )
+                        }
                       />
                     </Autocomplete.Root>
                   ) : (
