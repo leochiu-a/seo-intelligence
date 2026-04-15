@@ -9,6 +9,7 @@ const defaultProps = {
   pageCount: 5,
   isGlobal: false,
   placements: [] as Placement[],
+  placementSuggestions: [] as string[],
   onSave: vi.fn(),
   onClose: vi.fn(),
 };
@@ -78,5 +79,48 @@ describe('EditPopover', () => {
     );
     fireEvent.click(screen.getByText('Confirm'));
     expect(onSave).toHaveBeenCalledWith('/page/<id>', 5, true, [existingPlacement]);
+  });
+
+  it('shows autocomplete input (combobox role) when placementSuggestions is non-empty', () => {
+    const placement: Placement = { id: 'p-1', name: '', linkCount: 1 };
+    render(
+      <EditPopover
+        {...defaultProps}
+        isGlobal={true}
+        placements={[placement]}
+        placementSuggestions={['Header Nav', 'Footer']}
+      />,
+    );
+    const combobox = screen.getByRole('combobox');
+    expect(combobox).toBeInTheDocument();
+  });
+
+  it('renders plain input when placementSuggestions is empty (PLACE-04)', () => {
+    const placement: Placement = { id: 'p-1', name: 'Footer', linkCount: 1 };
+    render(
+      <EditPopover
+        {...defaultProps}
+        isGlobal={true}
+        placements={[placement]}
+        placementSuggestions={[]}
+      />,
+    );
+    expect(screen.queryByRole('combobox')).not.toBeInTheDocument();
+    expect(screen.getByDisplayValue('Footer')).toBeInTheDocument();
+  });
+
+  it('allows freeform text input not in suggestions list (PLACE-03)', () => {
+    const placement: Placement = { id: 'p-1', name: '', linkCount: 1 };
+    render(
+      <EditPopover
+        {...defaultProps}
+        isGlobal={true}
+        placements={[placement]}
+        placementSuggestions={['Header Nav', 'Footer']}
+      />,
+    );
+    const combobox = screen.getByRole('combobox');
+    fireEvent.change(combobox, { target: { value: 'Custom Name' } });
+    expect(combobox).toHaveValue('Custom Name');
   });
 });

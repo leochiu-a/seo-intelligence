@@ -14,6 +14,7 @@ import {
   parseImportJson,
   HANDLE_IDS,
   getClosestHandleIds,
+  collectPlacementSuggestions,
 } from './graph-utils';
 import type { UrlNodeData, LinkCountEdgeData, Placement } from './graph-utils';
 
@@ -692,5 +693,95 @@ describe('getClosestHandleIds', () => {
     const result = getClosestHandleIds({ x: 0, y: 0 }, { x: 100, y: 200 });
     expect(result.sourceHandle).toBe('handle-bottom');
     expect(result.targetHandle).toBe('handle-top');
+  });
+});
+
+describe('collectPlacementSuggestions', () => {
+  it('returns placement names from other global nodes', () => {
+    const nodes: Node<UrlNodeData>[] = [
+      makeNode('node-1', 1),
+      makeNode('node-2', 1, {
+        isGlobal: true,
+        placements: [
+          { id: 'p1', name: 'Header', linkCount: 1 },
+          { id: 'p2', name: 'Footer', linkCount: 1 },
+        ],
+      }),
+    ];
+    const result = collectPlacementSuggestions(nodes, 'node-1');
+    expect(result).toEqual(['Header', 'Footer']);
+  });
+
+  it('excludes the current node own placements', () => {
+    const nodes: Node<UrlNodeData>[] = [
+      makeNode('node-2', 1, {
+        isGlobal: true,
+        placements: [{ id: 'p1', name: 'Header', linkCount: 1 }],
+      }),
+    ];
+    const result = collectPlacementSuggestions(nodes, 'node-2');
+    expect(result).toEqual([]);
+  });
+
+  it('deduplicates names across multiple global nodes', () => {
+    const nodes: Node<UrlNodeData>[] = [
+      makeNode('node-1', 1),
+      makeNode('node-2', 1, {
+        isGlobal: true,
+        placements: [{ id: 'p1', name: 'Header', linkCount: 1 }],
+      }),
+      makeNode('node-3', 1, {
+        isGlobal: true,
+        placements: [{ id: 'p2', name: 'Header', linkCount: 1 }],
+      }),
+    ];
+    const result = collectPlacementSuggestions(nodes, 'node-1');
+    expect(result).toEqual(['Header']);
+    expect(result).toHaveLength(1);
+  });
+
+  it('filters out empty-string placement names', () => {
+    const nodes: Node<UrlNodeData>[] = [
+      makeNode('node-1', 1),
+      makeNode('node-2', 1, {
+        isGlobal: true,
+        placements: [
+          { id: 'p1', name: '', linkCount: 1 },
+          { id: 'p2', name: 'Footer', linkCount: 1 },
+        ],
+      }),
+    ];
+    const result = collectPlacementSuggestions(nodes, 'node-1');
+    expect(result).toEqual(['Footer']);
+  });
+
+  it('returns [] when no other global nodes exist', () => {
+    const nodes: Node<UrlNodeData>[] = [
+      makeNode('node-1', 1),
+      makeNode('node-2', 1),
+    ];
+    const result = collectPlacementSuggestions(nodes, 'node-1');
+    expect(result).toEqual([]);
+  });
+
+  it('returns [] when other global nodes have no placements', () => {
+    const nodes: Node<UrlNodeData>[] = [
+      makeNode('node-1', 1),
+      makeNode('node-2', 1, { isGlobal: true, placements: [] }),
+    ];
+    const result = collectPlacementSuggestions(nodes, 'node-1');
+    expect(result).toEqual([]);
+  });
+
+  it('skips non-global nodes entirely', () => {
+    const nodes: Node<UrlNodeData>[] = [
+      makeNode('node-1', 1),
+      makeNode('node-2', 1, {
+        isGlobal: false,
+        placements: [{ id: 'p1', name: 'ShouldBeIgnored', linkCount: 1 }],
+      }),
+    ];
+    const result = collectPlacementSuggestions(nodes, 'node-1');
+    expect(result).toEqual([]);
   });
 });

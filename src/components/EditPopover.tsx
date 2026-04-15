@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { X } from 'lucide-react';
+import { Autocomplete } from '@base-ui/react/autocomplete';
 import { type Placement } from '../lib/graph-utils';
 
 interface EditPopoverProps {
@@ -8,11 +9,12 @@ interface EditPopoverProps {
   pageCount: number;
   isGlobal: boolean;
   placements: Placement[];
+  placementSuggestions: string[];
   onSave: (urlTemplate: string, pageCount: number, isGlobal: boolean, placements: Placement[]) => void;
   onClose: () => void;
 }
 
-export function EditPopover({ nodeId: _nodeId, urlTemplate, pageCount, isGlobal, placements, onSave, onClose }: EditPopoverProps) {
+export function EditPopover({ nodeId: _nodeId, urlTemplate, pageCount, isGlobal, placements, placementSuggestions, onSave, onClose }: EditPopoverProps) {
   const [localTemplate, setLocalTemplate] = useState(urlTemplate);
   const [localCount, setLocalCount] = useState(pageCount);
   const [localIsGlobal, setLocalIsGlobal] = useState(isGlobal);
@@ -116,17 +118,57 @@ export function EditPopover({ nodeId: _nodeId, urlTemplate, pageCount, isGlobal,
             <div className="space-y-2">
               {localPlacements.map((p) => (
                 <div key={p.id} className="flex items-center gap-1.5">
-                  <input
-                    type="text"
-                    className="flex-1 h-7 text-sm text-dark border border-border rounded-lg px-2 focus:outline-none focus:ring-2 focus:ring-tier-neutral/50 focus:border-tier-neutral transition"
-                    placeholder="e.g. Header Nav"
-                    value={p.name}
-                    onChange={(e) =>
-                      setLocalPlacements((prev) =>
-                        prev.map((pl) => (pl.id === p.id ? { ...pl, name: e.target.value } : pl))
-                      )
-                    }
-                  />
+                  {placementSuggestions.length > 0 ? (
+                    <Autocomplete.Root
+                      value={p.name}
+                      onValueChange={(value) =>
+                        setLocalPlacements((prev) =>
+                          prev.map((pl) => (pl.id === p.id ? { ...pl, name: value } : pl))
+                        )
+                      }
+                      items={placementSuggestions}
+                      openOnInputClick
+                    >
+                      {/* Portal with container=popoverRef keeps dropdown inside popoverRef so click-outside handler works correctly */}
+                      <Autocomplete.Portal container={popoverRef}>
+                        <Autocomplete.Positioner
+                          sideOffset={4}
+                          className="z-[60]"
+                        >
+                          <Autocomplete.Popup className="bg-white border border-border rounded-lg shadow-lg overflow-hidden max-h-40 overflow-y-auto">
+                            {placementSuggestions.map((name) => (
+                              <Autocomplete.Item
+                                key={name}
+                                value={name}
+                                className="px-2 py-1.5 text-sm text-dark cursor-pointer hover:bg-gray-50 data-[highlighted]:bg-gray-100"
+                              >
+                                {name}
+                              </Autocomplete.Item>
+                            ))}
+                            <Autocomplete.Empty className="px-2 py-1.5 text-sm text-muted-fg">
+                              No matches
+                            </Autocomplete.Empty>
+                          </Autocomplete.Popup>
+                        </Autocomplete.Positioner>
+                      </Autocomplete.Portal>
+                      <Autocomplete.Input
+                        className="flex-1 h-7 text-sm text-dark border border-border rounded-lg px-2 focus:outline-none focus:ring-2 focus:ring-tier-neutral/50 focus:border-tier-neutral transition"
+                        placeholder="e.g. Header Nav"
+                      />
+                    </Autocomplete.Root>
+                  ) : (
+                    <input
+                      type="text"
+                      className="flex-1 h-7 text-sm text-dark border border-border rounded-lg px-2 focus:outline-none focus:ring-2 focus:ring-tier-neutral/50 focus:border-tier-neutral transition"
+                      placeholder="e.g. Header Nav"
+                      value={p.name}
+                      onChange={(e) =>
+                        setLocalPlacements((prev) =>
+                          prev.map((pl) => (pl.id === p.id ? { ...pl, name: e.target.value } : pl))
+                        )
+                      }
+                    />
+                  )}
                   <input
                     type="number"
                     min={1}
