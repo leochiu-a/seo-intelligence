@@ -67,10 +67,10 @@
 
 ### Placement Autocomplete
 
-- [ ] **PLACE-01**: When adding a placement name on a global node, user sees a dropdown of existing placement names used across all other global nodes
-- [ ] **PLACE-02**: User can select a suggested name from the dropdown to pre-fill the placement name field
-- [ ] **PLACE-03**: User can still type a freeform name not in the suggestions list
-- [ ] **PLACE-04**: Suggestions only appear when other global nodes have placements defined; no dropdown shown otherwise
+- [x] **PLACE-01**: When adding a placement name on a global node, user sees a dropdown of existing placement names used across all other global nodes
+- [x] **PLACE-02**: User can select a suggested name from the dropdown to pre-fill the placement name field
+- [x] **PLACE-03**: User can still type a freeform name not in the suggestions list
+- [x] **PLACE-04**: Suggestions only appear when other global nodes have placements defined; no dropdown shown otherwise
 
 ### Placement-Centric Filter
 

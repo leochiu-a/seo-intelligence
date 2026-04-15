@@ -129,7 +129,7 @@ Plans:
 **Plans**: 1 plan
 
 Plans:
-- [ ] 06-01-PLAN.md — collectPlacementSuggestions utility + Base UI Autocomplete in EditPopover with UrlNode prop wiring
+- [x] 06-01-PLAN.md — collectPlacementSuggestions utility + Base UI Autocomplete in EditPopover with UrlNode prop wiring
 
 **UI hint**: yes
 

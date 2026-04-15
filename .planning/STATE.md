@@ -1,16 +1,16 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.1
-milestone_name: UX Polish
-status: planning
-stopped_at: —
-last_updated: "2026-04-15T00:00:00.000Z"
+milestone: v1.0
+milestone_name: MVP
+status: verifying
+stopped_at: Completed 06-01-PLAN.md
+last_updated: "2026-04-15T09:27:42.756Z"
 last_activity: 2026-04-15
 progress:
   total_phases: 8
-  completed_phases: 6
-  total_plans: 11
-  completed_plans: 11
+  completed_phases: 7
+  total_plans: 12
+  completed_plans: 12
   percent: 0
 ---
 
@@ -25,10 +25,10 @@ See: .planning/PROJECT.md (updated 2026-04-13)
 
 ## Current Position
 
-Phase: Not started (roadmap defined, awaiting plan)
-Plan: —
-Status: Roadmap created for v1.1 UX Polish
-Last activity: 2026-04-15 — v1.1 UX Polish roadmap created (Phases 6-7)
+Phase: 06 (placement-autocomplete) — EXECUTING
+Plan: 1 of 1
+Status: Phase complete — ready for verification
+Last activity: 2026-04-15
 
 Progress: [░░░░░░░░░░] 0%
 
@@ -60,6 +60,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 04-global-nodes P01 | 2 | 3 tasks | 4 files |
 | Phase 04-global-nodes P02 | 2 | 2 tasks | 5 files |
 | Phase 05-global-filter-panel P01 | 2 min | 2 tasks | 4 files |
+| Phase 06-placement-autocomplete P01 | 8 | 2 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -90,6 +91,9 @@ Recent decisions affecting current work:
 - [Phase 05-global-filter-panel]: null sentinel for highlightedNodeIds when no filters active avoids unnecessary style recalculation
 - [Phase 05-global-filter-panel]: FilterPanel positioned left of canvas between Sidebar and canvas div for UX proximity
 - [Phase 05-global-filter-panel]: styledNodes separate from enrichedNodes memo keeps scoring concerns separate from UI dimming
+- [Phase 06-placement-autocomplete]: Used Autocomplete.Portal with container=popoverRef to satisfy Base UI API requirement while preserving click-outside handler correctness
+- [Phase 06-placement-autocomplete]: collectPlacementSuggestions extracted as pure function in graph-utils.ts for isolated unit testing
+- [Phase 06-placement-autocomplete]: Conditional rendering: Autocomplete.Root when suggestions available, plain input when empty (PLACE-04)
 
 ### Pending Todos
 
@@ -112,6 +116,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-15T00:00:00.000Z
-Stopped at: v1.1 UX Polish roadmap created (Phases 6-7)
+Last session: 2026-04-15T09:27:42.751Z
+Stopped at: Completed 06-01-PLAN.md
 Resume file: None
