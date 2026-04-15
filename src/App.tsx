@@ -18,8 +18,8 @@ import ReactFlow, {
 import 'reactflow/dist/style.css';
 import { UrlNode } from './components/UrlNode';
 import { LinkCountEdge } from './components/LinkCountEdge';
-import { Sidebar } from './components/Sidebar';
 import { Toolbar } from './components/Toolbar';
+import { ScoreSidebar } from './components/ScoreSidebar';
 import { FilterPanel } from './components/FilterPanel';
 import { ImportDialog } from './components/ImportDialog';
 import { useFilterState } from './hooks/useFilterState';
@@ -392,7 +392,6 @@ function AppInner() {
     <div className="h-screen w-screen flex flex-col bg-canvas text-dark">
       <Toolbar onAddNode={onAddNode} onImportJson={() => setShowImportDialog(true)} onExportJson={onExportJson} onClearCanvas={handleClearCanvas} isEmpty={nodes.length === 0} />
       <div className="flex flex-1 overflow-hidden">
-        <Sidebar />
         <FilterPanel
           nodes={nodes}
           activeFilters={activeFilters}
@@ -453,6 +452,7 @@ function AppInner() {
             )}
           </ReactFlow>
         </div>
+        <ScoreSidebar nodes={nodes} scores={scores} weakNodes={weakNodes} />
       </div>
       <ImportDialog
         open={showImportDialog}
