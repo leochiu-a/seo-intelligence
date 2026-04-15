@@ -118,12 +118,17 @@
 | EXPORT-01 ~ EXPORT-02 | Phase 3 | Complete |
 | GLOB-01 ~ GLOB-05 | Phase 4 | Pending |
 | FILTER-01 ~ FILTER-04 | Phase 5 | Pending |
+| PLACE-01 ~ PLACE-04 | Phase 6 | Pending |
+| PFILTER-01 ~ PFILTER-04 | Phase 7 | Pending |
 
 **Coverage:**
 - v1 requirements: 31 total
 - Mapped to phases: 31
 - Unmapped: 0 ✓
+- v1.1 requirements: 8 total
+- Mapped to phases: 8
+- Unmapped: 0 ✓
 
 ---
 *Requirements defined: 2026-04-13*
-*Last updated: 2026-04-15 — v1.1 requirements added*
+*Last updated: 2026-04-15 — v1.1 requirements mapped to Phases 6-7*

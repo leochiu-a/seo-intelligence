@@ -8,6 +8,7 @@ Four phases deliver a browser-based visual tool for modeling internal link struc
 
 - 🚧 **v1.0 MVP** - Phases 0-3 (in progress)
 - 📋 **v1.1 Global Navigation** - Phases 4-5 (planned)
+- 📋 **v1.1 UX Polish** - Phases 6-7 (planned)
 
 ## Phases
 
@@ -15,6 +16,10 @@ Four phases deliver a browser-based visual tool for modeling internal link struc
 - [x] **Phase 1: Canvas Editor** - Interactive canvas with URL template nodes, directed edges, and inline configuration (completed 2026-04-13)
 - [x] **Phase 2: Scoring & Analysis** - PageRank engine with visual node scoring and ranked sidebar (completed 2026-04-13)
 - [ ] **Phase 3: Scenarios & Export** - localStorage graph persistence plus CSV/JSON export (scenarios dropped per D-01)
+- [ ] **Phase 4: Global Nodes** - Global node designation with named placements and PageRank injection
+- [ ] **Phase 5: Global Filter Panel** - Filter panel with placement checkboxes and canvas dimming
+- [ ] **Phase 6: Placement Autocomplete** - Typing a placement name in the edit popover shows suggestions from existing placement names across all other global nodes
+- [ ] **Phase 7: Placement-Centric Filter** - Filter panel redesigned to group by unique placement name so checking "Header" highlights every global node that carries a Header placement
 
 ## Phase Details
 
@@ -112,9 +117,33 @@ Plans:
 Plans:
 - [x] 05-01-PLAN.md — FilterPanel component with useFilterState hook, canvas dimming via node.style.opacity
 
+### Phase 6: Placement Autocomplete
+**Goal**: Users typing a placement name in the edit popover see suggestions drawn from placement names already used across other global nodes, reducing typos and enforcing naming consistency
+**Depends on**: Phase 5
+**Requirements**: PLACE-01, PLACE-02, PLACE-03, PLACE-04
+**Success Criteria** (what must be TRUE):
+  1. When a global node has a placement name field focused and other global nodes have placements defined, a dropdown of existing placement names appears
+  2. User can click a suggestion to pre-fill the placement name field without further typing
+  3. User can ignore suggestions and type a freeform name that is not in the list
+  4. When no other global nodes have placements defined, no dropdown appears
+**Plans**: TBD
+**UI hint**: yes
+
+### Phase 7: Placement-Centric Filter
+**Goal**: The filter panel groups by unique placement name across all global nodes, so users can check "Header" once to highlight every global node carrying a Header placement instead of hunting for individual nodes
+**Depends on**: Phase 6
+**Requirements**: PFILTER-01, PFILTER-02, PFILTER-03, PFILTER-04
+**Success Criteria** (what must be TRUE):
+  1. Filter panel lists unique placement names (deduplicated across all global nodes) as top-level checkboxes
+  2. Checking a placement name highlights all global nodes that carry that placement, dimming all other nodes
+  3. Each placement name entry shows which global node(s) use it as sub-items
+  4. Unchecking all placement filters restores the canvas to full-opacity normal state
+**Plans**: TBD
+**UI hint**: yes
+
 ## Progress
 
-**Execution Order:** 0 -> 1 -> 2 -> 3 -> 4 -> 5
+**Execution Order:** 0 -> 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
@@ -124,3 +153,5 @@ Plans:
 | 3. Scenarios & Export | 0/2 | Not started | - |
 | 4. Global Nodes | 0/2 | Complete    | 2026-04-14 |
 | 5. Global Filter Panel | 1/1 | Complete   | 2026-04-14 |
+| 6. Placement Autocomplete | 0/? | Not started | - |
+| 7. Placement-Centric Filter | 0/? | Not started | - |
