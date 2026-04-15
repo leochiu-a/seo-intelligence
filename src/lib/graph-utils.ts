@@ -284,6 +284,45 @@ export function identifyWeakNodes(
   return weak;
 }
 
+export interface PlacementGroup {
+  placementName: string;
+  nodeIds: string[];
+  nodeLabels: string[];
+}
+
+/**
+ * Groups all global nodes by their unique placement names.
+ * Each group contains the IDs and URL templates of all global nodes that carry that placement name.
+ * Results are sorted alphabetically by placementName for stable rendering.
+ * Empty-string placement names are skipped. Duplicate names on the same node are deduplicated.
+ */
+export function collectPlacementGroups(nodes: Node<UrlNodeData>[]): PlacementGroup[] {
+  const groups = new Map<string, { nodeIds: string[]; nodeLabels: string[] }>();
+
+  for (const node of nodes) {
+    if (!node.data.isGlobal || !node.data.placements?.length) continue;
+
+    const seenNamesForThisNode = new Set<string>();
+    for (const placement of node.data.placements) {
+      const name = placement.name.trim();
+      if (!name) continue;
+      if (seenNamesForThisNode.has(name)) continue;
+      seenNamesForThisNode.add(name);
+
+      if (!groups.has(name)) {
+        groups.set(name, { nodeIds: [], nodeLabels: [] });
+      }
+      const group = groups.get(name)!;
+      group.nodeIds.push(node.id);
+      group.nodeLabels.push(node.data.urlTemplate);
+    }
+  }
+
+  return Array.from(groups.entries())
+    .map(([placementName, { nodeIds, nodeLabels }]) => ({ placementName, nodeIds, nodeLabels }))
+    .sort((a, b) => a.placementName.localeCompare(b.placementName));
+}
+
 /**
  * Collects unique, non-empty placement names from all global nodes
  * EXCEPT the node with the given currentNodeId.

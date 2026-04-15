@@ -15,6 +15,7 @@ import {
   HANDLE_IDS,
   getClosestHandleIds,
   collectPlacementSuggestions,
+  collectPlacementGroups,
 } from './graph-utils';
 import type { UrlNodeData, LinkCountEdgeData, Placement } from './graph-utils';
 
@@ -783,5 +784,102 @@ describe('collectPlacementSuggestions', () => {
     ];
     const result = collectPlacementSuggestions(nodes, 'node-1');
     expect(result).toEqual([]);
+  });
+});
+
+describe('collectPlacementGroups', () => {
+  it('returns [] when no nodes are global', () => {
+    const nodes: Node<UrlNodeData>[] = [
+      makeNode('node-1', 1),
+      makeNode('node-2', 1),
+    ];
+    const result = collectPlacementGroups(nodes);
+    expect(result).toEqual([]);
+  });
+
+  it('returns [] when global node has no placements', () => {
+    const nodes: Node<UrlNodeData>[] = [
+      makeNode('node-1', 1, { isGlobal: true, placements: [] }),
+    ];
+    const result = collectPlacementGroups(nodes);
+    expect(result).toEqual([]);
+  });
+
+  it('returns [] when all placement names are empty strings', () => {
+    const nodes: Node<UrlNodeData>[] = [
+      makeNode('node-1', 1, {
+        isGlobal: true,
+        placements: [{ id: 'p1', name: '', linkCount: 1 }],
+      }),
+    ];
+    const result = collectPlacementGroups(nodes);
+    expect(result).toEqual([]);
+  });
+
+  it('returns one group with two nodeIds when two globals share a placement name', () => {
+    const nodes: Node<UrlNodeData>[] = [
+      makeNode('node-1', 1, {
+        isGlobal: true,
+        placements: [{ id: 'p1', name: 'Header', linkCount: 1 }],
+      }),
+      makeNode('node-2', 1, {
+        isGlobal: true,
+        placements: [{ id: 'p2', name: 'Header', linkCount: 1 }],
+      }),
+    ];
+    const result = collectPlacementGroups(nodes);
+    expect(result).toHaveLength(1);
+    expect(result[0].placementName).toBe('Header');
+    expect(result[0].nodeIds).toEqual(['node-1', 'node-2']);
+  });
+
+  it('returns multiple groups sorted alphabetically by placementName', () => {
+    const nodes: Node<UrlNodeData>[] = [
+      makeNode('node-1', 1, {
+        isGlobal: true,
+        placements: [
+          { id: 'p1', name: 'Sidebar', linkCount: 1 },
+          { id: 'p2', name: 'Header', linkCount: 1 },
+        ],
+      }),
+    ];
+    const result = collectPlacementGroups(nodes);
+    expect(result).toHaveLength(2);
+    expect(result[0].placementName).toBe('Header');
+    expect(result[1].placementName).toBe('Sidebar');
+  });
+
+  it('deduplicates nodeId when same placement name appears twice on one node', () => {
+    const nodes: Node<UrlNodeData>[] = [
+      makeNode('node-1', 1, {
+        isGlobal: true,
+        placements: [
+          { id: 'p1', name: 'Header', linkCount: 1 },
+          { id: 'p2', name: 'Header', linkCount: 2 },
+        ],
+      }),
+    ];
+    const result = collectPlacementGroups(nodes);
+    expect(result).toHaveLength(1);
+    expect(result[0].placementName).toBe('Header');
+    expect(result[0].nodeIds).toEqual(['node-1']);
+    expect(result[0].nodeIds).toHaveLength(1);
+  });
+
+  it('nodeLabels matches urlTemplate for each nodeId in the group', () => {
+    const nodes: Node<UrlNodeData>[] = [
+      makeNode('node-1', 1, {
+        isGlobal: true,
+        placements: [{ id: 'p1', name: 'Footer', linkCount: 1 }],
+      }),
+      makeNode('node-2', 1, {
+        isGlobal: true,
+        placements: [{ id: 'p2', name: 'Footer', linkCount: 1 }],
+      }),
+    ];
+    const result = collectPlacementGroups(nodes);
+    expect(result).toHaveLength(1);
+    expect(result[0].nodeIds).toEqual(['node-1', 'node-2']);
+    expect(result[0].nodeLabels).toEqual(['/node-1', '/node-2']);
   });
 });
