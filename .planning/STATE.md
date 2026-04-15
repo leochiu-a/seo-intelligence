@@ -1,11 +1,11 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.0
-milestone_name: MVP
-status: verifying
-stopped_at: Completed 05-01-PLAN.md
-last_updated: "2026-04-14T15:10:42.216Z"
-last_activity: 2026-04-14
+milestone: v1.1
+milestone_name: UX Polish
+status: planning
+stopped_at: —
+last_updated: "2026-04-15T00:00:00.000Z"
+last_activity: 2026-04-15
 progress:
   total_phases: 6
   completed_phases: 6
@@ -25,10 +25,10 @@ See: .planning/PROJECT.md (updated 2026-04-13)
 
 ## Current Position
 
-Phase: 05 (global-filter-panel) — EXECUTING
-Plan: 1 of 1
-Status: Phase complete — ready for verification
-Last activity: 2026-04-15 - Completed quick task 260415-m0h: fix popover z-index covered by step node and remove redundant right node sidebar
+Phase: Not started (defining requirements)
+Plan: —
+Status: Defining requirements
+Last activity: 2026-04-15 — Milestone v1.1 UX Polish started
 
 Progress: [░░░░░░░░░░] 0%
 

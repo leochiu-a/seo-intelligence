@@ -8,6 +8,14 @@ A visual SEO internal link planning tool for PMs and SEO engineers to model and 
 
 Let PMs visually plan and simulate internal link structures — and immediately see which pages will rank highest — before any code is written or deployed.
 
+## Current Milestone: v1.1 UX Polish
+
+**Goal:** Improve placement authoring and filter ergonomics for power users managing multi-node global structures
+
+**Target features:**
+- Placement autocomplete in edit popover — typing a placement name shows suggestions from existing names used across other global nodes; freeform still allowed
+- Placement-centric global filter — filter panel groups by unique placement name; checking "Header" highlights all global nodes that have a Header placement
+
 ## Requirements
 
 ### Validated
@@ -74,4 +82,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-14 after Phase 4: Global Nodes complete*
+*Last updated: 2026-04-15 — Milestone v1.1 UX Polish started*
