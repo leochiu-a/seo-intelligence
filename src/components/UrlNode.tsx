@@ -1,5 +1,5 @@
-import { memo, useState } from 'react';
-import { Handle, Position, type NodeProps } from 'reactflow';
+import { memo, useState, useEffect } from 'react';
+import { Handle, Position, useReactFlow, type NodeProps } from 'reactflow';
 import { Pencil, TriangleAlert, Globe } from 'lucide-react';
 import { EditPopover } from './EditPopover';
 import { formatPageCount, type UrlNodeData, type ScoreTier, type Placement, HANDLE_IDS } from '../lib/graph-utils';
@@ -41,6 +41,14 @@ const TONE_MAP: Record<ScoreTier, { card: string; focus: string; badge: string; 
 
 function UrlNodeComponent({ id, data, selected }: NodeProps<UrlNodeExtendedData>) {
   const [showPopover, setShowPopover] = useState(false);
+  const { setNodes } = useReactFlow();
+
+  // Elevate this node's z-index when popover is open so it renders above siblings
+  useEffect(() => {
+    setNodes((nds) =>
+      nds.map((n) => (n.id === id ? { ...n, zIndex: showPopover ? 1000 : 0 } : n))
+    );
+  }, [showPopover, id, setNodes]);
 
   const tier = data.scoreTier ?? 'neutral';
   const tone = TONE_MAP[tier];

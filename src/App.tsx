@@ -20,7 +20,6 @@ import { UrlNode } from './components/UrlNode';
 import { LinkCountEdge } from './components/LinkCountEdge';
 import { Sidebar } from './components/Sidebar';
 import { Toolbar } from './components/Toolbar';
-import { ScoreSidebar } from './components/ScoreSidebar';
 import { FilterPanel } from './components/FilterPanel';
 import { ImportDialog } from './components/ImportDialog';
 import { useFilterState } from './hooks/useFilterState';
@@ -454,7 +453,6 @@ function AppInner() {
             )}
           </ReactFlow>
         </div>
-        <ScoreSidebar nodes={nodes} scores={scores} weakNodes={weakNodes} />
       </div>
       <ImportDialog
         open={showImportDialog}
