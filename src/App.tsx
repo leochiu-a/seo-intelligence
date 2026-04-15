@@ -264,17 +264,21 @@ function AppInner() {
 
     const ids = new Set<string>();
     for (const key of activeFilters) {
-      if (key.startsWith('node:')) {
-        // "node:{nodeId}" — highlight the global node itself
-        ids.add(key.slice(5));
-      } else if (key.startsWith('placement:')) {
-        // "placement:{nodeId}:{placementId}" — highlight the global node
-        const nodeId = key.split(':')[1];
-        ids.add(nodeId);
+      if (key.startsWith('placement-name:')) {
+        // "placement-name:{name}" — highlight all global nodes carrying that placement name
+        const name = key.slice('placement-name:'.length);
+        for (const node of nodes) {
+          if (
+            node.data.isGlobal &&
+            node.data.placements?.some((p) => p.name === name)
+          ) {
+            ids.add(node.id);
+          }
+        }
       }
     }
     return ids;
-  }, [activeFilters]);
+  }, [activeFilters, nodes]);
 
   // Apply opacity styles based on active filters
   const styledNodes = useMemo(() => {
