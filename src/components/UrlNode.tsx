@@ -1,8 +1,8 @@
-import { memo, useState, useEffect } from 'react';
-import { Handle, Position, useReactFlow, type NodeProps } from 'reactflow';
+import { memo, useState, useEffect, useMemo } from 'react';
+import { Handle, Position, useReactFlow, type NodeProps, type Node } from 'reactflow';
 import { Pencil, TriangleAlert, Globe } from 'lucide-react';
 import { EditPopover } from './EditPopover';
-import { formatPageCount, type UrlNodeData, type ScoreTier, type Placement, HANDLE_IDS } from '../lib/graph-utils';
+import { formatPageCount, type UrlNodeData, type ScoreTier, type Placement, HANDLE_IDS, collectPlacementSuggestions } from '../lib/graph-utils';
 
 export type { UrlNodeData } from '../lib/graph-utils';
 
@@ -41,7 +41,7 @@ const TONE_MAP: Record<ScoreTier, { card: string; focus: string; badge: string; 
 
 function UrlNodeComponent({ id, data, selected }: NodeProps<UrlNodeExtendedData>) {
   const [showPopover, setShowPopover] = useState(false);
-  const { setNodes } = useReactFlow();
+  const { setNodes, getNodes } = useReactFlow();
 
   // Elevate this node's z-index when popover is open so it renders above siblings
   useEffect(() => {
@@ -49,6 +49,11 @@ function UrlNodeComponent({ id, data, selected }: NodeProps<UrlNodeExtendedData>
       nds.map((n) => (n.id === id ? { ...n, zIndex: showPopover ? 1000 : 0 } : n))
     );
   }, [showPopover, id, setNodes]);
+
+  const placementSuggestions = useMemo(
+    () => collectPlacementSuggestions(getNodes() as Node<UrlNodeData>[], id),
+    [id, getNodes],
+  );
 
   const tier = data.scoreTier ?? 'neutral';
   const tone = TONE_MAP[tier];
@@ -142,6 +147,7 @@ function UrlNodeComponent({ id, data, selected }: NodeProps<UrlNodeExtendedData>
           pageCount={data.pageCount}
           isGlobal={data.isGlobal ?? false}
           placements={data.placements ?? []}
+          placementSuggestions={placementSuggestions}
           onSave={handleSave}
           onClose={() => setShowPopover(false)}
         />

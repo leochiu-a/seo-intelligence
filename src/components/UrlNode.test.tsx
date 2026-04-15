@@ -8,11 +8,12 @@ import type { UrlNodeData } from '../lib/graph-utils';
 
 // Capture setNodes calls so we can verify zIndex mutations
 const mockSetNodes = vi.fn();
+const mockGetNodes = vi.fn(() => []);
 vi.mock('reactflow', async (importOriginal) => {
   const actual = await importOriginal<typeof import('reactflow')>();
   return {
     ...actual,
-    useReactFlow: () => ({ setNodes: mockSetNodes }),
+    useReactFlow: () => ({ setNodes: mockSetNodes, getNodes: mockGetNodes }),
   };
 });
 
