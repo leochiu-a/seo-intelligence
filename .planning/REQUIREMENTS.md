@@ -63,6 +63,22 @@
 - [x] **EXPORT-01**: User can export current graph as JSON (nodes, edges, scores)
 - [x] **EXPORT-02**: User can export score ranking as CSV (url_template, page_count, score)
 
+## v1.1 Requirements
+
+### Placement Autocomplete
+
+- [ ] **PLACE-01**: When adding a placement name on a global node, user sees a dropdown of existing placement names used across all other global nodes
+- [ ] **PLACE-02**: User can select a suggested name from the dropdown to pre-fill the placement name field
+- [ ] **PLACE-03**: User can still type a freeform name not in the suggestions list
+- [ ] **PLACE-04**: Suggestions only appear when other global nodes have placements defined; no dropdown shown otherwise
+
+### Placement-Centric Filter
+
+- [ ] **PFILTER-01**: Filter panel lists unique placement names (deduplicated across all global nodes) as top-level checkbox items
+- [ ] **PFILTER-02**: Checking a placement name highlights all global nodes that have that placement, dimming all others
+- [ ] **PFILTER-03**: Filter panel shows which global node(s) map to each placement name as sub-items
+- [ ] **PFILTER-04**: Unchecking all filters restores canvas to full-opacity normal state
+
 ## v2 Requirements
 
 ### Advanced Analysis
@@ -110,4 +126,4 @@
 
 ---
 *Requirements defined: 2026-04-13*
-*Last updated: 2026-04-14 after v1.1 milestone initialization*
+*Last updated: 2026-04-15 — v1.1 requirements added*
