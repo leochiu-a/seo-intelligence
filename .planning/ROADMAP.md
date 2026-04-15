@@ -126,7 +126,11 @@ Plans:
   2. User can click a suggestion to pre-fill the placement name field without further typing
   3. User can ignore suggestions and type a freeform name that is not in the list
   4. When no other global nodes have placements defined, no dropdown appears
-**Plans**: TBD
+**Plans**: 1 plan
+
+Plans:
+- [ ] 06-01-PLAN.md — collectPlacementSuggestions utility + Base UI Autocomplete in EditPopover with UrlNode prop wiring
+
 **UI hint**: yes
 
 ### Phase 7: Placement-Centric Filter
@@ -153,5 +157,5 @@ Plans:
 | 3. Scenarios & Export | 0/2 | Not started | - |
 | 4. Global Nodes | 0/2 | Complete    | 2026-04-14 |
 | 5. Global Filter Panel | 1/1 | Complete   | 2026-04-14 |
-| 6. Placement Autocomplete | 0/? | Not started | - |
+| 6. Placement Autocomplete | 0/1 | Not started | - |
 | 7. Placement-Centric Filter | 0/? | Not started | - |
