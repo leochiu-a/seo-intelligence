@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: MVP
 status: verifying
-stopped_at: Completed 06-01-PLAN.md
-last_updated: "2026-04-15T09:27:42.756Z"
+stopped_at: Completed 07-01-PLAN.md
+last_updated: "2026-04-15T10:05:14.642Z"
 last_activity: 2026-04-15
 progress:
   total_phases: 8
-  completed_phases: 7
-  total_plans: 12
-  completed_plans: 12
+  completed_phases: 8
+  total_plans: 13
+  completed_plans: 13
   percent: 0
 ---
 
@@ -61,6 +61,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 04-global-nodes P02 | 2 | 2 tasks | 5 files |
 | Phase 05-global-filter-panel P01 | 2 min | 2 tasks | 4 files |
 | Phase 06-placement-autocomplete P01 | 8 | 2 tasks | 6 files |
+| Phase 07-placement-centric-filter P01 | 5 | 3 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -94,6 +95,7 @@ Recent decisions affecting current work:
 - [Phase 06-placement-autocomplete]: Used Autocomplete.Portal with container=popoverRef to satisfy Base UI API requirement while preserving click-outside handler correctness
 - [Phase 06-placement-autocomplete]: collectPlacementSuggestions extracted as pure function in graph-utils.ts for isolated unit testing
 - [Phase 06-placement-autocomplete]: Conditional rendering: Autocomplete.Root when suggestions available, plain input when empty (PLACE-04)
+- [Phase 07-placement-centric-filter]: placement-name:{name} key format — one checkbox per unique placement name across all global nodes, replacing node:/placement: keys
 
 ### Pending Todos
 
@@ -116,6 +118,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-15T09:27:42.751Z
-Stopped at: Completed 06-01-PLAN.md
+Last session: 2026-04-15T10:05:14.640Z
+Stopped at: Completed 07-01-PLAN.md
 Resume file: None

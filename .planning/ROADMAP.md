@@ -19,7 +19,7 @@ Four phases deliver a browser-based visual tool for modeling internal link struc
 - [ ] **Phase 4: Global Nodes** - Global node designation with named placements and PageRank injection
 - [ ] **Phase 5: Global Filter Panel** - Filter panel with placement checkboxes and canvas dimming
 - [ ] **Phase 6: Placement Autocomplete** - Typing a placement name in the edit popover shows suggestions from existing placement names across all other global nodes
-- [ ] **Phase 7: Placement-Centric Filter** - Filter panel redesigned to group by unique placement name so checking "Header" highlights every global node that carries a Header placement
+- [x] **Phase 7: Placement-Centric Filter** - Filter panel redesigned to group by unique placement name so checking "Header" highlights every global node that carries a Header placement (completed 2026-04-15)
 
 ## Phase Details
 
@@ -142,7 +142,11 @@ Plans:
   2. Checking a placement name highlights all global nodes that carry that placement, dimming all other nodes
   3. Each placement name entry shows which global node(s) use it as sub-items
   4. Unchecking all placement filters restores the canvas to full-opacity normal state
-**Plans**: TBD
+**Plans**: 1 plan
+
+Plans:
+- [x] 07-01-PLAN.md — collectPlacementGroups utility + placement-centric FilterPanel redesign + App.tsx key resolution update
+
 **UI hint**: yes
 
 ## Progress
@@ -158,4 +162,4 @@ Plans:
 | 4. Global Nodes | 0/2 | Complete    | 2026-04-14 |
 | 5. Global Filter Panel | 1/1 | Complete   | 2026-04-14 |
 | 6. Placement Autocomplete | 0/1 | Not started | - |
-| 7. Placement-Centric Filter | 0/? | Not started | - |
+| 7. Placement-Centric Filter | 1/1 | Complete   | 2026-04-15 |
