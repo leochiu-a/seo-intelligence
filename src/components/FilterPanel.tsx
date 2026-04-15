@@ -1,5 +1,6 @@
 import type { Node } from 'reactflow';
-import type { UrlNodeData } from '../lib/graph-utils';
+import { collectPlacementGroups } from '../lib/graph-utils';
+import type { UrlNodeData, PlacementGroup } from '../lib/graph-utils';
 
 interface FilterPanelProps {
   nodes: Node<UrlNodeData>[];
@@ -9,7 +10,7 @@ interface FilterPanelProps {
 }
 
 export function FilterPanel({ nodes, activeFilters, onToggle, onClear }: FilterPanelProps) {
-  const globalNodes = nodes.filter((n) => n.data.isGlobal === true);
+  const groups: PlacementGroup[] = collectPlacementGroups(nodes);
 
   return (
     <aside
@@ -18,68 +19,50 @@ export function FilterPanel({ nodes, activeFilters, onToggle, onClear }: FilterP
     >
       <div className="px-3 py-2.5 border-b border-border">
         <h2 className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-fg">
-          Global Filters
+          Placement Filters
         </h2>
       </div>
 
-      {globalNodes.length === 0 ? (
-        <p
-          className="px-3 py-4 text-[11px] text-muted-fg text-center"
-          data-testid="filter-empty"
-        >
-          No global nodes
+      {groups.length === 0 ? (
+        <p className="px-3 py-4 text-[11px] text-muted-fg text-center" data-testid="filter-empty">
+          No placement filters
         </p>
       ) : (
         <ul className="flex-1 overflow-y-auto divide-y divide-border">
-          {globalNodes.map((node) => {
-            const nodeKey = `node:${node.id}`;
-            const placements = node.data.placements ?? [];
-
+          {groups.map((group) => {
+            const filterKey = `placement-name:${group.placementName}`;
             return (
-              <li key={node.id} className="py-2 px-3">
-                {/* Global node checkbox */}
+              <li key={group.placementName} className="py-2 px-3">
+                {/* Top-level placement name checkbox */}
                 <div className="flex items-center gap-2">
                   <input
                     type="checkbox"
-                    id={`filter-node-${node.id}`}
-                    checked={activeFilters.has(nodeKey)}
-                    onChange={() => onToggle(nodeKey)}
+                    id={`filter-pname-${group.placementName}`}
+                    checked={activeFilters.has(filterKey)}
+                    onChange={() => onToggle(filterKey)}
                     className="rounded border-border accent-blue-600"
                   />
                   <label
-                    htmlFor={`filter-node-${node.id}`}
-                    className="text-xs text-dark truncate cursor-pointer select-none"
-                    title={node.data.urlTemplate}
+                    htmlFor={`filter-pname-${group.placementName}`}
+                    className="text-xs text-dark truncate cursor-pointer select-none font-medium"
+                    title={group.placementName}
                   >
-                    {node.data.urlTemplate}
+                    {group.placementName}
                   </label>
                 </div>
 
-                {/* Placement sub-checkboxes */}
-                {placements.length > 0 && (
-                  <ul className="mt-1.5 space-y-1 pl-4">
-                    {placements.map((p) => {
-                      const placementKey = `placement:${node.id}:${p.id}`;
-                      return (
-                        <li key={p.id} className="flex items-center gap-2">
-                          <input
-                            type="checkbox"
-                            id={`filter-placement-${node.id}-${p.id}`}
-                            checked={activeFilters.has(placementKey)}
-                            onChange={() => onToggle(placementKey)}
-                            className="rounded border-border accent-blue-600"
-                          />
-                          <label
-                            htmlFor={`filter-placement-${node.id}-${p.id}`}
-                            className="text-[11px] text-muted-fg cursor-pointer select-none"
-                          >
-                            {p.name}
-                          </label>
-                        </li>
-                      );
-                    })}
-                  </ul>
-                )}
+                {/* Sub-items: read-only node URL templates */}
+                <ul className="mt-1.5 space-y-0.5 pl-4">
+                  {group.nodeLabels.map((label, idx) => (
+                    <li
+                      key={group.nodeIds[idx]}
+                      className="text-[11px] text-muted-fg truncate"
+                      title={label}
+                    >
+                      {label}
+                    </li>
+                  ))}
+                </ul>
               </li>
             );
           })}

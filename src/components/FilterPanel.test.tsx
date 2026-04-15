@@ -4,7 +4,12 @@ import { FilterPanel } from './FilterPanel';
 import type { Node } from 'reactflow';
 import type { UrlNodeData } from '../lib/graph-utils';
 
-const makeNode = (id: string, urlTemplate: string, isGlobal?: boolean, placements?: UrlNodeData['placements']): Node<UrlNodeData> => ({
+const makeNode = (
+  id: string,
+  urlTemplate: string,
+  isGlobal?: boolean,
+  placements?: UrlNodeData['placements'],
+): Node<UrlNodeData> => ({
   id,
   type: 'urlNode',
   position: { x: 0, y: 0 },
@@ -18,76 +23,119 @@ const defaultProps = {
   onClear: vi.fn(),
 };
 
-describe('FilterPanel', () => {
-  it('Test 1: renders nothing (empty) when no nodes exist', () => {
+describe('FilterPanel (placement-centric)', () => {
+  it('Test 1: renders "No placement filters" when nodes array is empty', () => {
     render(<FilterPanel {...defaultProps} nodes={[]} />);
     expect(screen.getByTestId('filter-panel')).toBeInTheDocument();
-    expect(screen.getByTestId('filter-empty')).toBeInTheDocument();
+    const empty = screen.getByTestId('filter-empty');
+    expect(empty).toBeInTheDocument();
+    expect(empty).toHaveTextContent('No placement filters');
   });
 
-  it('Test 2: renders a checkbox for each global node showing its urlTemplate', () => {
+  it('Test 2: renders "No placement filters" when global nodes have no placements', () => {
     const nodes = [
-      makeNode('n1', '/header', true),
+      makeNode('n1', '/header', true, []),
       makeNode('n2', '/footer', true),
-      makeNode('n3', '/page', false),
     ];
     render(<FilterPanel {...defaultProps} nodes={nodes} />);
-    expect(screen.getByLabelText('/header')).toBeInTheDocument();
-    expect(screen.getByLabelText('/footer')).toBeInTheDocument();
-    expect(screen.queryByLabelText('/page')).not.toBeInTheDocument();
+    expect(screen.getByTestId('filter-empty')).toHaveTextContent('No placement filters');
   });
 
-  it('Test 3: renders nested checkboxes for each placement under a global node', () => {
+  it('Test 3: renders one top-level checkbox for each unique placement name', () => {
     const nodes = [
       makeNode('n1', '/header', true, [
-        { id: 'p1', name: 'Header Nav', linkCount: 3 },
-        { id: 'p2', name: 'Hero CTA', linkCount: 1 },
+        { id: 'p1', name: 'Header Nav', linkCount: 1 },
+        { id: 'p2', name: 'Footer', linkCount: 1 },
       ]),
     ];
     render(<FilterPanel {...defaultProps} nodes={nodes} />);
     expect(screen.getByLabelText('Header Nav')).toBeInTheDocument();
-    expect(screen.getByLabelText('Hero CTA')).toBeInTheDocument();
+    expect(screen.getByLabelText('Footer')).toBeInTheDocument();
   });
 
-  it('Test 4: clicking a global node checkbox calls onToggle with key "node:{nodeId}"', () => {
-    const onToggle = vi.fn();
-    const nodes = [makeNode('n1', '/header', true)];
-    render(<FilterPanel {...defaultProps} nodes={nodes} onToggle={onToggle} />);
-    fireEvent.click(screen.getByLabelText('/header'));
-    expect(onToggle).toHaveBeenCalledWith('node:n1');
+  it('Test 4: each placement name checkbox shows the placement name as its label', () => {
+    const nodes = [
+      makeNode('n1', '/header', true, [
+        { id: 'p1', name: 'Sidebar', linkCount: 1 },
+      ]),
+    ];
+    render(<FilterPanel {...defaultProps} nodes={nodes} />);
+    expect(screen.getByLabelText('Sidebar')).toBeInTheDocument();
   });
 
-  it('Test 5: clicking a placement checkbox calls onToggle with key "placement:{nodeId}:{placementId}"', () => {
+  it('Test 5: checking a placement name checkbox calls onToggle with key "placement-name:{name}"', () => {
     const onToggle = vi.fn();
     const nodes = [
-      makeNode('n1', '/header', true, [{ id: 'p1', name: 'Header Nav', linkCount: 3 }]),
+      makeNode('n1', '/header', true, [
+        { id: 'p1', name: 'Header Nav', linkCount: 1 },
+      ]),
     ];
     render(<FilterPanel {...defaultProps} nodes={nodes} onToggle={onToggle} />);
     fireEvent.click(screen.getByLabelText('Header Nav'));
-    expect(onToggle).toHaveBeenCalledWith('placement:n1:p1');
+    expect(onToggle).toHaveBeenCalledWith('placement-name:Header Nav');
   });
 
-  it('Test 6: checkboxes reflect checked state from activeFilters Set', () => {
-    const activeFilters = new Set(['node:n1', 'placement:n1:p1']);
+  it('Test 6: sub-items show the urlTemplate of global nodes that carry that placement', () => {
+    const nodes = [
+      makeNode('n1', '/global-header', true, [
+        { id: 'p1', name: 'Header', linkCount: 1 },
+      ]),
+    ];
+    render(<FilterPanel {...defaultProps} nodes={nodes} />);
+    expect(screen.getByText('/global-header')).toBeInTheDocument();
+  });
+
+  it('Test 7: activeFilters controls checked state of top-level placement checkboxes', () => {
+    const activeFilters = new Set(['placement-name:Header Nav']);
     const nodes = [
       makeNode('n1', '/header', true, [
-        { id: 'p1', name: 'Header Nav', linkCount: 3 },
-        { id: 'p2', name: 'Hero CTA', linkCount: 1 },
+        { id: 'p1', name: 'Header Nav', linkCount: 1 },
+        { id: 'p2', name: 'Footer', linkCount: 1 },
       ]),
     ];
     render(<FilterPanel {...defaultProps} nodes={nodes} activeFilters={activeFilters} />);
-    expect(screen.getByLabelText('/header')).toBeChecked();
     expect(screen.getByLabelText('Header Nav')).toBeChecked();
-    expect(screen.getByLabelText('Hero CTA')).not.toBeChecked();
+    expect(screen.getByLabelText('Footer')).not.toBeChecked();
   });
 
-  it('Test 7: shows "No global nodes" message when nodes exist but none are global', () => {
+  it('Test 8: "Clear all" button appears when activeFilters is non-empty and calls onClear when clicked', () => {
+    const onClear = vi.fn();
+    const activeFilters = new Set(['placement-name:Header']);
     const nodes = [
-      makeNode('n1', '/page', false),
-      makeNode('n2', '/category', undefined),
+      makeNode('n1', '/header', true, [
+        { id: 'p1', name: 'Header', linkCount: 1 },
+      ]),
+    ];
+    render(<FilterPanel {...defaultProps} nodes={nodes} activeFilters={activeFilters} onClear={onClear} />);
+    const btn = screen.getByRole('button', { name: /clear all/i });
+    expect(btn).toBeInTheDocument();
+    fireEvent.click(btn);
+    expect(onClear).toHaveBeenCalledTimes(1);
+  });
+
+  it('Test 9: "Clear all" button absent when activeFilters is empty', () => {
+    const nodes = [
+      makeNode('n1', '/header', true, [
+        { id: 'p1', name: 'Header', linkCount: 1 },
+      ]),
+    ];
+    render(<FilterPanel {...defaultProps} nodes={nodes} activeFilters={new Set()} />);
+    expect(screen.queryByRole('button', { name: /clear all/i })).not.toBeInTheDocument();
+  });
+
+  it('Test 10: two global nodes sharing "Header" → one "Header" group with two sub-items', () => {
+    const nodes = [
+      makeNode('n1', '/global-1', true, [
+        { id: 'p1', name: 'Header', linkCount: 1 },
+      ]),
+      makeNode('n2', '/global-2', true, [
+        { id: 'p2', name: 'Header', linkCount: 1 },
+      ]),
     ];
     render(<FilterPanel {...defaultProps} nodes={nodes} />);
-    expect(screen.getByTestId('filter-empty')).toBeInTheDocument();
-    expect(screen.getByTestId('filter-empty')).toHaveTextContent('No global nodes');
+    const checkboxes = screen.getAllByLabelText('Header');
+    expect(checkboxes).toHaveLength(1);
+    expect(screen.getByText('/global-1')).toBeInTheDocument();
+    expect(screen.getByText('/global-2')).toBeInTheDocument();
   });
 });
