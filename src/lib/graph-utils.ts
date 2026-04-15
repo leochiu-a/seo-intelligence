@@ -284,6 +284,20 @@ export function identifyWeakNodes(
   return weak;
 }
 
+/**
+ * Collects unique, non-empty placement names from all global nodes
+ * EXCEPT the node with the given currentNodeId.
+ */
+export function collectPlacementSuggestions(
+  nodes: Node<UrlNodeData>[],
+  currentNodeId: string,
+): string[] {
+  const names = nodes
+    .filter((n) => n.id !== currentNodeId && n.data.isGlobal && n.data.placements?.length)
+    .flatMap((n) => (n.data.placements ?? []).map((p) => p.name).filter(Boolean));
+  return [...new Set(names)];
+}
+
 // ---------------------------------------------------------------------------
 // URL tree hierarchy
 // ---------------------------------------------------------------------------
