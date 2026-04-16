@@ -174,3 +174,93 @@ Plans:
 
 Plans:
 - [ ] TBD (promote with /gsd:review-backlog when ready)
+
+### Phase 999.2: Crawl Depth 指標 + 3-Click 警告 (BACKLOG) — P0
+
+**Goal:** Sidebar 顯示每個節點到 root 節點的最短路徑深度，超過 3 層的節點標示警告
+**Context:** SEO 共識是重要頁面要在 3 次點擊內可達，Google 對深層頁面爬取頻率明顯較低。目前工具只看 PageRank 分數，但高分卻深層的頁面照樣爬不到。
+**Requirements:** TBD
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (promote with /gsd:review-backlog when ready)
+
+### Phase 999.3: Scenario Diff（Current vs Proposed）(BACKLOG) — P0
+
+**Goal:** 支援 2 份 scenario 並排比對，顯示每個節點的 score delta（+15% / -8%），讓 PM 回答「這次改版比現況好多少」
+**Context:** 這是 pre-deploy simulation 工具的殺手功能，現有 audit 工具做不到。PM 最想回答的問題是改版效果量化。
+**Requirements:** TBD
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (promote with /gsd:review-backlog when ready)
+
+### Phase 999.4: Orphan Node 獨立警示（inbound=0）(BACKLOG) — P0
+
+**Goal:** 區分「score 低（weak）」和「完全沒有 inbound（orphan）」兩種 case，orphan 獨立警示
+**Context:** `identifyWeakNodes` 用 mean - stddev 但沒區分兩者。完全沒有 inbound 的頁面 Google 根本爬不到，比 weak node 嚴重得多。
+**Requirements:** TBD
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (promote with /gsd:review-backlog when ready)
+
+### Phase 999.5: Topical Cluster Tags + 同 Cluster Edge 加權 (BACKLOG) — P1
+
+**Goal:** 節點可打 tag/cluster，同 cluster 內的邊有 bonus weight，視覺上同 cluster 上色
+**Context:** Google 非常看重 topical authority，同主題頁面互連的權重遠高於跨主題。目前 PageRank 是 topology-agnostic 的，`/food/ramen` → `/food/sushi` 和 `/food/ramen` → `/hotel/taipei` 在模型裡權重一樣，但 SEO 效果完全不同。
+**Requirements:** TBD
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (promote with /gsd:review-backlog when ready)
+
+### Phase 999.6: Anchor Text Type on Edge (BACKLOG) — P1
+
+**Goal:** Edge 上可標 anchor text type（exact match / partial match / branded / generic），顯示節點的 inbound anchor 多樣性
+**Context:** Anchor text 是內部連結 SEO 的第二大變數。相同 link count，anchor 用「首頁」vs「台北一日遊」傳遞的 topical relevance 天差地遠。
+**Requirements:** TBD
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (promote with /gsd:review-backlog when ready)
+
+### Phase 999.7: 匯入 Screaming Frog CSV / GSC Export (BACKLOG) — P1
+
+**Goal:** 支援匯入 Screaming Frog / Sitebulb crawl data 作為 baseline，對比 GSC impressions/clicks，證明模型和真實流量相關
+**Context:** 這是 pre-deploy tool 最根本的信任問題 — PM 看到某頁分數 0.47，那又怎樣？需要和真實數據橋接才敢拿去向老闆提案。
+**Requirements:** TBD
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (promote with /gsd:review-backlog when ready)
+
+### Phase 999.8: Total Outbound Links 警示（>150 紅字）(BACKLOG) — P2
+
+**Goal:** 每個節點顯示 total outbound links 總和，超過 150 條紅字警示
+**Context:** 符合 Shopify / Google 的 per-page link 上限建議。
+**Requirements:** TBD
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (promote with /gsd:review-backlog when ready)
+
+### Phase 999.9: 匯出改版建議清單 (BACKLOG) — P2
+
+**Goal:** 匯出可執行的改版建議（e.g.「`/category/*` 應增加 inbound 3 條」），讓 PM 直接丟給工程 ticket
+**Context:** 目前只能匯出原始數據，缺乏 actionable insights 的格式化輸出。
+**Requirements:** TBD
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (promote with /gsd:review-backlog when ready)
+
+### Phase 999.10: 多人協作 / 雲端存檔 (BACKLOG) — P3
+
+**Goal:** 支援多人協作和雲端存檔，讓團隊共用 scenario
+**Context:** 目前 MVP 不需要，但從 PM 工具角度遲早要。
+**Requirements:** TBD
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (promote with /gsd:review-backlog when ready)
