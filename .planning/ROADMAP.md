@@ -180,15 +180,19 @@ Plans:
 **UI hint**: yes
 
 ### Phase 9: Scenario Comparison
-**Goal**: Users can maintain multiple named graph scenarios, switch between them independently, and view a side-by-side score delta to quantify the SEO impact of proposed changes
+**Goal**: Users can create, switch, and manage multiple named graph scenarios with independent state and localStorage persistence (SCENE-01, SCENE-02, SCENE-03). Side-by-side score delta comparison (SCENE-04, SCENE-05) deferred per D-06.
 **Depends on**: Phase 8
 **Requirements**: SCENE-01, SCENE-02, SCENE-03, SCENE-04, SCENE-05
 **Success Criteria** (what must be TRUE):
   1. User can create a new named scenario (e.g. "Current", "Proposal A") and switch between them; each scenario has its own fully independent graph state
   2. Scenarios persist in localStorage so switching tabs or refreshing does not lose work
-  3. User can open a side-by-side comparison view showing two scenarios simultaneously with each node's score delta (e.g. +15%, -8%) displayed
-  4. Score delta display uses green for improvements and red for regressions, making the impact immediately readable
-**Plans**: TBD
+  3. User can open a side-by-side comparison view showing two scenarios simultaneously with each node's score delta (e.g. +15%, -8%) displayed — DEFERRED
+  4. Score delta display uses green for improvements and red for regressions, making the impact immediately readable — DEFERRED
+**Plans**: 2 plans
+
+Plans:
+- [ ] 09-01-PLAN.md — TDD: useScenarios hook with scenario types, CRUD, switch, localStorage persistence, auto-migration
+- [ ] 09-02-PLAN.md — ScenarioTabBar component + App.tsx wiring (replace single-graph with multi-scenario)
 **UI hint**: yes
 
 ### Phase 10: Outbound Link Warning
@@ -217,7 +221,7 @@ Plans:
 | 6. Placement Autocomplete | 0/1 | Not started | - |
 | 7. Placement-Centric Filter | 1/1 | Complete   | 2026-04-15 |
 | 8. Crawl Depth & Orphan Detection | 2/2 | Complete   | 2026-04-16 |
-| 9. Scenario Comparison | 0/? | Not started | - |
+| 9. Scenario Comparison | 0/2 | Not started | - |
 | 10. Outbound Link Warning | 0/? | Not started | - |
 
 ## Backlog
