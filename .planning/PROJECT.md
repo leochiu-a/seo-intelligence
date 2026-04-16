@@ -35,12 +35,12 @@ Let PMs visually plan and simulate internal link structures — and immediately 
 - [x] Placement autocomplete in edit popover — Validated in Phase 6: Placement Autocomplete
 - [x] Placement-centric global filter — Validated in Phase 7: Placement-Centric Filter
 - [x] Filter panel groups by unique placement name — Validated in Phase 7: Placement-Centric Filter
+- [x] Sidebar displays crawl depth (shortest path from root) per node, with >3 click warning — Validated in Phase 8: Crawl Depth & Orphan Detection
+- [x] Orphan nodes (inbound=0) get dedicated alert distinct from weak nodes — Validated in Phase 8: Crawl Depth & Orphan Detection
 
 ### Active
 
-- [ ] Sidebar displays crawl depth (shortest path from root) per node, with >3 click warning
 - [ ] Scenario diff: create/compare two named scenarios with per-node score deltas
-- [ ] Orphan nodes (inbound=0) get dedicated alert distinct from weak nodes
 - [ ] Nodes with >150 total outbound links flagged with warning
 
 ### Out of Scope
@@ -89,4 +89,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-16 — Milestone v2.0 SEO Analysis Depth started*
+*Last updated: 2026-04-16 — Phase 8 complete: crawl depth + orphan detection*
