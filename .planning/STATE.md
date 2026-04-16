@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: MVP
 status: Not started
-stopped_at: Phase 8 context gathered
-last_updated: "2026-04-16T13:04:23.614Z"
+stopped_at: Completed 08-crawl-depth-orphan-detection-01-PLAN.md
+last_updated: "2026-04-16T13:20:14.715Z"
 last_activity: 2026-04-16 — v2.0 roadmap created (Phases 8-10)
 progress:
-  total_phases: 8
+  total_phases: 21
   completed_phases: 7
   total_plans: 12
-  completed_plans: 13
+  completed_plans: 14
   percent: 0
 ---
 
@@ -62,6 +62,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 05-global-filter-panel P01 | 2 min | 2 tasks | 4 files |
 | Phase 06-placement-autocomplete P01 | 8 | 2 tasks | 6 files |
 | Phase 07-placement-centric-filter P01 | 5 | 3 tasks | 5 files |
+| Phase 08-crawl-depth-orphan-detection P01 | 5 | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -96,6 +97,8 @@ Recent decisions affecting current work:
 - [Phase 06-placement-autocomplete]: collectPlacementSuggestions extracted as pure function in graph-utils.ts for isolated unit testing
 - [Phase 06-placement-autocomplete]: Conditional rendering: Autocomplete.Root when suggestions available, plain input when empty (PLACE-04)
 - [Phase 07-placement-centric-filter]: placement-name:{name} key format — one checkbox per unique placement name across all global nodes, replacing node:/placement: keys
+- [Phase 08-crawl-depth-orphan-detection]: calculateCrawlDepth and identifyOrphanNodes both apply synthetic global edges from PageRank pattern for consistent BFS behavior
+- [Phase 08-crawl-depth-orphan-detection]: identifyOrphanNodes uses raw inbound counts not BFS reachability — orphan means zero inbound, distinct from unreachable
 
 ### Pending Todos
 
@@ -118,6 +121,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-16T13:04:23.606Z
-Stopped at: Phase 8 context gathered
-Resume file: .planning/phases/08-crawl-depth-orphan-detection/08-CONTEXT.md
+Last session: 2026-04-16T13:20:14.712Z
+Stopped at: Completed 08-crawl-depth-orphan-detection-01-PLAN.md
+Resume file: None

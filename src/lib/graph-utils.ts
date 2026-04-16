@@ -11,6 +11,7 @@ export interface UrlNodeData {
   pageCount: number;
   isGlobal?: boolean;
   placements?: Placement[];
+  isRoot?: boolean;
 }
 
 export interface LinkCountEdgeData {
@@ -321,6 +322,97 @@ export function collectPlacementGroups(nodes: Node<UrlNodeData>[]): PlacementGro
   return Array.from(groups.entries())
     .map(([placementName, { nodeIds, nodeLabels }]) => ({ placementName, nodeIds, nodeLabels }))
     .sort((a, b) => a.placementName.localeCompare(b.placementName));
+}
+
+/**
+ * BFS shortest-path distance from the designated root node to all other nodes.
+ * Follows directed edges (source -> target). Also includes synthetic edges
+ * from every non-global node to every global node (same as PageRank injection).
+ * Returns Map<nodeId, depth>. Root = 0, unreachable = Infinity.
+ * If rootId is null/undefined or not found, returns empty Map.
+ */
+export function calculateCrawlDepth(
+  nodes: Node<UrlNodeData>[],
+  edges: Edge<LinkCountEdgeData>[],
+  rootId: string | null | undefined,
+): Map<string, number> {
+  if (!rootId || nodes.length === 0) return new Map();
+  if (!nodes.some((n) => n.id === rootId)) return new Map();
+
+  // Build adjacency list: sourceId -> Set<targetId>
+  const adj = new Map<string, Set<string>>();
+  for (const n of nodes) adj.set(n.id, new Set());
+
+  for (const e of edges) {
+    adj.get(e.source)?.add(e.target);
+  }
+
+  // Global node synthetic edges: every non-global node -> every global node
+  const globalNodeIds = nodes.filter((n) => n.data.isGlobal).map((n) => n.id);
+  const nonGlobalNodeIds = nodes.filter((n) => !n.data.isGlobal).map((n) => n.id);
+  for (const globalId of globalNodeIds) {
+    for (const srcId of nonGlobalNodeIds) {
+      adj.get(srcId)?.add(globalId);
+    }
+  }
+
+  // BFS
+  const depth = new Map<string, number>();
+  for (const n of nodes) depth.set(n.id, Infinity);
+  depth.set(rootId, 0);
+
+  const queue: string[] = [rootId];
+  while (queue.length > 0) {
+    const current = queue.shift()!;
+    const currentDepth = depth.get(current)!;
+    for (const neighbor of adj.get(current) ?? []) {
+      if (depth.get(neighbor)! > currentDepth + 1) {
+        depth.set(neighbor, currentDepth + 1);
+        queue.push(neighbor);
+      }
+    }
+  }
+
+  return depth;
+}
+
+/**
+ * Identifies orphan nodes: nodes with zero inbound edges (explicit + synthetic global),
+ * excluding the root node.
+ * Returns Set<nodeId> of orphan node IDs.
+ *
+ * Per D-10: Orphan = zero inbound edges, excluding root. Distinct from weak and unreachable.
+ */
+export function identifyOrphanNodes(
+  nodes: Node<UrlNodeData>[],
+  edges: Edge<LinkCountEdgeData>[],
+  rootId: string | null | undefined,
+): Set<string> {
+  if (nodes.length === 0) return new Set();
+
+  // Count inbound edges per node (explicit edges)
+  const inboundCount = new Map<string, number>();
+  for (const n of nodes) inboundCount.set(n.id, 0);
+
+  for (const e of edges) {
+    inboundCount.set(e.target, (inboundCount.get(e.target) ?? 0) + 1);
+  }
+
+  // Global node synthetic inbound: every non-global node links to every global node
+  const globalNodeIds = new Set(nodes.filter((n) => n.data.isGlobal).map((n) => n.id));
+  const nonGlobalCount = nodes.filter((n) => !n.data.isGlobal).length;
+  for (const globalId of globalNodeIds) {
+    inboundCount.set(globalId, (inboundCount.get(globalId) ?? 0) + nonGlobalCount);
+  }
+
+  const orphans = new Set<string>();
+  for (const [id, count] of inboundCount) {
+    if (count === 0 && id !== rootId) {
+      orphans.add(id);
+    }
+  }
+
+  return orphans;
 }
 
 /**

@@ -16,6 +16,8 @@ import {
   getClosestHandleIds,
   collectPlacementSuggestions,
   collectPlacementGroups,
+  calculateCrawlDepth,
+  identifyOrphanNodes,
 } from './graph-utils';
 import type { UrlNodeData, LinkCountEdgeData, Placement } from './graph-utils';
 
@@ -787,6 +789,104 @@ describe('collectPlacementSuggestions', () => {
   });
 });
 
+describe('calculateCrawlDepth', () => {
+  it('returns empty Map for empty nodes', () => {
+    const result = calculateCrawlDepth([], [], 'a');
+    expect(result.size).toBe(0);
+  });
+
+  it('returns empty Map when rootId is null', () => {
+    const nodes = [makeNode('a', 1)];
+    const result = calculateCrawlDepth(nodes, [], null);
+    expect(result.size).toBe(0);
+  });
+
+  it('returns empty Map when rootId is undefined', () => {
+    const nodes = [makeNode('a', 1)];
+    const result = calculateCrawlDepth(nodes, [], undefined);
+    expect(result.size).toBe(0);
+  });
+
+  it('returns empty Map when rootId is not found in nodes', () => {
+    const nodes = [makeNode('a', 1)];
+    const result = calculateCrawlDepth(nodes, [], 'nonexistent');
+    expect(result.size).toBe(0);
+  });
+
+  it('single root node returns Map with root depth 0', () => {
+    const nodes = [makeNode('a', 1)];
+    const result = calculateCrawlDepth(nodes, [], 'a');
+    expect(result.get('a')).toBe(0);
+  });
+
+  it('linear chain A->B->C returns depths {A:0, B:1, C:2}', () => {
+    const nodes = [makeNode('a', 1), makeNode('b', 1), makeNode('c', 1)];
+    const edges = [
+      makeEdge('e1', 'a', 'b', 1),
+      makeEdge('e2', 'b', 'c', 1),
+    ];
+    const result = calculateCrawlDepth(nodes, edges, 'a');
+    expect(result.get('a')).toBe(0);
+    expect(result.get('b')).toBe(1);
+    expect(result.get('c')).toBe(2);
+  });
+
+  it('branching A->B, A->C returns depths {A:0, B:1, C:1}', () => {
+    const nodes = [makeNode('a', 1), makeNode('b', 1), makeNode('c', 1)];
+    const edges = [
+      makeEdge('e1', 'a', 'b', 1),
+      makeEdge('e2', 'a', 'c', 1),
+    ];
+    const result = calculateCrawlDepth(nodes, edges, 'a');
+    expect(result.get('a')).toBe(0);
+    expect(result.get('b')).toBe(1);
+    expect(result.get('c')).toBe(1);
+  });
+
+  it('unreachable node D returns Infinity depth', () => {
+    const nodes = [makeNode('a', 1), makeNode('b', 1), makeNode('d', 1)];
+    const edges = [makeEdge('e1', 'a', 'b', 1)];
+    const result = calculateCrawlDepth(nodes, edges, 'a');
+    expect(result.get('a')).toBe(0);
+    expect(result.get('b')).toBe(1);
+    expect(result.get('d')).toBe(Infinity);
+  });
+
+  it('diamond A->B, A->C, B->D, C->D returns D at depth 2 (shortest path)', () => {
+    const nodes = [makeNode('a', 1), makeNode('b', 1), makeNode('c', 1), makeNode('d', 1)];
+    const edges = [
+      makeEdge('e1', 'a', 'b', 1),
+      makeEdge('e2', 'a', 'c', 1),
+      makeEdge('e3', 'b', 'd', 1),
+      makeEdge('e4', 'c', 'd', 1),
+    ];
+    const result = calculateCrawlDepth(nodes, edges, 'a');
+    expect(result.get('d')).toBe(2);
+  });
+
+  it('follows edge direction only: A->B does NOT make B reachable to A (one-way)', () => {
+    const nodes = [makeNode('a', 1), makeNode('b', 1)];
+    const edges = [makeEdge('e1', 'a', 'b', 1)];
+    const resultFromA = calculateCrawlDepth(nodes, edges, 'a');
+    const resultFromB = calculateCrawlDepth(nodes, edges, 'b');
+    // From A: B is reachable at depth 1
+    expect(resultFromA.get('b')).toBe(1);
+    // From B: A is NOT reachable (Infinity)
+    expect(resultFromB.get('a')).toBe(Infinity);
+  });
+
+  it('global node G with placements — non-global root A reaches G via synthetic edge at depth 1', () => {
+    const placements: Placement[] = [{ id: 'p1', name: 'Header', linkCount: 2 }];
+    const nodes = [
+      makeNode('a', 1),
+      makeNode('g', 1, { isGlobal: true, placements }),
+    ];
+    const result = calculateCrawlDepth(nodes, [], 'a');
+    expect(result.get('a')).toBe(0);
+    expect(result.get('g')).toBe(1);
+  });
+});
+
 describe('collectPlacementGroups', () => {
   it('returns [] when no nodes are global', () => {
     const nodes: Node<UrlNodeData>[] = [
@@ -881,5 +981,71 @@ describe('collectPlacementGroups', () => {
     expect(result).toHaveLength(1);
     expect(result[0].nodeIds).toEqual(['node-1', 'node-2']);
     expect(result[0].nodeLabels).toEqual(['/node-1', '/node-2']);
+  });
+});
+
+describe('identifyOrphanNodes', () => {
+  it('returns empty Set for empty nodes', () => {
+    const result = identifyOrphanNodes([], [], 'a');
+    expect(result.size).toBe(0);
+  });
+
+  it('single node with no edges and no root returns Set with that nodeId', () => {
+    const nodes = [makeNode('a', 1)];
+    const result = identifyOrphanNodes(nodes, [], null);
+    expect(result.has('a')).toBe(true);
+  });
+
+  it('single node that IS root returns empty Set (root excluded)', () => {
+    const nodes = [makeNode('a', 1)];
+    const result = identifyOrphanNodes(nodes, [], 'a');
+    expect(result.size).toBe(0);
+  });
+
+  it('A->B with A=root returns empty Set (B has inbound from A)', () => {
+    const nodes = [makeNode('a', 1), makeNode('b', 1)];
+    const edges = [makeEdge('e1', 'a', 'b', 1)];
+    const result = identifyOrphanNodes(nodes, edges, 'a');
+    expect(result.size).toBe(0);
+  });
+
+  it('A->B, C isolated, A=root returns Set { C }', () => {
+    const nodes = [makeNode('a', 1), makeNode('b', 1), makeNode('c', 1)];
+    const edges = [makeEdge('e1', 'a', 'b', 1)];
+    const result = identifyOrphanNodes(nodes, edges, 'a');
+    expect(result.has('c')).toBe(true);
+    expect(result.has('a')).toBe(false);
+    expect(result.has('b')).toBe(false);
+  });
+
+  it('global node G with non-global root A — G has synthetic inbound from A, so G is NOT orphan', () => {
+    const placements: Placement[] = [{ id: 'p1', name: 'Header', linkCount: 2 }];
+    const nodes = [
+      makeNode('a', 1),
+      makeNode('g', 1, { isGlobal: true, placements }),
+    ];
+    const result = identifyOrphanNodes(nodes, [], 'a');
+    expect(result.has('g')).toBe(false);
+  });
+
+  it('node with explicit inbound edge is not orphan even if not reachable from root', () => {
+    // D->E, no path from root A; but E has inbound from D so E is not orphan
+    const nodes = [makeNode('a', 1), makeNode('d', 1), makeNode('e', 1)];
+    const edges = [makeEdge('e1', 'd', 'e', 1)];
+    const result = identifyOrphanNodes(nodes, edges, 'a');
+    // D has zero inbound -> D is orphan (not root)
+    expect(result.has('d')).toBe(true);
+    // E has inbound from D -> E is not orphan
+    expect(result.has('e')).toBe(false);
+  });
+
+  it('A->B, B->A — neither is orphan (both have inbound); root=A', () => {
+    const nodes = [makeNode('a', 1), makeNode('b', 1)];
+    const edges = [
+      makeEdge('e1', 'a', 'b', 1),
+      makeEdge('e2', 'b', 'a', 1),
+    ];
+    const result = identifyOrphanNodes(nodes, edges, 'a');
+    expect(result.size).toBe(0);
   });
 });
