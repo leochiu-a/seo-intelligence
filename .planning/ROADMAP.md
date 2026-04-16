@@ -163,3 +163,14 @@ Plans:
 | 5. Global Filter Panel | 1/1 | Complete   | 2026-04-14 |
 | 6. Placement Autocomplete | 0/1 | Not started | - |
 | 7. Placement-Centric Filter | 1/1 | Complete   | 2026-04-15 |
+
+## Backlog
+
+### Phase 999.1: 之後要怎麼找到 (BACKLOG)
+
+**Goal:** [Captured for future planning]
+**Requirements:** TBD
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (promote with /gsd:review-backlog when ready)
