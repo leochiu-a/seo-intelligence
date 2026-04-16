@@ -983,3 +983,69 @@ describe('collectPlacementGroups', () => {
     expect(result[0].nodeLabels).toEqual(['/node-1', '/node-2']);
   });
 });
+
+describe('identifyOrphanNodes', () => {
+  it('returns empty Set for empty nodes', () => {
+    const result = identifyOrphanNodes([], [], 'a');
+    expect(result.size).toBe(0);
+  });
+
+  it('single node with no edges and no root returns Set with that nodeId', () => {
+    const nodes = [makeNode('a', 1)];
+    const result = identifyOrphanNodes(nodes, [], null);
+    expect(result.has('a')).toBe(true);
+  });
+
+  it('single node that IS root returns empty Set (root excluded)', () => {
+    const nodes = [makeNode('a', 1)];
+    const result = identifyOrphanNodes(nodes, [], 'a');
+    expect(result.size).toBe(0);
+  });
+
+  it('A->B with A=root returns empty Set (B has inbound from A)', () => {
+    const nodes = [makeNode('a', 1), makeNode('b', 1)];
+    const edges = [makeEdge('e1', 'a', 'b', 1)];
+    const result = identifyOrphanNodes(nodes, edges, 'a');
+    expect(result.size).toBe(0);
+  });
+
+  it('A->B, C isolated, A=root returns Set { C }', () => {
+    const nodes = [makeNode('a', 1), makeNode('b', 1), makeNode('c', 1)];
+    const edges = [makeEdge('e1', 'a', 'b', 1)];
+    const result = identifyOrphanNodes(nodes, edges, 'a');
+    expect(result.has('c')).toBe(true);
+    expect(result.has('a')).toBe(false);
+    expect(result.has('b')).toBe(false);
+  });
+
+  it('global node G with non-global root A — G has synthetic inbound from A, so G is NOT orphan', () => {
+    const placements: Placement[] = [{ id: 'p1', name: 'Header', linkCount: 2 }];
+    const nodes = [
+      makeNode('a', 1),
+      makeNode('g', 1, { isGlobal: true, placements }),
+    ];
+    const result = identifyOrphanNodes(nodes, [], 'a');
+    expect(result.has('g')).toBe(false);
+  });
+
+  it('node with explicit inbound edge is not orphan even if not reachable from root', () => {
+    // D->E, no path from root A; but E has inbound from D so E is not orphan
+    const nodes = [makeNode('a', 1), makeNode('d', 1), makeNode('e', 1)];
+    const edges = [makeEdge('e1', 'd', 'e', 1)];
+    const result = identifyOrphanNodes(nodes, edges, 'a');
+    // D has zero inbound -> D is orphan (not root)
+    expect(result.has('d')).toBe(true);
+    // E has inbound from D -> E is not orphan
+    expect(result.has('e')).toBe(false);
+  });
+
+  it('A->B, B->A — neither is orphan (both have inbound); root=A', () => {
+    const nodes = [makeNode('a', 1), makeNode('b', 1)];
+    const edges = [
+      makeEdge('e1', 'a', 'b', 1),
+      makeEdge('e2', 'b', 'a', 1),
+    ];
+    const result = identifyOrphanNodes(nodes, edges, 'a');
+    expect(result.size).toBe(0);
+  });
+});
