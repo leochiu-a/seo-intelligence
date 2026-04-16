@@ -26,7 +26,7 @@ Four phases deliver a browser-based visual tool for modeling internal link struc
 
 ## v2.0 SEO Analysis Depth — Phases 8-10
 
-- [ ] **Phase 8: Crawl Depth & Orphan Detection** - BFS-based crawl depth from root node with depth warnings, plus dedicated orphan node alerts distinct from weak-node indicators
+- [x] **Phase 8: Crawl Depth & Orphan Detection** - BFS-based crawl depth from root node with depth warnings, plus dedicated orphan node alerts distinct from weak-node indicators (completed 2026-04-16)
 - [ ] **Phase 9: Scenario Comparison** - Multi-scenario management with independent graph state, localStorage persistence, and side-by-side score delta diff
 - [ ] **Phase 10: Outbound Link Warning** - Per-node total outbound link calculation with threshold warning at >150 links on canvas and sidebar
 
@@ -175,8 +175,8 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 08-01-PLAN.md — TDD: calculateCrawlDepth (BFS) + identifyOrphanNodes pure functions + isRoot on UrlNodeData
-- [ ] 08-02-PLAN.md — Root toggle in EditPopover, depth/orphan indicators in UrlNode, sidebar sections, App.tsx wiring + localStorage
+- [x] 08-01-PLAN.md — TDD: calculateCrawlDepth (BFS) + identifyOrphanNodes pure functions + isRoot on UrlNodeData
+- [x] 08-02-PLAN.md — Root toggle in EditPopover, depth/orphan indicators in UrlNode, sidebar sections, App.tsx wiring + localStorage
 **UI hint**: yes
 
 ### Phase 9: Scenario Comparison
@@ -216,7 +216,7 @@ Plans:
 | 5. Global Filter Panel | 1/1 | Complete   | 2026-04-14 |
 | 6. Placement Autocomplete | 0/1 | Not started | - |
 | 7. Placement-Centric Filter | 1/1 | Complete   | 2026-04-15 |
-| 8. Crawl Depth & Orphan Detection | 0/2 | Not started | - |
+| 8. Crawl Depth & Orphan Detection | 2/2 | Complete   | 2026-04-16 |
 | 9. Scenario Comparison | 0/? | Not started | - |
 | 10. Outbound Link Warning | 0/? | Not started | - |
 
@@ -226,7 +226,7 @@ Plans:
 
 **Goal:** [Captured for future planning]
 **Requirements:** TBD
-**Plans:** 0 plans
+**Plans:** 2/2 plans complete
 
 Plans:
 - [ ] TBD (promote with /gsd:review-backlog when ready)

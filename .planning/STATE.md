@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: MVP
 status: Not started
-stopped_at: Completed 08-crawl-depth-orphan-detection-01-PLAN.md
-last_updated: "2026-04-16T13:20:14.715Z"
+stopped_at: Completed 08-crawl-depth-orphan-detection Plan 02
+last_updated: "2026-04-16T13:27:12.760Z"
 last_activity: 2026-04-16 — v2.0 roadmap created (Phases 8-10)
 progress:
   total_phases: 21
-  completed_phases: 7
-  total_plans: 12
-  completed_plans: 14
+  completed_phases: 8
+  total_plans: 14
+  completed_plans: 15
   percent: 0
 ---
 
@@ -63,6 +63,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 06-placement-autocomplete P01 | 8 | 2 tasks | 6 files |
 | Phase 07-placement-centric-filter P01 | 5 | 3 tasks | 5 files |
 | Phase 08-crawl-depth-orphan-detection P01 | 5 | 2 tasks | 2 files |
+| Phase 08-crawl-depth-orphan-detection P02 | 12 | 3 tasks | 7 files |
 
 ## Accumulated Context
 
@@ -99,6 +100,8 @@ Recent decisions affecting current work:
 - [Phase 07-placement-centric-filter]: placement-name:{name} key format — one checkbox per unique placement name across all global nodes, replacing node:/placement: keys
 - [Phase 08-crawl-depth-orphan-detection]: calculateCrawlDepth and identifyOrphanNodes both apply synthetic global edges from PageRank pattern for consistent BFS behavior
 - [Phase 08-crawl-depth-orphan-detection]: identifyOrphanNodes uses raw inbound counts not BFS reachability — orphan means zero inbound, distinct from unreachable
+- [Phase 08-crawl-depth-orphan-detection]: Root toggle uses separate onRootToggle callback (not onSave) so exclusive-root logic runs immediately in App.tsx
+- [Phase 08-crawl-depth-orphan-detection]: unreachableNodes derived from depthMap Infinity entries — keeps orphan (zero inbound) and unreachable (no path from root) concepts distinct
 
 ### Pending Todos
 
@@ -121,6 +124,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-16T13:20:14.712Z
-Stopped at: Completed 08-crawl-depth-orphan-detection-01-PLAN.md
+Last session: 2026-04-16T13:27:12.757Z
+Stopped at: Completed 08-crawl-depth-orphan-detection Plan 02
 Resume file: None
