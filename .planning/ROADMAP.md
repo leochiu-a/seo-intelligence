@@ -192,7 +192,7 @@ Plans:
 
 Plans:
 - [x] 09-01-PLAN.md — TDD: useScenarios hook with scenario types, CRUD, switch, localStorage persistence, auto-migration
-- [ ] 09-02-PLAN.md — ScenarioTabBar component + App.tsx wiring (replace single-graph with multi-scenario)
+- [x] 09-02-PLAN.md — ScenarioTabBar component + App.tsx wiring (replace single-graph with multi-scenario)
 **UI hint**: yes
 
 ### Phase 10: Outbound Link Warning

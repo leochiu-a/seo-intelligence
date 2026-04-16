@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: MVP
-status: executing
-stopped_at: Completed 09-scenario-comparison 09-01-PLAN.md
-last_updated: "2026-04-16T14:22:50.108Z"
+status: verifying
+stopped_at: Completed 09-scenario-comparison 09-02-PLAN.md
+last_updated: "2026-04-16T14:33:39.203Z"
 last_activity: 2026-04-16
 progress:
   total_phases: 21
-  completed_phases: 8
+  completed_phases: 9
   total_plans: 16
-  completed_plans: 16
+  completed_plans: 17
   percent: 0
 ---
 
@@ -27,7 +27,7 @@ See: .planning/PROJECT.md (updated 2026-04-16)
 
 Phase: 09 (scenario-comparison) — EXECUTING
 Plan: 2 of 2
-Status: Ready to execute
+Status: Phase complete — ready for verification
 Last activity: 2026-04-16
 
 Progress: [░░░░░░░░░░] 0%
@@ -65,6 +65,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 08-crawl-depth-orphan-detection P01 | 5 | 2 tasks | 2 files |
 | Phase 08-crawl-depth-orphan-detection P02 | 12 | 3 tasks | 7 files |
 | Phase 09-scenario-comparison P01 | 8 | 1 tasks | 3 files |
+| Phase 09-scenario-comparison P02 | 9 | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -106,6 +107,8 @@ Recent decisions affecting current work:
 - [Phase 09-scenario-comparison]: loadOrMigrate exported as named pure function for direct unit testing without React harness
 - [Phase 09-scenario-comparison]: useScenarios hook is pure data layer — never calls setNodes/setEdges, App.tsx handles graph restoration
 - [Phase 09-scenario-comparison]: structuredClone used for scenario clone mode — no shared references, faster than JSON round-trip
+- [Phase 09-scenario-comparison]: wireCallbacks helper extracted inline in AppInner to centralize node/edge runtime callback re-attachment across restore, switch, create, delete paths
+- [Phase 09-scenario-comparison]: App.test.tsx migration test made StrictMode-safe: asserts old key deleted and new key present without checking scenario name due to double useState initialization
 
 ### Pending Todos
 
@@ -128,6 +131,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-16T14:22:50.103Z
-Stopped at: Completed 09-scenario-comparison 09-01-PLAN.md
+Last session: 2026-04-16T14:33:39.200Z
+Stopped at: Completed 09-scenario-comparison 09-02-PLAN.md
 Resume file: None
