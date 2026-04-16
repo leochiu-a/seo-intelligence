@@ -9,6 +9,7 @@ Four phases deliver a browser-based visual tool for modeling internal link struc
 - 🚧 **v1.0 MVP** - Phases 0-3 (in progress)
 - 📋 **v1.1 Global Navigation** - Phases 4-5 (planned)
 - 📋 **v1.1 UX Polish** - Phases 6-7 (planned)
+- 📋 **v2.0 SEO Analysis Depth** - Phases 8-10 (planned)
 
 ## Phases
 
@@ -20,6 +21,14 @@ Four phases deliver a browser-based visual tool for modeling internal link struc
 - [ ] **Phase 5: Global Filter Panel** - Filter panel with placement checkboxes and canvas dimming
 - [ ] **Phase 6: Placement Autocomplete** - Typing a placement name in the edit popover shows suggestions from existing placement names across all other global nodes
 - [x] **Phase 7: Placement-Centric Filter** - Filter panel redesigned to group by unique placement name so checking "Header" highlights every global node that carries a Header placement (completed 2026-04-15)
+
+---
+
+## v2.0 SEO Analysis Depth — Phases 8-10
+
+- [ ] **Phase 8: Crawl Depth & Orphan Detection** - BFS-based crawl depth from root node with depth warnings, plus dedicated orphan node alerts distinct from weak-node indicators
+- [ ] **Phase 9: Scenario Comparison** - Multi-scenario management with independent graph state, localStorage persistence, and side-by-side score delta diff
+- [ ] **Phase 10: Outbound Link Warning** - Per-node total outbound link calculation with threshold warning at >150 links on canvas and sidebar
 
 ## Phase Details
 
@@ -149,9 +158,49 @@ Plans:
 
 **UI hint**: yes
 
+---
+
+## v2.0 Phase Details
+
+### Phase 8: Crawl Depth & Orphan Detection
+**Goal**: Users can see how many clicks separate each page from the root, with clear warnings for deep or unreachable pages, and a distinct alert for orphan nodes that have no inbound links at all
+**Depends on**: Phase 7
+**Requirements**: DEPTH-01, DEPTH-02, DEPTH-03, DEPTH-04, DEPTH-05, ORPHAN-01, ORPHAN-02, ORPHAN-03
+**Success Criteria** (what must be TRUE):
+  1. User can designate any node as the root (homepage) via the edit popover; root designation persists across sessions
+  2. Sidebar displays a crawl depth number next to each node's score, calculated as the shortest BFS path from root
+  3. Nodes more than 3 clicks from root show a depth warning indicator in both the sidebar and on the canvas node
+  4. Nodes with no path from root are flagged as "unreachable" with a distinct alert separate from the depth warning
+  5. Orphan nodes (zero inbound edges, excluding root) display a dedicated orphan warning icon that is visually distinct from the weak-node indicator, and are grouped above weak nodes in the sidebar
+**Plans**: TBD
+**UI hint**: yes
+
+### Phase 9: Scenario Comparison
+**Goal**: Users can maintain multiple named graph scenarios, switch between them independently, and view a side-by-side score delta to quantify the SEO impact of proposed changes
+**Depends on**: Phase 8
+**Requirements**: SCENE-01, SCENE-02, SCENE-03, SCENE-04, SCENE-05
+**Success Criteria** (what must be TRUE):
+  1. User can create a new named scenario (e.g. "Current", "Proposal A") and switch between them; each scenario has its own fully independent graph state
+  2. Scenarios persist in localStorage so switching tabs or refreshing does not lose work
+  3. User can open a side-by-side comparison view showing two scenarios simultaneously with each node's score delta (e.g. +15%, -8%) displayed
+  4. Score delta display uses green for improvements and red for regressions, making the impact immediately readable
+**Plans**: TBD
+**UI hint**: yes
+
+### Phase 10: Outbound Link Warning
+**Goal**: Users are warned when any node carries more outbound links than the recommended SEO threshold, so over-linked pages can be identified and corrected before deployment
+**Depends on**: Phase 9
+**Requirements**: OUTBOUND-01, OUTBOUND-02, OUTBOUND-03
+**Success Criteria** (what must be TRUE):
+  1. System calculates total outbound links per node, combining explicit edges and global placement contributions
+  2. Nodes exceeding 150 total outbound links display a red warning indicator directly on the canvas node
+  3. Sidebar shows the outbound link count for each node and highlights the count in red when it exceeds the threshold
+**Plans**: TBD
+**UI hint**: yes
+
 ## Progress
 
-**Execution Order:** 0 -> 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7
+**Execution Order:** 0 -> 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9 -> 10
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
@@ -163,6 +212,9 @@ Plans:
 | 5. Global Filter Panel | 1/1 | Complete   | 2026-04-14 |
 | 6. Placement Autocomplete | 0/1 | Not started | - |
 | 7. Placement-Centric Filter | 1/1 | Complete   | 2026-04-15 |
+| 8. Crawl Depth & Orphan Detection | 0/? | Not started | - |
+| 9. Scenario Comparison | 0/? | Not started | - |
+| 10. Outbound Link Warning | 0/? | Not started | - |
 
 ## Backlog
 

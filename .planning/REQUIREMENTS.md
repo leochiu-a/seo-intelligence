@@ -149,6 +149,10 @@
 | FILTER-01 ~ FILTER-04 | Phase 5 | Pending |
 | PLACE-01 ~ PLACE-04 | Phase 6 | Pending |
 | PFILTER-01 ~ PFILTER-04 | Phase 7 | Pending |
+| DEPTH-01 ~ DEPTH-05 | Phase 8 | Pending |
+| ORPHAN-01 ~ ORPHAN-03 | Phase 8 | Pending |
+| SCENE-01 ~ SCENE-05 | Phase 9 | Pending |
+| OUTBOUND-01 ~ OUTBOUND-03 | Phase 10 | Pending |
 
 **Coverage:**
 - v1 requirements: 31 total
@@ -158,9 +162,9 @@
 - Mapped to phases: 8
 - Unmapped: 0 ✓
 - v2.0 requirements: 16 total
-- Mapped to phases: 0
-- Unmapped: 16 ⚠️ (pending roadmap)
+- Mapped to phases: 16
+- Unmapped: 0 ✓
 
 ---
 *Requirements defined: 2026-04-13*
-*Last updated: 2026-04-16 — v2.0 requirements defined for SEO Analysis Depth milestone*
+*Last updated: 2026-04-16 — v2.0 requirements mapped to Phases 8-10*
