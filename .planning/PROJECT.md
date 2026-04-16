@@ -8,13 +8,15 @@ A visual SEO internal link planning tool for PMs and SEO engineers to model and 
 
 Let PMs visually plan and simulate internal link structures — and immediately see which pages will rank highest — before any code is written or deployed.
 
-## Current Milestone: v1.1 UX Polish
+## Current Milestone: v2.0 SEO Analysis Depth
 
-**Goal:** Improve placement authoring and filter ergonomics for power users managing multi-node global structures
+**Goal:** Close the gap between the tool's topology-only scoring and real SEO analysis by adding crawl depth, orphan detection, outbound limits, and scenario comparison
 
 **Target features:**
-- Placement autocomplete in edit popover — typing a placement name shows suggestions from existing names used across other global nodes; freeform still allowed
-- Placement-centric global filter — filter panel groups by unique placement name; checking "Header" highlights all global nodes that have a Header placement
+- Crawl depth indicator with 3-click warning — sidebar displays shortest path depth from root node, warns when >3
+- Scenario diff (Current vs Proposed) — side-by-side comparison with per-node score deltas
+- Orphan node independent alert — distinguish inbound=0 (orphan) from low-score (weak), with dedicated warning
+- Outbound link limit warning — flag nodes with >150 total outbound links
 
 ## Requirements
 
@@ -30,11 +32,16 @@ Let PMs visually plan and simulate internal link structures — and immediately 
 - [x] Weak/isolated pages automatically flagged — Validated in Phase 2: Scoring & Analysis
 - [x] Export graph data as CSV and JSON — Validated in Phase 3: Scenarios & Export
 - [x] Nodes can be designated as "global" with named placements and per-placement link counts — Validated in Phase 4: Global Nodes
+- [x] Placement autocomplete in edit popover — Validated in Phase 6: Placement Autocomplete
+- [x] Placement-centric global filter — Validated in Phase 7: Placement-Centric Filter
+- [x] Filter panel groups by unique placement name — Validated in Phase 7: Placement-Centric Filter
 
 ### Active
 
-- [ ] Multiple graph scenarios can be created and compared side-by-side
-- [ ] A filter panel lets users highlight global nodes and their placements on the canvas, dimming unrelated nodes
+- [ ] Sidebar displays crawl depth (shortest path from root) per node, with >3 click warning
+- [ ] Scenario diff: create/compare two named scenarios with per-node score deltas
+- [ ] Orphan nodes (inbound=0) get dedicated alert distinct from weak nodes
+- [ ] Nodes with >150 total outbound links flagged with warning
 
 ### Out of Scope
 
@@ -82,4 +89,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-15 — Milestone v1.1 UX Polish started*
+*Last updated: 2026-04-16 — Milestone v2.0 SEO Analysis Depth started*
