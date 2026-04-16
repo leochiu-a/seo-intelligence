@@ -16,6 +16,8 @@ import {
   getClosestHandleIds,
   collectPlacementSuggestions,
   collectPlacementGroups,
+  calculateCrawlDepth,
+  identifyOrphanNodes,
 } from './graph-utils';
 import type { UrlNodeData, LinkCountEdgeData, Placement } from './graph-utils';
 
@@ -784,6 +786,104 @@ describe('collectPlacementSuggestions', () => {
     ];
     const result = collectPlacementSuggestions(nodes, 'node-1');
     expect(result).toEqual([]);
+  });
+});
+
+describe('calculateCrawlDepth', () => {
+  it('returns empty Map for empty nodes', () => {
+    const result = calculateCrawlDepth([], [], 'a');
+    expect(result.size).toBe(0);
+  });
+
+  it('returns empty Map when rootId is null', () => {
+    const nodes = [makeNode('a', 1)];
+    const result = calculateCrawlDepth(nodes, [], null);
+    expect(result.size).toBe(0);
+  });
+
+  it('returns empty Map when rootId is undefined', () => {
+    const nodes = [makeNode('a', 1)];
+    const result = calculateCrawlDepth(nodes, [], undefined);
+    expect(result.size).toBe(0);
+  });
+
+  it('returns empty Map when rootId is not found in nodes', () => {
+    const nodes = [makeNode('a', 1)];
+    const result = calculateCrawlDepth(nodes, [], 'nonexistent');
+    expect(result.size).toBe(0);
+  });
+
+  it('single root node returns Map with root depth 0', () => {
+    const nodes = [makeNode('a', 1)];
+    const result = calculateCrawlDepth(nodes, [], 'a');
+    expect(result.get('a')).toBe(0);
+  });
+
+  it('linear chain A->B->C returns depths {A:0, B:1, C:2}', () => {
+    const nodes = [makeNode('a', 1), makeNode('b', 1), makeNode('c', 1)];
+    const edges = [
+      makeEdge('e1', 'a', 'b', 1),
+      makeEdge('e2', 'b', 'c', 1),
+    ];
+    const result = calculateCrawlDepth(nodes, edges, 'a');
+    expect(result.get('a')).toBe(0);
+    expect(result.get('b')).toBe(1);
+    expect(result.get('c')).toBe(2);
+  });
+
+  it('branching A->B, A->C returns depths {A:0, B:1, C:1}', () => {
+    const nodes = [makeNode('a', 1), makeNode('b', 1), makeNode('c', 1)];
+    const edges = [
+      makeEdge('e1', 'a', 'b', 1),
+      makeEdge('e2', 'a', 'c', 1),
+    ];
+    const result = calculateCrawlDepth(nodes, edges, 'a');
+    expect(result.get('a')).toBe(0);
+    expect(result.get('b')).toBe(1);
+    expect(result.get('c')).toBe(1);
+  });
+
+  it('unreachable node D returns Infinity depth', () => {
+    const nodes = [makeNode('a', 1), makeNode('b', 1), makeNode('d', 1)];
+    const edges = [makeEdge('e1', 'a', 'b', 1)];
+    const result = calculateCrawlDepth(nodes, edges, 'a');
+    expect(result.get('a')).toBe(0);
+    expect(result.get('b')).toBe(1);
+    expect(result.get('d')).toBe(Infinity);
+  });
+
+  it('diamond A->B, A->C, B->D, C->D returns D at depth 2 (shortest path)', () => {
+    const nodes = [makeNode('a', 1), makeNode('b', 1), makeNode('c', 1), makeNode('d', 1)];
+    const edges = [
+      makeEdge('e1', 'a', 'b', 1),
+      makeEdge('e2', 'a', 'c', 1),
+      makeEdge('e3', 'b', 'd', 1),
+      makeEdge('e4', 'c', 'd', 1),
+    ];
+    const result = calculateCrawlDepth(nodes, edges, 'a');
+    expect(result.get('d')).toBe(2);
+  });
+
+  it('follows edge direction only: A->B does NOT make B reachable to A (one-way)', () => {
+    const nodes = [makeNode('a', 1), makeNode('b', 1)];
+    const edges = [makeEdge('e1', 'a', 'b', 1)];
+    const resultFromA = calculateCrawlDepth(nodes, edges, 'a');
+    const resultFromB = calculateCrawlDepth(nodes, edges, 'b');
+    // From A: B is reachable at depth 1
+    expect(resultFromA.get('b')).toBe(1);
+    // From B: A is NOT reachable (Infinity)
+    expect(resultFromB.get('a')).toBe(Infinity);
+  });
+
+  it('global node G with placements — non-global root A reaches G via synthetic edge at depth 1', () => {
+    const placements: Placement[] = [{ id: 'p1', name: 'Header', linkCount: 2 }];
+    const nodes = [
+      makeNode('a', 1),
+      makeNode('g', 1, { isGlobal: true, placements }),
+    ];
+    const result = calculateCrawlDepth(nodes, [], 'a');
+    expect(result.get('a')).toBe(0);
+    expect(result.get('g')).toBe(1);
   });
 });
 
