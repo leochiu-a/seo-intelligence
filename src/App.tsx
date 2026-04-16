@@ -19,10 +19,12 @@ import 'reactflow/dist/style.css';
 import { UrlNode } from './components/UrlNode';
 import { LinkCountEdge } from './components/LinkCountEdge';
 import { Toolbar } from './components/Toolbar';
+import { ScenarioTabBar } from './components/ScenarioTabBar';
 import { ScoreSidebar } from './components/ScoreSidebar';
 import { FilterPanel } from './components/FilterPanel';
 import { ImportDialog } from './components/ImportDialog';
 import { useFilterState } from './hooks/useFilterState';
+import { useScenarios } from './hooks/useScenarios';
 import {
   createDefaultNode,
   updateNodeData,
@@ -56,8 +58,6 @@ interface AppNodeData extends UrlNodeData {
 // Define nodeTypes and edgeTypes outside the component to avoid infinite re-renders (React Flow docs requirement)
 const nodeTypes = { urlNode: UrlNode };
 const edgeTypes = { linkCountEdge: LinkCountEdge };
-
-const STORAGE_KEY = 'seo-planner-graph';
 
 /** Strips runtime-only fields before writing to localStorage */
 function serializeGraph(
@@ -101,6 +101,21 @@ function AppInner() {
   const [showImportDialog, setShowImportDialog] = useState(false);
   // Guard: save effect skips its first invocation (regardless of restore timing), then saves on all subsequent renders
   const isFirstRender = useRef(true);
+  // Guard: suppresses save effect during scenario switch to prevent corrupt writes
+  const isSwitchingRef = useRef(false);
+
+  const {
+    store,
+    createScenario,
+    switchScenario,
+    renameScenario,
+    deleteScenario,
+    persist,
+    updateActiveGraph,
+  } = useScenarios();
+
+  // Derive active scenario from store
+  const activeScenario = store.scenarios.find((s) => s.id === store.activeScenarioId) ?? store.scenarios[0];
 
   const { activeFilters, toggle: toggleFilter, clear: clearFilters } = useFilterState();
 
@@ -165,6 +180,86 @@ function AppInner() {
       setEdges((eds) => updateEdgeLinkCount(eds, edgeId, linkCount));
     },
     [setEdges],
+  );
+
+  // Helper: re-attach runtime callbacks onto serialized nodes/edges from a scenario record
+  const wireCallbacks = useCallback(
+    (
+      serializedNodes: Array<{ id: string; type?: string; position: { x: number; y: number }; data: { urlTemplate: string; pageCount: number; isGlobal?: boolean; placements?: Placement[]; isRoot?: boolean } }>,
+      serializedEdges: Array<{ id: string; source: string; target: string; sourceHandle?: string | null; targetHandle?: string | null; type?: string; markerEnd?: unknown; data: { linkCount: number } }>,
+    ): { wiredNodes: Node<AppNodeData>[]; wiredEdges: Edge[] } => {
+      const wiredNodes: Node<AppNodeData>[] = serializedNodes.map((n) => ({
+        ...n,
+        type: n.type ?? 'urlNode',
+        data: {
+          urlTemplate: n.data.urlTemplate,
+          pageCount: n.data.pageCount,
+          ...(n.data.isGlobal != null && { isGlobal: n.data.isGlobal }),
+          ...(n.data.placements != null && { placements: n.data.placements }),
+          ...(n.data.isRoot != null && { isRoot: n.data.isRoot }),
+          onUpdate: onNodeDataUpdate,
+          onRootToggle,
+          onZIndexChange: onNodeZIndexChange,
+        },
+      }));
+      const wiredEdges: Edge[] = serializedEdges.map((e) => ({
+        id: e.id,
+        source: e.source,
+        target: e.target,
+        ...(e.sourceHandle != null ? { sourceHandle: e.sourceHandle } : {}),
+        ...(e.targetHandle != null ? { targetHandle: e.targetHandle } : {}),
+        type: e.type ?? 'linkCountEdge',
+        markerEnd: (e.markerEnd as import('reactflow').EdgeMarkerType | undefined) ?? { type: MarkerType.ArrowClosed, color: '#9CA3AF' },
+        data: { linkCount: e.data?.linkCount ?? 1, onLinkCountChange: onEdgeLinkCountChange },
+      }));
+      return { wiredNodes, wiredEdges };
+    },
+    [onNodeDataUpdate, onRootToggle, onNodeZIndexChange, onEdgeLinkCountChange],
+  );
+
+  // Scenario switch handler
+  const handleSwitchScenario = useCallback(
+    (targetId: string) => {
+      if (targetId === store.activeScenarioId) return;
+      isSwitchingRef.current = true;
+      const target = switchScenario(targetId, nodes, edges);
+      if (!target) return;
+      const { wiredNodes, wiredEdges } = wireCallbacks(target.nodes, target.edges);
+      setNodes(wiredNodes);
+      setEdges(wiredEdges);
+      persist();
+      requestAnimationFrame(() => { isSwitchingRef.current = false; });
+    },
+    [store.activeScenarioId, nodes, edges, switchScenario, wireCallbacks, setNodes, setEdges, persist],
+  );
+
+  // Scenario create handler
+  const handleCreateScenario = useCallback(
+    (mode: 'blank' | 'clone') => {
+      isSwitchingRef.current = true;
+      const newScenario = createScenario(mode, nodes, edges);
+      const { wiredNodes, wiredEdges } = wireCallbacks(newScenario.nodes, newScenario.edges);
+      setNodes(wiredNodes);
+      setEdges(wiredEdges);
+      persist();
+      requestAnimationFrame(() => { isSwitchingRef.current = false; });
+    },
+    [nodes, edges, createScenario, wireCallbacks, setNodes, setEdges, persist],
+  );
+
+  // Scenario delete handler
+  const handleDeleteScenario = useCallback(
+    (id: string) => {
+      const result = deleteScenario(id);
+      if (!result) return; // only one scenario — D-03
+      isSwitchingRef.current = true;
+      const { wiredNodes, wiredEdges } = wireCallbacks(result.nodes, result.edges);
+      setNodes(wiredNodes);
+      setEdges(wiredEdges);
+      persist();
+      requestAnimationFrame(() => { isSwitchingRef.current = false; });
+    },
+    [deleteScenario, wireCallbacks, setNodes, setEdges, persist],
   );
 
   const handleImportFromDialog = useCallback(
@@ -421,68 +516,41 @@ function AppInner() {
   const handleClearCanvas = useCallback(() => {
     setNodes([]);
     setEdges([]);
-    localStorage.removeItem(STORAGE_KEY);
+    // Save effect will write empty graph to active scenario via updateActiveGraph + persist
   }, [setNodes, setEdges]);
 
-  // Restore graph from localStorage on mount (runs once — empty dep array)
+  // Restore active scenario from useScenarios store on mount (runs once)
   // Must be defined BEFORE the save effect so React processes restore before save.
   useEffect(() => {
-    const saved = localStorage.getItem(STORAGE_KEY);
-    if (!saved) {
-      // No saved graph: empty canvas is already in place via initialNodes/initialEdges
-      return;
-    }
-    try {
-      const parsed = JSON.parse(saved) as {
-        nodes: Array<{ id: string; type?: string; position: { x: number; y: number }; data: { urlTemplate: string; pageCount: number; isGlobal?: boolean; placements?: Placement[]; isRoot?: boolean } }>;
-        edges: Array<{ id: string; source: string; target: string; sourceHandle?: string | null; targetHandle?: string | null; type?: string; markerEnd?: unknown; data: { linkCount: number } }>;
-      };
-      const restoredNodes: Node<AppNodeData>[] = parsed.nodes.map((n) => ({
-        ...n,
-        type: n.type ?? 'urlNode',
-        data: {
-          urlTemplate: n.data.urlTemplate,
-          pageCount: n.data.pageCount,
-          ...(n.data.isGlobal != null && { isGlobal: n.data.isGlobal }),
-          ...(n.data.placements != null && { placements: n.data.placements }),
-          ...(n.data.isRoot != null && { isRoot: n.data.isRoot }),
-          onUpdate: onNodeDataUpdate,
-          onRootToggle,
-          onZIndexChange: onNodeZIndexChange,
-        },
-      }));
-      const restoredEdges: Edge[] = parsed.edges.map((e) => ({
-        id: e.id,
-        source: e.source,
-        target: e.target,
-        ...(e.sourceHandle != null ? { sourceHandle: e.sourceHandle } : {}),
-        ...(e.targetHandle != null ? { targetHandle: e.targetHandle } : {}),
-        type: e.type ?? 'linkCountEdge',
-        markerEnd: (e.markerEnd as import('reactflow').EdgeMarkerType | undefined) ?? { type: MarkerType.ArrowClosed, color: '#9CA3AF' },
-        data: {
-          linkCount: e.data?.linkCount ?? 1,
-          onLinkCountChange: onEdgeLinkCountChange,
-        },
-      }));
-      setNodes(restoredNodes);
-      setEdges(restoredEdges);
-    } catch {
-      // Corrupt data: fall back to empty canvas already in place
-    }
+    if (activeScenario.nodes.length === 0 && activeScenario.edges.length === 0) return;
+    const { wiredNodes, wiredEdges } = wireCallbacks(activeScenario.nodes, activeScenario.edges);
+    setNodes(wiredNodes);
+    setEdges(wiredEdges);
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Save graph to localStorage on every change (skips the very first render)
+  // Save graph to active scenario on every change (skips the very first render, skips during switch)
   useEffect(() => {
     if (isFirstRender.current) {
       isFirstRender.current = false;
       return;
     }
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(serializeGraph(nodes, edges)));
-  }, [nodes, edges]);
+    if (isSwitchingRef.current) return; // suppress save during scenario switch
+    const serialized = serializeGraph(nodes, edges);
+    updateActiveGraph(serialized.nodes, serialized.edges);
+    persist();
+  }, [nodes, edges]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <div className="h-screen w-screen flex flex-col bg-canvas text-dark">
       <Toolbar onAddNode={onAddNode} onImportJson={() => setShowImportDialog(true)} onExportJson={onExportJson} onClearCanvas={handleClearCanvas} isEmpty={nodes.length === 0} />
+      <ScenarioTabBar
+        scenarios={store.scenarios}
+        activeId={store.activeScenarioId}
+        onSwitch={handleSwitchScenario}
+        onAdd={handleCreateScenario}
+        onRename={(id, name) => { renameScenario(id, name); persist(); }}
+        onDelete={handleDeleteScenario}
+      />
       <div className="flex flex-1 overflow-hidden">
         <FilterPanel
           nodes={nodes}
