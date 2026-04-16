@@ -8,13 +8,15 @@ interface EditPopoverProps {
   urlTemplate: string;
   pageCount: number;
   isGlobal: boolean;
+  isRoot: boolean;
   placements: Placement[];
   placementSuggestions: string[];
   onSave: (urlTemplate: string, pageCount: number, isGlobal: boolean, placements: Placement[]) => void;
+  onRootToggle: (nodeId: string) => void;
   onClose: () => void;
 }
 
-export function EditPopover({ nodeId: _nodeId, urlTemplate, pageCount, isGlobal, placements, placementSuggestions, onSave, onClose }: EditPopoverProps) {
+export function EditPopover({ nodeId, urlTemplate, pageCount, isGlobal, isRoot, placements, placementSuggestions, onSave, onRootToggle, onClose }: EditPopoverProps) {
   const [localTemplate, setLocalTemplate] = useState(urlTemplate);
   const [localCount, setLocalCount] = useState(pageCount);
   const [localIsGlobal, setLocalIsGlobal] = useState(isGlobal);
@@ -93,6 +95,21 @@ export function EditPopover({ nodeId: _nodeId, urlTemplate, pageCount, isGlobal,
             value={localCount}
             onChange={(e) => setLocalCount(Number(e.target.value))}
           />
+        </div>
+
+        <div className="flex items-center justify-between">
+          <label className="block text-[11px] font-semibold uppercase tracking-wide text-muted-fg">
+            Root (Homepage)
+          </label>
+          <button
+            type="button"
+            role="switch"
+            aria-checked={isRoot}
+            onClick={() => onRootToggle(nodeId)}
+            className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${isRoot ? 'bg-violet-600' : 'bg-gray-300'}`}
+          >
+            <span className={`inline-block h-3.5 w-3.5 rounded-full bg-white transition-transform ${isRoot ? 'translate-x-[18px]' : 'translate-x-[3px]'}`} />
+          </button>
         </div>
 
         <div className="flex items-center justify-between">

@@ -1,6 +1,6 @@
 import { memo, useState, useEffect, useMemo } from 'react';
 import { Handle, Position, useReactFlow, type NodeProps, type Node } from 'reactflow';
-import { Pencil, TriangleAlert, Globe } from 'lucide-react';
+import { Pencil, TriangleAlert, Globe, Home, Unplug, Layers } from 'lucide-react';
 import { EditPopover } from './EditPopover';
 import { formatPageCount, type UrlNodeData, type ScoreTier, type Placement, HANDLE_IDS, collectPlacementSuggestions } from '../lib/graph-utils';
 
@@ -8,9 +8,13 @@ export type { UrlNodeData } from '../lib/graph-utils';
 
 interface UrlNodeExtendedData extends UrlNodeData {
   onUpdate?: (id: string, data: Partial<UrlNodeData>) => void;
+  onRootToggle?: (id: string) => void;
   onZIndexChange?: (id: string, zIndex: number) => void;
   scoreTier?: ScoreTier;
   isWeak?: boolean;
+  isOrphan?: boolean;
+  isUnreachable?: boolean;
+  crawlDepth?: number;
 }
 
 const TONE_MAP: Record<ScoreTier, { card: string; focus: string; badge: string; badgeLabel: string }> = {
@@ -97,8 +101,8 @@ function UrlNodeComponent({ id, data, selected }: NodeProps<UrlNodeExtendedData>
         <Pencil size={13} className="text-muted-fg hover:text-dark" />
       </button>
 
-      {/* Badges — tier and/or global */}
-      {(tier !== 'neutral' || data.isGlobal) && (
+      {/* Badges — tier, global, and/or root */}
+      {(tier !== 'neutral' || data.isGlobal || data.isRoot) && (
         <div className="mb-2 flex flex-wrap items-center gap-1">
           {tier !== 'neutral' && (
             <span className={`inline-flex items-center rounded-full px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${tone.badge}`}>
@@ -109,6 +113,12 @@ function UrlNodeComponent({ id, data, selected }: NodeProps<UrlNodeExtendedData>
             <span className="inline-flex items-center gap-1 rounded-full px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide bg-blue-100 text-blue-700">
               <Globe size={9} />
               Global
+            </span>
+          )}
+          {data.isRoot && (
+            <span className="inline-flex items-center gap-1 rounded-full px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide bg-violet-100 text-violet-700">
+              <Home size={9} />
+              Root
             </span>
           )}
         </div>
@@ -122,11 +132,32 @@ function UrlNodeComponent({ id, data, selected }: NodeProps<UrlNodeExtendedData>
       {/* Subtitle */}
       <div className="flex items-center gap-1.5 text-[11px] text-muted-fg">
         <span>{formatPageCount(data.pageCount)}</span>
-        {data.isWeak && (
+        {data.isWeak && !data.isOrphan && !data.isUnreachable && (
           <>
             <span>·</span>
             <TriangleAlert size={11} className="text-amber-500" aria-label="Weak page" />
             <span className="text-amber-500">Weak</span>
+          </>
+        )}
+        {data.isOrphan && (
+          <>
+            <span>·</span>
+            <Unplug size={11} className="text-red-500" aria-label="Orphan page" />
+            <span className="text-red-500">Orphan</span>
+          </>
+        )}
+        {data.isUnreachable && !data.isOrphan && (
+          <>
+            <span>·</span>
+            <Unplug size={11} className="text-red-500" aria-label="Unreachable page" />
+            <span className="text-red-500">Unreachable</span>
+          </>
+        )}
+        {typeof data.crawlDepth === 'number' && data.crawlDepth !== Infinity && data.crawlDepth > 3 && !data.isOrphan && !data.isUnreachable && (
+          <>
+            <span>·</span>
+            <Layers size={11} className="text-amber-500" aria-label="Deep page" />
+            <span className="text-amber-500">Depth {data.crawlDepth}</span>
           </>
         )}
       </div>
@@ -150,9 +181,11 @@ function UrlNodeComponent({ id, data, selected }: NodeProps<UrlNodeExtendedData>
           urlTemplate={data.urlTemplate}
           pageCount={data.pageCount}
           isGlobal={data.isGlobal ?? false}
+          isRoot={data.isRoot ?? false}
           placements={data.placements ?? []}
           placementSuggestions={placementSuggestions}
           onSave={handleSave}
+          onRootToggle={data.onRootToggle ?? (() => {})}
           onClose={() => setShowPopover(false)}
         />
       )}
