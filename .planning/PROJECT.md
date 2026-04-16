@@ -40,8 +40,13 @@ Let PMs visually plan and simulate internal link structures — and immediately 
 
 ### Active
 
-- [ ] Scenario diff: create/compare two named scenarios with per-node score deltas
 - [ ] Nodes with >150 total outbound links flagged with warning
+
+### Validated (Phase 9)
+
+- [x] User can create, switch, rename, and delete named scenarios (e.g. "Current", "Proposal A") — Validated in Phase 9: Scenario Comparison
+- [x] Each scenario has its own fully independent graph state — Validated in Phase 9: Scenario Comparison
+- [x] Scenarios persist in localStorage under `seo-planner-scenarios`; auto-migrates old single-graph data to "Default" scenario — Validated in Phase 9: Scenario Comparison
 
 ### Out of Scope
 
@@ -89,4 +94,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-16 — Phase 8 complete: crawl depth + orphan detection*
+*Last updated: 2026-04-16 — Phase 9 complete: multi-scenario management with tab bar, localStorage persistence, and auto-migration*
