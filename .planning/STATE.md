@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: MVP
-status: Not started
-stopped_at: Phase 9 context gathered
-last_updated: "2026-04-16T14:04:33.976Z"
+status: executing
+stopped_at: Completed 09-scenario-comparison 09-01-PLAN.md
+last_updated: "2026-04-16T14:22:50.108Z"
 last_activity: 2026-04-16
 progress:
   total_phases: 21
   completed_phases: 8
-  total_plans: 14
-  completed_plans: 15
+  total_plans: 16
+  completed_plans: 16
   percent: 0
 ---
 
@@ -21,13 +21,13 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-16)
 
 **Core value:** Let PMs visually plan and simulate internal link structures — and immediately see which pages will rank highest — before any code is written or deployed.
-**Current focus:** Phase 8 — Crawl Depth & Orphan Detection
+**Current focus:** Phase 09 — scenario-comparison
 
 ## Current Position
 
-Phase: 999.1
-Plan: Not started
-Status: Not started
+Phase: 09 (scenario-comparison) — EXECUTING
+Plan: 2 of 2
+Status: Ready to execute
 Last activity: 2026-04-16
 
 Progress: [░░░░░░░░░░] 0%
@@ -64,6 +64,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 07-placement-centric-filter P01 | 5 | 3 tasks | 5 files |
 | Phase 08-crawl-depth-orphan-detection P01 | 5 | 2 tasks | 2 files |
 | Phase 08-crawl-depth-orphan-detection P02 | 12 | 3 tasks | 7 files |
+| Phase 09-scenario-comparison P01 | 8 | 1 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -102,6 +103,9 @@ Recent decisions affecting current work:
 - [Phase 08-crawl-depth-orphan-detection]: identifyOrphanNodes uses raw inbound counts not BFS reachability — orphan means zero inbound, distinct from unreachable
 - [Phase 08-crawl-depth-orphan-detection]: Root toggle uses separate onRootToggle callback (not onSave) so exclusive-root logic runs immediately in App.tsx
 - [Phase 08-crawl-depth-orphan-detection]: unreachableNodes derived from depthMap Infinity entries — keeps orphan (zero inbound) and unreachable (no path from root) concepts distinct
+- [Phase 09-scenario-comparison]: loadOrMigrate exported as named pure function for direct unit testing without React harness
+- [Phase 09-scenario-comparison]: useScenarios hook is pure data layer — never calls setNodes/setEdges, App.tsx handles graph restoration
+- [Phase 09-scenario-comparison]: structuredClone used for scenario clone mode — no shared references, faster than JSON round-trip
 
 ### Pending Todos
 
@@ -124,6 +128,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-16T14:04:33.971Z
-Stopped at: Phase 9 context gathered
-Resume file: .planning/phases/09-scenario-comparison/09-CONTEXT.md
+Last session: 2026-04-16T14:22:50.103Z
+Stopped at: Completed 09-scenario-comparison 09-01-PLAN.md
+Resume file: None

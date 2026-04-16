@@ -97,9 +97,9 @@
 
 ### Scenario Comparison
 
-- [ ] **SCENE-01**: User can create multiple named scenarios (e.g. "Current", "Proposal A")
-- [ ] **SCENE-02**: User can switch between scenarios; each scenario has its own independent graph state
-- [ ] **SCENE-03**: Scenarios persist in localStorage independently
+- [x] **SCENE-01**: User can create multiple named scenarios (e.g. "Current", "Proposal A")
+- [x] **SCENE-02**: User can switch between scenarios; each scenario has its own independent graph state
+- [x] **SCENE-03**: Scenarios persist in localStorage independently
 - [ ] **SCENE-04**: User can view two scenarios side-by-side with per-node score delta (e.g. +15%, -8%)
 - [ ] **SCENE-05**: Score delta display highlights improvements (green) and regressions (red)
 
