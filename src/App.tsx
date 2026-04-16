@@ -32,6 +32,8 @@ import {
   identifyWeakNodes,
   parseImportJson,
   getClosestHandleIds,
+  calculateCrawlDepth,
+  identifyOrphanNodes,
   type UrlNodeData,
   type LinkCountEdgeData,
   type ScoreTier,
@@ -42,9 +44,13 @@ import {
 // and score fields for dynamic visual rendering
 interface AppNodeData extends UrlNodeData {
   onUpdate: (id: string, data: Partial<UrlNodeData>) => void;
+  onRootToggle: (id: string) => void;
   onZIndexChange: (id: string, zIndex: number) => void;
   scoreTier?: ScoreTier;
   isWeak?: boolean;
+  isOrphan?: boolean;
+  isUnreachable?: boolean;
+  crawlDepth?: number;
 }
 
 // Define nodeTypes and edgeTypes outside the component to avoid infinite re-renders (React Flow docs requirement)
@@ -57,13 +63,19 @@ const STORAGE_KEY = 'seo-planner-graph';
 function serializeGraph(
   nodes: Node<AppNodeData>[],
   edges: Edge[],
-): { nodes: Array<{ id: string; type?: string; position: { x: number; y: number }; data: { urlTemplate: string; pageCount: number; isGlobal?: boolean; placements?: Placement[] } }>; edges: Array<{ id: string; source: string; target: string; sourceHandle?: string | null; targetHandle?: string | null; type?: string; markerEnd?: unknown; data: { linkCount: number } }> } {
+): { nodes: Array<{ id: string; type?: string; position: { x: number; y: number }; data: { urlTemplate: string; pageCount: number; isGlobal?: boolean; placements?: Placement[]; isRoot?: boolean } }>; edges: Array<{ id: string; source: string; target: string; sourceHandle?: string | null; targetHandle?: string | null; type?: string; markerEnd?: unknown; data: { linkCount: number } }> } {
   return {
-    nodes: nodes.map(({ id, type, position, data: { urlTemplate, pageCount, isGlobal, placements } }) => ({
+    nodes: nodes.map(({ id, type, position, data: { urlTemplate, pageCount, isGlobal, placements, isRoot } }) => ({
       id,
       type,
       position,
-      data: { urlTemplate, pageCount, ...(isGlobal && { isGlobal }), ...(placements?.length && { placements }) },
+      data: {
+        urlTemplate,
+        pageCount,
+        ...(isGlobal && { isGlobal }),
+        ...(placements?.length && { placements }),
+        ...(isRoot && { isRoot }),
+      },
     })),
     edges: edges.map(({ id, source, target, sourceHandle, targetHandle, type, markerEnd, data }) => ({
       id,
@@ -114,17 +126,38 @@ function AppInner() {
     [setNodes],
   );
 
+  // onRootToggle ensures only one node is root at a time (exclusive root designation)
+  const onRootToggle = useCallback(
+    (nodeId: string) => {
+      setNodes((nds) =>
+        nds.map((n) => {
+          if (n.id === nodeId) {
+            // Toggle this node's root status
+            const newIsRoot = !n.data.isRoot;
+            return { ...n, data: { ...n.data, isRoot: newIsRoot } };
+          }
+          // Clear root from all other nodes
+          if (n.data.isRoot) {
+            return { ...n, data: { ...n.data, isRoot: false } };
+          }
+          return n;
+        }),
+      );
+    },
+    [setNodes],
+  );
+
   const addNode = useCallback(
     (position: { x: number; y: number }) => {
       const newNode = createDefaultNode(position);
       setNodes((nds) =>
         nds.concat({
           ...newNode,
-          data: { ...newNode.data, onUpdate: onNodeDataUpdate, onZIndexChange: onNodeZIndexChange },
+          data: { ...newNode.data, onUpdate: onNodeDataUpdate, onRootToggle, onZIndexChange: onNodeZIndexChange },
         }),
       );
     },
-    [onNodeDataUpdate, onNodeZIndexChange, setNodes],
+    [onNodeDataUpdate, onRootToggle, onNodeZIndexChange, setNodes],
   );
 
   const onEdgeLinkCountChange = useCallback(
@@ -139,7 +172,7 @@ function AppInner() {
       // Wire runtime callbacks into imported data (same pattern as onDrop handler)
       const wiredNodes = importedNodes.map((n) => ({
         ...n,
-        data: { ...n.data, onUpdate: onNodeDataUpdate, onZIndexChange: onNodeZIndexChange },
+        data: { ...n.data, onUpdate: onNodeDataUpdate, onRootToggle, onZIndexChange: onNodeZIndexChange },
       }));
       const wiredEdges = importedEdges.map((edge) => ({
         ...edge,
@@ -149,7 +182,7 @@ function AppInner() {
       setNodes(wiredNodes as Node<AppNodeData>[]);
       setEdges(wiredEdges);
     },
-    [onNodeDataUpdate, onNodeZIndexChange, onEdgeLinkCountChange, setNodes, setEdges],
+    [onNodeDataUpdate, onRootToggle, onNodeZIndexChange, onEdgeLinkCountChange, setNodes, setEdges],
   );
 
   const onDragOver = useCallback((event: React.DragEvent) => {
@@ -180,7 +213,7 @@ function AppInner() {
             }));
             setNodes(importedNodes.map((n) => ({
               ...n,
-              data: { ...n.data, onUpdate: onNodeDataUpdate, onZIndexChange: onNodeZIndexChange },
+              data: { ...n.data, onUpdate: onNodeDataUpdate, onRootToggle, onZIndexChange: onNodeZIndexChange },
             })));
             setEdges(wiredEdges);
           } catch {
@@ -200,7 +233,7 @@ function AppInner() {
       });
       addNode(position);
     },
-    [reactFlowInstance, addNode, setNodes, setEdges, onNodeDataUpdate, onNodeZIndexChange, onEdgeLinkCountChange],
+    [reactFlowInstance, addNode, setNodes, setEdges, onNodeDataUpdate, onRootToggle, onNodeZIndexChange, onEdgeLinkCountChange],
   );
 
   const onAddNode = useCallback(() => {
@@ -255,22 +288,58 @@ function AppInner() {
     [scores],
   );
 
-  // Enrich nodes with score tier and weak flag for UrlNode rendering
+  // Derive root node ID from nodes state
+  const rootId = useMemo(
+    () => nodes.find((n) => n.data.isRoot)?.id ?? null,
+    [nodes],
+  );
+
+  // Compute crawl depth map using BFS from root
+  const depthMap = useMemo(
+    () => calculateCrawlDepth(nodes, edges, rootId),
+    [nodes, edges, rootId],
+  );
+
+  // Identify orphan nodes (zero inbound, excluding root)
+  const orphanNodes = useMemo(
+    () => identifyOrphanNodes(nodes, edges, rootId),
+    [nodes, edges, rootId],
+  );
+
+  // Identify unreachable nodes (have depth = Infinity in depthMap)
+  const unreachableNodes = useMemo(() => {
+    const set = new Set<string>();
+    for (const [id, depth] of depthMap) {
+      if (depth === Infinity) set.add(id);
+    }
+    return set;
+  }, [depthMap]);
+
+  // Enrich nodes with score tier, weak flag, and crawl depth/orphan fields for UrlNode rendering
   const enrichedNodes = useMemo(() => {
     return nodes.map((node) => {
       const score = scores.get(node.id) ?? 0;
       const scoreTier = classifyScoreTier(score, allScoreValues);
       const isWeak = weakNodes.has(node.id);
-      // Only create new object if score data changed
-      if (node.data.scoreTier === scoreTier && node.data.isWeak === isWeak) {
+      const isOrphan = orphanNodes.has(node.id);
+      const isUnreachable = unreachableNodes.has(node.id);
+      const crawlDepth = depthMap.get(node.id);
+      // Only create new object if any enriched data changed
+      if (
+        node.data.scoreTier === scoreTier &&
+        node.data.isWeak === isWeak &&
+        node.data.isOrphan === isOrphan &&
+        node.data.isUnreachable === isUnreachable &&
+        node.data.crawlDepth === crawlDepth
+      ) {
         return node;
       }
       return {
         ...node,
-        data: { ...node.data, scoreTier, isWeak },
+        data: { ...node.data, scoreTier, isWeak, isOrphan, isUnreachable, crawlDepth },
       };
     });
-  }, [nodes, scores, weakNodes, allScoreValues]);
+  }, [nodes, scores, weakNodes, allScoreValues, orphanNodes, unreachableNodes, depthMap]);
 
   // Derive highlighted node IDs from active filter keys
   const highlightedNodeIds = useMemo(() => {
@@ -326,6 +395,7 @@ function AppInner() {
         urlTemplate: n.data.urlTemplate,
         pageCount: n.data.pageCount,
         ...(n.data.isGlobal && { isGlobal: n.data.isGlobal }),
+        ...(n.data.isRoot && { isRoot: n.data.isRoot }),
         ...(n.data.placements?.length && { placements: n.data.placements }),
         x: n.position.x,
         y: n.position.y,
@@ -337,6 +407,7 @@ function AppInner() {
         linkCount: (e.data as LinkCountEdgeData)?.linkCount ?? 1,
       })),
       scores: Object.fromEntries(scores),
+      depthMap: Object.fromEntries(depthMap),
     };
     const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
@@ -345,7 +416,7 @@ function AppInner() {
     a.download = 'seo-planner-export.json';
     a.click();
     URL.revokeObjectURL(url);
-  }, [nodes, edges, scores]);
+  }, [nodes, edges, scores, depthMap]);
 
   const handleClearCanvas = useCallback(() => {
     setNodes([]);
@@ -363,7 +434,7 @@ function AppInner() {
     }
     try {
       const parsed = JSON.parse(saved) as {
-        nodes: Array<{ id: string; type?: string; position: { x: number; y: number }; data: { urlTemplate: string; pageCount: number; isGlobal?: boolean; placements?: Placement[] } }>;
+        nodes: Array<{ id: string; type?: string; position: { x: number; y: number }; data: { urlTemplate: string; pageCount: number; isGlobal?: boolean; placements?: Placement[]; isRoot?: boolean } }>;
         edges: Array<{ id: string; source: string; target: string; sourceHandle?: string | null; targetHandle?: string | null; type?: string; markerEnd?: unknown; data: { linkCount: number } }>;
       };
       const restoredNodes: Node<AppNodeData>[] = parsed.nodes.map((n) => ({
@@ -374,7 +445,9 @@ function AppInner() {
           pageCount: n.data.pageCount,
           ...(n.data.isGlobal != null && { isGlobal: n.data.isGlobal }),
           ...(n.data.placements != null && { placements: n.data.placements }),
+          ...(n.data.isRoot != null && { isRoot: n.data.isRoot }),
           onUpdate: onNodeDataUpdate,
+          onRootToggle,
           onZIndexChange: onNodeZIndexChange,
         },
       }));
@@ -471,7 +544,15 @@ function AppInner() {
             )}
           </ReactFlow>
         </div>
-        <ScoreSidebar nodes={nodes} scores={scores} weakNodes={weakNodes} />
+        <ScoreSidebar
+          nodes={nodes}
+          scores={scores}
+          weakNodes={weakNodes}
+          orphanNodes={orphanNodes}
+          unreachableNodes={unreachableNodes}
+          depthMap={depthMap}
+          rootId={rootId}
+        />
       </div>
       <ImportDialog
         open={showImportDialog}

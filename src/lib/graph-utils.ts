@@ -594,6 +594,7 @@ export function parseImportJson(raw: string): {
       throw new Error(`Node at index ${i} is missing "pageCount"`);
     }
     const isGlobal = typeof node.isGlobal === 'boolean' ? node.isGlobal : undefined;
+    const isRoot = typeof node.isRoot === 'boolean' ? node.isRoot : undefined;
     const placements = Array.isArray(node.placements) ? (node.placements as Placement[]) : undefined;
     return {
       id: String(node.id),
@@ -603,6 +604,7 @@ export function parseImportJson(raw: string): {
         urlTemplate: node.urlTemplate,
         pageCount: node.pageCount,
         ...(isGlobal != null && { isGlobal }),
+        ...(isRoot != null && { isRoot }),
         ...(placements != null && { placements }),
       },
     };

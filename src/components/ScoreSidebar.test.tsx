@@ -182,10 +182,22 @@ function renderSidebar(
   nodes: Node<UrlNodeData>[],
   scores: Map<string, number>,
   weakNodes: Set<string> = new Set(),
+  orphanNodes: Set<string> = new Set(),
+  unreachableNodes: Set<string> = new Set(),
+  depthMap: Map<string, number> = new Map(),
+  rootId: string | null = null,
 ) {
   return render(
     <ReactFlowProvider>
-      <ScoreSidebar nodes={nodes} scores={scores} weakNodes={weakNodes} />
+      <ScoreSidebar
+        nodes={nodes}
+        scores={scores}
+        weakNodes={weakNodes}
+        orphanNodes={orphanNodes}
+        unreachableNodes={unreachableNodes}
+        depthMap={depthMap}
+        rootId={rootId}
+      />
     </ReactFlowProvider>,
   );
 }

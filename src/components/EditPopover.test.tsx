@@ -8,27 +8,32 @@ const defaultProps = {
   urlTemplate: '/page/<id>',
   pageCount: 5,
   isGlobal: false,
+  isRoot: false,
   placements: [] as Placement[],
   placementSuggestions: [] as string[],
   onSave: vi.fn(),
+  onRootToggle: vi.fn(),
   onClose: vi.fn(),
 };
 
 describe('EditPopover', () => {
   it('shows global toggle switch', () => {
     render(<EditPopover {...defaultProps} />);
-    const toggle = screen.getByRole('switch');
-    expect(toggle).toBeInTheDocument();
-    expect(toggle).toHaveAttribute('aria-checked', 'false');
+    const toggles = screen.getAllByRole('switch');
+    // There are two switches: Root and Global Node
+    expect(toggles).toHaveLength(2);
+    const globalToggle = toggles.find((t) => t.getAttribute('aria-checked') === 'false');
+    expect(globalToggle).toBeInTheDocument();
   });
 
   it('shows placements section when global is toggled on', () => {
     render(<EditPopover {...defaultProps} />);
     // Placements section not visible initially
     expect(screen.queryByText('Placements')).not.toBeInTheDocument();
-    // Toggle global on
-    const toggle = screen.getByRole('switch');
-    fireEvent.click(toggle);
+    // Toggle global on — Global Node toggle is the second switch (after Root)
+    const toggles = screen.getAllByRole('switch');
+    const globalToggle = toggles[1];
+    fireEvent.click(globalToggle);
     expect(screen.getByText('Placements')).toBeInTheDocument();
     expect(screen.getByText('+ Add Placement')).toBeInTheDocument();
   });
@@ -36,9 +41,10 @@ describe('EditPopover', () => {
   it('hides placements section when global is toggled off', () => {
     render(<EditPopover {...defaultProps} isGlobal={true} />);
     expect(screen.getByText('Placements')).toBeInTheDocument();
-    // Toggle off
-    const toggle = screen.getByRole('switch');
-    fireEvent.click(toggle);
+    // Toggle off — Global Node toggle is the second switch (after Root)
+    const toggles = screen.getAllByRole('switch');
+    const globalToggle = toggles[1];
+    fireEvent.click(globalToggle);
     expect(screen.queryByText('Placements')).not.toBeInTheDocument();
   });
 
