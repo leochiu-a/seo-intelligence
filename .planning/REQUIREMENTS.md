@@ -79,22 +79,51 @@
 - [ ] **PFILTER-03**: Filter panel shows which global node(s) map to each placement name as sub-items
 - [ ] **PFILTER-04**: Unchecking all filters restores canvas to full-opacity normal state
 
-## v2 Requirements
+## v2.0 Requirements
+
+### Crawl Depth Analysis
+
+- [ ] **DEPTH-01**: System calculates shortest path distance from a designated root node to every other node using BFS
+- [ ] **DEPTH-02**: Sidebar displays crawl depth value next to each node's score
+- [ ] **DEPTH-03**: Nodes with depth >3 display a warning indicator in both sidebar and canvas
+- [ ] **DEPTH-04**: User can designate which node is the "root" (homepage) via the edit popover
+- [ ] **DEPTH-05**: Unreachable nodes (infinite depth) are flagged as "unreachable" with a distinct alert
+
+### Orphan Detection
+
+- [ ] **ORPHAN-01**: System identifies orphan nodes (zero inbound edges, excluding root) separately from weak nodes
+- [ ] **ORPHAN-02**: Orphan nodes display a dedicated "orphan" warning icon distinct from the weak-node indicator
+- [ ] **ORPHAN-03**: Sidebar groups orphan nodes in a separate section above weak nodes
+
+### Scenario Comparison
+
+- [ ] **SCENE-01**: User can create multiple named scenarios (e.g. "Current", "Proposal A")
+- [ ] **SCENE-02**: User can switch between scenarios; each scenario has its own independent graph state
+- [ ] **SCENE-03**: Scenarios persist in localStorage independently
+- [ ] **SCENE-04**: User can view two scenarios side-by-side with per-node score delta (e.g. +15%, -8%)
+- [ ] **SCENE-05**: Score delta display highlights improvements (green) and regressions (red)
+
+### Outbound Link Warning
+
+- [ ] **OUTBOUND-01**: System calculates total outbound links per node (explicit edges + global placements)
+- [ ] **OUTBOUND-02**: Nodes exceeding 150 outbound links display a red warning indicator on canvas
+- [ ] **OUTBOUND-03**: Sidebar shows outbound link count with warning threshold highlight
+
+## Future Requirements
 
 ### Advanced Analysis
 
-- **V2-01**: Side-by-side visual comparison of two scenarios
-- **V2-02**: "What if" simulation — drag a link and preview score change before confirming
-- **V2-03**: Suggested links — highlight nodes that would benefit most from more inbound links
+- **V2-01**: "What if" simulation — drag a link and preview score change before confirming
+- **V2-02**: Suggested links — highlight nodes that would benefit most from more inbound links
 
 ### Collaboration
 
-- **V2-04**: Backend persistence and shareable project URLs
-- **V2-05**: Multi-user editing
+- **V2-03**: Backend persistence and shareable project URLs
+- **V2-04**: Multi-user editing
 
 ### Import
 
-- **V2-06**: Import existing site structure from crawl data (CSV/sitemap)
+- **V2-05**: Import existing site structure from crawl data (CSV/sitemap)
 
 ## Out of Scope
 
@@ -128,7 +157,10 @@
 - v1.1 requirements: 8 total
 - Mapped to phases: 8
 - Unmapped: 0 ✓
+- v2.0 requirements: 16 total
+- Mapped to phases: 0
+- Unmapped: 16 ⚠️ (pending roadmap)
 
 ---
 *Requirements defined: 2026-04-13*
-*Last updated: 2026-04-15 — v1.1 requirements mapped to Phases 6-7*
+*Last updated: 2026-04-16 — v2.0 requirements defined for SEO Analysis Depth milestone*
