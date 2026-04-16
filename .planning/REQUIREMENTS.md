@@ -84,16 +84,16 @@
 ### Crawl Depth Analysis
 
 - [x] **DEPTH-01**: System calculates shortest path distance from a designated root node to every other node using BFS
-- [ ] **DEPTH-02**: Sidebar displays crawl depth value next to each node's score
-- [ ] **DEPTH-03**: Nodes with depth >3 display a warning indicator in both sidebar and canvas
-- [ ] **DEPTH-04**: User can designate which node is the "root" (homepage) via the edit popover
+- [x] **DEPTH-02**: Sidebar displays crawl depth value next to each node's score
+- [x] **DEPTH-03**: Nodes with depth >3 display a warning indicator in both sidebar and canvas
+- [x] **DEPTH-04**: User can designate which node is the "root" (homepage) via the edit popover
 - [x] **DEPTH-05**: Unreachable nodes (infinite depth) are flagged as "unreachable" with a distinct alert
 
 ### Orphan Detection
 
 - [x] **ORPHAN-01**: System identifies orphan nodes (zero inbound edges, excluding root) separately from weak nodes
-- [ ] **ORPHAN-02**: Orphan nodes display a dedicated "orphan" warning icon distinct from the weak-node indicator
-- [ ] **ORPHAN-03**: Sidebar groups orphan nodes in a separate section above weak nodes
+- [x] **ORPHAN-02**: Orphan nodes display a dedicated "orphan" warning icon distinct from the weak-node indicator
+- [x] **ORPHAN-03**: Sidebar groups orphan nodes in a separate section above weak nodes
 
 ### Scenario Comparison
 
