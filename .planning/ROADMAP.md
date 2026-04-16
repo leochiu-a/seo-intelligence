@@ -172,7 +172,11 @@ Plans:
   3. Nodes more than 3 clicks from root show a depth warning indicator in both the sidebar and on the canvas node
   4. Nodes with no path from root are flagged as "unreachable" with a distinct alert separate from the depth warning
   5. Orphan nodes (zero inbound edges, excluding root) display a dedicated orphan warning icon that is visually distinct from the weak-node indicator, and are grouped above weak nodes in the sidebar
-**Plans**: TBD
+**Plans**: 2 plans
+
+Plans:
+- [ ] 08-01-PLAN.md — TDD: calculateCrawlDepth (BFS) + identifyOrphanNodes pure functions + isRoot on UrlNodeData
+- [ ] 08-02-PLAN.md — Root toggle in EditPopover, depth/orphan indicators in UrlNode, sidebar sections, App.tsx wiring + localStorage
 **UI hint**: yes
 
 ### Phase 9: Scenario Comparison
@@ -212,7 +216,7 @@ Plans:
 | 5. Global Filter Panel | 1/1 | Complete   | 2026-04-14 |
 | 6. Placement Autocomplete | 0/1 | Not started | - |
 | 7. Placement-Centric Filter | 1/1 | Complete   | 2026-04-15 |
-| 8. Crawl Depth & Orphan Detection | 0/? | Not started | - |
+| 8. Crawl Depth & Orphan Detection | 0/2 | Not started | - |
 | 9. Scenario Comparison | 0/? | Not started | - |
 | 10. Outbound Link Warning | 0/? | Not started | - |
 
