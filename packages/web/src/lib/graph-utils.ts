@@ -743,6 +743,10 @@ export function parseImportJson(raw: string): {
     const isGlobal = typeof node.isGlobal === 'boolean' ? node.isGlobal : undefined;
     const isRoot = typeof node.isRoot === 'boolean' ? node.isRoot : undefined;
     const placements = Array.isArray(node.placements) ? (node.placements as Placement[]) : undefined;
+    const tagsRaw = Array.isArray(node.tags) ? node.tags : undefined;
+    const tags = tagsRaw
+      ? tagsRaw.filter((t): t is string => typeof t === 'string')
+      : undefined;
     return {
       id: String(node.id),
       type: 'urlNode',
@@ -753,6 +757,7 @@ export function parseImportJson(raw: string): {
         ...(isGlobal != null && { isGlobal }),
         ...(isRoot != null && { isRoot }),
         ...(placements != null && { placements }),
+        ...(tags != null && tags.length > 0 && { tags }),
       },
     };
   });
