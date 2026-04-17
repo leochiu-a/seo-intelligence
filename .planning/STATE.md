@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: MVP
 status: verifying
-stopped_at: Completed 999.5-02-PLAN.md
-last_updated: "2026-04-17T09:19:11.246Z"
+stopped_at: Completed 999.5-03-PLAN.md
+last_updated: "2026-04-17T15:04:10.351Z"
 last_activity: "2026-04-17 - Completed quick task 260417-ljg: 連接點沒有對齊線"
 progress:
   total_phases: 19
   completed_phases: 10
   total_plans: 26
-  completed_plans: 20
+  completed_plans: 22
   percent: 0
 ---
 
@@ -69,6 +69,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 10-outbound-link-warning P01 | 2 | 2 tasks | 2 files |
 | Phase 10-outbound-link-warning P02 | 3 | 3 tasks | 5 files |
 | Phase 999.5-topical-cluster-tags P02 | 5 | 2 tasks | 3 files |
+| Phase 999.5-topical-cluster-tags P03 | 5 | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -120,6 +121,8 @@ Recent decisions affecting current work:
 - [Phase 10-outbound-link-warning]: UrlNode over-linked subtitle branch has no orphan/unreachable/weak exclusions — D-09 over-linked coexists with all reachability/strength indicators as last item in chain
 - [Phase 999.5-topical-cluster-tags]: DJB2 chosen for cluster tag hash: zero deps, pure function, deterministic — snapshot-testable palette mapping
 - [Phase 999.5-topical-cluster-tags]: 8-entry palette (teal/cyan/sky/pink/rose/orange/lime/fuchsia) avoids reserved UI colors (green/amber/red/indigo/blue/violet)
+- [Phase 999.5-topical-cluster-tags]: Cluster Tags section placed outside localIsGlobal conditional so both global and non-global nodes can carry tags (D-04)
+- [Phase 999.5-topical-cluster-tags]: Enter keydown in cluster tag input calls e.stopPropagation to prevent document-level handleConfirm from firing
 
 ### Pending Todos
 
@@ -143,6 +146,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-17T09:19:11.243Z
-Stopped at: Completed 999.5-02-PLAN.md
+Last session: 2026-04-17T15:04:10.347Z
+Stopped at: Completed 999.5-03-PLAN.md
 Resume file: None

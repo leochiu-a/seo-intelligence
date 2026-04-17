@@ -245,7 +245,7 @@ Plans:
 **Goal:** 節點可打 tag/cluster，同 cluster 內的邊有 bonus weight，視覺上同 cluster 上色
 **Context:** Google 非常看重 topical authority，同主題頁面互連的權重遠高於跨主題。目前 PageRank 是 topology-agnostic 的，`/food/ramen` → `/food/sushi` 和 `/food/ramen` → `/hotel/taipei` 在模型裡權重一樣，但 SEO 效果完全不同。
 **Requirements:** TBD
-**Plans:** 1/8 plans executed
+**Plans:** 3/8 plans executed
 
 Plans:
 - [ ] TBD (promote with /gsd:review-backlog when ready)
