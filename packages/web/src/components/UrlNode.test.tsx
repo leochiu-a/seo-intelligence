@@ -120,4 +120,30 @@ describe('UrlNode', () => {
     expect(screen.queryByLabelText('Over-linked page')).not.toBeInTheDocument();
     expect(screen.queryByText('120 links')).not.toBeInTheDocument();
   });
+
+  it('passes clusterSuggestions from other nodes with tags into EditPopover', async () => {
+    const user = userEvent.setup();
+    // Simulate other nodes having tags
+    mockGetNodes.mockReturnValue([
+      { id: 'node-2', type: 'urlNode', position: { x: 0, y: 0 }, data: { urlTemplate: '/other', pageCount: 1, tags: ['food', 'taipei'] } },
+      { id: 'node-3', type: 'urlNode', position: { x: 0, y: 0 }, data: { urlTemplate: '/another', pageCount: 1, tags: ['food'] } },
+    ]);
+
+    renderNode({ urlTemplate: '/blog', pageCount: 1, onUpdate: vi.fn() });
+    await user.click(screen.getByRole('button', { name: 'Edit node' }));
+
+    // The Cluster Tags section should be present
+    expect(screen.getByText('Cluster Tags')).toBeInTheDocument();
+  });
+
+  it('passes data.tags to EditPopover as initial tags', async () => {
+    const user = userEvent.setup();
+    mockGetNodes.mockReturnValue([]);
+
+    renderNode({ urlTemplate: '/blog', pageCount: 1, tags: ['travel'], onUpdate: vi.fn() });
+    await user.click(screen.getByRole('button', { name: 'Edit node' }));
+
+    // 'travel' chip should be visible in the popover
+    expect(screen.getByText('travel')).toBeInTheDocument();
+  });
 });

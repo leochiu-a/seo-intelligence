@@ -2,7 +2,7 @@ import { memo, useState, useEffect, useMemo } from 'react';
 import { Handle, Position, useReactFlow, type NodeProps, type Node } from 'reactflow';
 import { Pencil, TriangleAlert, Globe, Home, Unplug, Layers } from 'lucide-react';
 import { EditPopover } from './EditPopover';
-import { formatPageCount, type UrlNodeData, type ScoreTier, type Placement, HANDLE_IDS, collectPlacementSuggestions } from '../lib/graph-utils';
+import { formatPageCount, type UrlNodeData, type ScoreTier, type Placement, HANDLE_IDS, collectPlacementSuggestions, collectClusterSuggestions } from '../lib/graph-utils';
 
 export type { UrlNodeData } from '../lib/graph-utils';
 
@@ -65,12 +65,23 @@ function UrlNodeComponent({ id, data, selected }: NodeProps<UrlNodeExtendedData>
     [id, getNodes],
   );
 
+  const clusterSuggestions = useMemo(
+    () => collectClusterSuggestions(getNodes() as Node<UrlNodeData>[], id),
+    [id, getNodes],
+  );
+
   const tier = data.scoreTier ?? 'neutral';
   const tone = TONE_MAP[tier];
 
-  const handleSave = (urlTemplate: string, pageCount: number, isGlobal: boolean, placements: Placement[]) => {
+  const handleSave = (
+    urlTemplate: string,
+    pageCount: number,
+    isGlobal: boolean,
+    placements: Placement[],
+    tags: string[],
+  ) => {
     if (data.onUpdate) {
-      data.onUpdate(id, { urlTemplate, pageCount, isGlobal, placements });
+      data.onUpdate(id, { urlTemplate, pageCount, isGlobal, placements, tags });
     }
   };
 
@@ -193,6 +204,8 @@ function UrlNodeComponent({ id, data, selected }: NodeProps<UrlNodeExtendedData>
           isRoot={data.isRoot ?? false}
           placements={data.placements ?? []}
           placementSuggestions={placementSuggestions}
+          tags={data.tags ?? []}
+          clusterSuggestions={clusterSuggestions}
           onSave={handleSave}
           onRootToggle={data.onRootToggle ?? (() => {})}
           onClose={() => setShowPopover(false)}
