@@ -444,6 +444,7 @@ function AppInner() {
       ) {
         return node;
       }
+      // Tags, placements, isGlobal, isRoot ride through via ...node.data spread (Phase 999.5 D-17).
       return {
         ...node,
         data: {
@@ -516,6 +517,7 @@ function AppInner() {
         ...(n.data.isGlobal && { isGlobal: n.data.isGlobal }),
         ...(n.data.isRoot && { isRoot: n.data.isRoot }),
         ...(n.data.placements?.length && { placements: n.data.placements }),
+        ...(n.data.tags?.length && { tags: n.data.tags }),
         x: n.position.x,
         y: n.position.y,
       })),
