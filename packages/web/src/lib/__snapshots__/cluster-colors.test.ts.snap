@@ -1,0 +1,66 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`CLUSTER_PALETTE > matches palette snapshot (locks color order — reorder requires approval) 1`] = `
+[
+  {
+    "dot": "bg-teal-400",
+    "edge": "#2dd4bf",
+    "stripe": "bg-teal-400",
+  },
+  {
+    "dot": "bg-cyan-400",
+    "edge": "#22d3ee",
+    "stripe": "bg-cyan-400",
+  },
+  {
+    "dot": "bg-sky-400",
+    "edge": "#38bdf8",
+    "stripe": "bg-sky-400",
+  },
+  {
+    "dot": "bg-pink-400",
+    "edge": "#f472b6",
+    "stripe": "bg-pink-400",
+  },
+  {
+    "dot": "bg-rose-400",
+    "edge": "#fb7185",
+    "stripe": "bg-rose-400",
+  },
+  {
+    "dot": "bg-orange-400",
+    "edge": "#fb923c",
+    "stripe": "bg-orange-400",
+  },
+  {
+    "dot": "bg-lime-400",
+    "edge": "#a3e635",
+    "stripe": "bg-lime-400",
+  },
+  {
+    "dot": "bg-fuchsia-400",
+    "edge": "#e879f9",
+    "stripe": "bg-fuchsia-400",
+  },
+]
+`;
+
+exports[`getClusterColor > returns consistent mapping snapshot for canonical tags 1`] = `
+{
+  "food": {
+    "dot": "bg-orange-400",
+    "edge": "#fb923c",
+    "stripe": "bg-orange-400",
+  },
+  "hotel": {
+    "dot": "bg-cyan-400",
+    "edge": "#22d3ee",
+    "stripe": "bg-cyan-400",
+  },
+  "taipei": {
+    "dot": "bg-cyan-400",
+    "edge": "#22d3ee",
+    "stripe": "bg-cyan-400",
+  },
+}
+`;
