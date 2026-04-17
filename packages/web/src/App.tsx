@@ -36,6 +36,8 @@ import {
   getClosestHandleIds,
   calculateCrawlDepth,
   identifyOrphanNodes,
+  calculateOutboundLinks,
+  OUTBOUND_WARNING_THRESHOLD,
   type UrlNodeData,
   type LinkCountEdgeData,
   type ScoreTier,
@@ -53,6 +55,8 @@ interface AppNodeData extends UrlNodeData {
   isOrphan?: boolean;
   isUnreachable?: boolean;
   crawlDepth?: number;
+  outboundCount?: number;
+  isOverLinked?: boolean;
 }
 
 // Define nodeTypes and edgeTypes outside the component to avoid infinite re-renders (React Flow docs requirement)
@@ -410,6 +414,13 @@ function AppInner() {
     return set;
   }, [depthMap]);
 
+  // Compute total outbound links per node (explicit edges + implicit global contribution).
+  // Global source nodes contribute 0 implicit per Phase 4 D-01 parity.
+  const outboundMap = useMemo(
+    () => calculateOutboundLinks(nodes, edges),
+    [nodes, edges],
+  );
+
   // Enrich nodes with score tier, weak flag, and crawl depth/orphan fields for UrlNode rendering
   const enrichedNodes = useMemo(() => {
     return nodes.map((node) => {
@@ -419,22 +430,35 @@ function AppInner() {
       const isOrphan = orphanNodes.has(node.id);
       const isUnreachable = unreachableNodes.has(node.id);
       const crawlDepth = depthMap.get(node.id);
+      const outboundCount = outboundMap.get(node.id) ?? 0;
+      const isOverLinked = outboundCount > OUTBOUND_WARNING_THRESHOLD;
       // Only create new object if any enriched data changed
       if (
         node.data.scoreTier === scoreTier &&
         node.data.isWeak === isWeak &&
         node.data.isOrphan === isOrphan &&
         node.data.isUnreachable === isUnreachable &&
-        node.data.crawlDepth === crawlDepth
+        node.data.crawlDepth === crawlDepth &&
+        node.data.outboundCount === outboundCount &&
+        node.data.isOverLinked === isOverLinked
       ) {
         return node;
       }
       return {
         ...node,
-        data: { ...node.data, scoreTier, isWeak, isOrphan, isUnreachable, crawlDepth },
+        data: {
+          ...node.data,
+          scoreTier,
+          isWeak,
+          isOrphan,
+          isUnreachable,
+          crawlDepth,
+          outboundCount,
+          isOverLinked,
+        },
       };
     });
-  }, [nodes, scores, weakNodes, allScoreValues, orphanNodes, unreachableNodes, depthMap]);
+  }, [nodes, scores, weakNodes, allScoreValues, orphanNodes, unreachableNodes, depthMap, outboundMap]);
 
   // Derive highlighted node IDs from active filter keys
   const highlightedNodeIds = useMemo(() => {
@@ -503,6 +527,7 @@ function AppInner() {
       })),
       scores: Object.fromEntries(scores),
       depthMap: Object.fromEntries(depthMap),
+      outboundMap: Object.fromEntries(outboundMap),
     };
     const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
@@ -511,7 +536,7 @@ function AppInner() {
     a.download = 'seo-planner-export.json';
     a.click();
     URL.revokeObjectURL(url);
-  }, [nodes, edges, scores, depthMap]);
+  }, [nodes, edges, scores, depthMap, outboundMap]);
 
   const handleClearCanvas = useCallback(() => {
     setNodes([]);
@@ -619,6 +644,7 @@ function AppInner() {
           orphanNodes={orphanNodes}
           unreachableNodes={unreachableNodes}
           depthMap={depthMap}
+          outboundMap={outboundMap}
           rootId={rootId}
         />
       </div>
