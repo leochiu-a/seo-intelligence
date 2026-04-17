@@ -18,6 +18,8 @@ import {
   collectPlacementGroups,
   calculateCrawlDepth,
   identifyOrphanNodes,
+  calculateOutboundLinks,
+  OUTBOUND_WARNING_THRESHOLD,
 } from './graph-utils';
 import type { UrlNodeData, LinkCountEdgeData, Placement } from './graph-utils';
 
@@ -1047,5 +1049,103 @@ describe('identifyOrphanNodes', () => {
     ];
     const result = identifyOrphanNodes(nodes, edges, 'a');
     expect(result.size).toBe(0);
+  });
+});
+
+describe('OUTBOUND_WARNING_THRESHOLD', () => {
+  it('is 150', () => {
+    expect(OUTBOUND_WARNING_THRESHOLD).toBe(150);
+  });
+});
+
+describe('calculateOutboundLinks', () => {
+  it('returns 0 for a node with no outbound edges and no globals', () => {
+    const nodes = [makeNode('a', 1)];
+    const result = calculateOutboundLinks(nodes, []);
+    expect(result.get('a')).toBe(0);
+  });
+
+  it('sums explicit edge linkCount values (3 + 5 = 8)', () => {
+    // Two non-global nodes A, B, no globals; A->B linkCount=3 and A->B linkCount=5
+    const nodes = [makeNode('a', 1), makeNode('b', 1)];
+    const edges = [
+      makeEdge('e1', 'a', 'b', 3),
+      makeEdge('e2', 'a', 'b', 5),
+    ];
+    const result = calculateOutboundLinks(nodes, edges);
+    expect(result.get('a')).toBe(8);
+  });
+
+  it('adds sum(placements.linkCount) per global node for a non-global source (10 + 20 = 30)', () => {
+    const placements: Placement[] = [
+      { id: 'p1', name: 'Header', linkCount: 10 },
+      { id: 'p2', name: 'Footer', linkCount: 20 },
+    ];
+    const nodes = [
+      makeNode('a', 1),
+      makeNode('g', 1, { isGlobal: true, placements }),
+    ];
+    const result = calculateOutboundLinks(nodes, []);
+    expect(result.get('a')).toBe(30);
+  });
+
+  it('global source node contributes 0 implicit regardless of other globals', () => {
+    // Two globals, no explicit edges; each global source gets 0 implicit (D-02 / Phase 4 D-01 parity)
+    const nodes = [
+      makeNode('a', 1, { isGlobal: true, placements: [{ id: 'pa', name: 'Header', linkCount: 5 }] }),
+      makeNode('g', 1, { isGlobal: true, placements: [{ id: 'pg', name: 'Footer', linkCount: 10 }] }),
+    ];
+    const result = calculateOutboundLinks(nodes, []);
+    expect(result.get('a')).toBe(0);
+  });
+
+  it('non-global source + 2 globals (sums 30 and 15) + explicit edges summing 100 = 145 (under threshold)', () => {
+    // globals contribute 30 + 15 = 45 implicit to every non-global source;
+    // explicit edges from 'src' sum to 100; total = 145
+    const globalA: Placement[] = [
+      { id: 'pa1', name: 'Header', linkCount: 10 },
+      { id: 'pa2', name: 'Footer', linkCount: 20 },
+    ]; // sum = 30
+    const globalB: Placement[] = [
+      { id: 'pb1', name: 'Sidebar', linkCount: 15 },
+    ]; // sum = 15
+    const nodes = [
+      makeNode('src', 1),
+      makeNode('t1', 1),
+      makeNode('t2', 1),
+      makeNode('gA', 1, { isGlobal: true, placements: globalA }),
+      makeNode('gB', 1, { isGlobal: true, placements: globalB }),
+    ];
+    const edges = [
+      makeEdge('e1', 'src', 't1', 60),
+      makeEdge('e2', 'src', 't2', 40),
+    ]; // explicit = 100
+    const result = calculateOutboundLinks(nodes, edges);
+    expect(result.get('src')).toBe(145);
+    expect(result.get('src')! <= OUTBOUND_WARNING_THRESHOLD).toBe(true);
+  });
+
+  it('same as above but explicit sum 110 -> 155 (over threshold)', () => {
+    const globalA: Placement[] = [
+      { id: 'pa1', name: 'Header', linkCount: 10 },
+      { id: 'pa2', name: 'Footer', linkCount: 20 },
+    ]; // sum = 30
+    const globalB: Placement[] = [
+      { id: 'pb1', name: 'Sidebar', linkCount: 15 },
+    ]; // sum = 15
+    const nodes = [
+      makeNode('src', 1),
+      makeNode('t1', 1),
+      makeNode('t2', 1),
+      makeNode('gA', 1, { isGlobal: true, placements: globalA }),
+      makeNode('gB', 1, { isGlobal: true, placements: globalB }),
+    ];
+    const edges = [
+      makeEdge('e1', 'src', 't1', 70),
+      makeEdge('e2', 'src', 't2', 40),
+    ]; // explicit = 110
+    const result = calculateOutboundLinks(nodes, edges);
+    expect(result.get('src')).toBe(155);
+    expect(result.get('src')! > OUTBOUND_WARNING_THRESHOLD).toBe(true);
   });
 });
