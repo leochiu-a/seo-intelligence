@@ -113,6 +113,15 @@ const MAX_ITER = 100;
 const EPSILON = 0.0001;
 
 /**
+ * Outbound-link warning threshold. A non-global node whose total outbound link
+ * count (explicit edges + implicit global injection) exceeds this value is
+ * flagged as over-linked. Colocated with DAMPING/MAX_ITER/EPSILON per Phase 10
+ * D-05. Exported (not module-private) so UrlNode.tsx and ScoreSidebar.tsx in
+ * plan 10-02 can reuse the single source of truth instead of duplicating 150.
+ */
+export const OUTBOUND_WARNING_THRESHOLD = 150;
+
+/**
  * Iterative PageRank with page count and link count weighting.
  * d = 0.85, convergence delta < 0.0001, max 100 iterations.
  *
@@ -231,6 +240,59 @@ export function calculatePageRank(
   }
 
   return scores;
+}
+
+/**
+ * Total outbound links per node:
+ *   sum(explicit edge.linkCount) + implicit global contribution
+ *
+ * For a NON-GLOBAL source node: implicit = sum over all global nodes G of
+ *   sum(G.data.placements.linkCount).
+ * For a GLOBAL source node: implicit = 0 (mirrors Phase 4 D-01 — no
+ * global->global synthetic injection).
+ *
+ * `linkCount` is already a per-source-page figure (Phase 1 EDGE-01), so no
+ * pageCount multiplication is applied.
+ *
+ * Returns Map<nodeId, totalOutbound>. Every node in `nodes` is present in the
+ * returned map (defaulting to 0).
+ */
+export function calculateOutboundLinks(
+  nodes: Node<UrlNodeData>[],
+  edges: Edge<LinkCountEdgeData>[],
+): Map<string, number> {
+  const result = new Map<string, number>();
+  for (const n of nodes) {
+    result.set(n.id, 0);
+  }
+
+  // Explicit outbound edges (counted for every source, global or non-global)
+  for (const e of edges) {
+    const lc = e.data?.linkCount ?? 1;
+    if (result.has(e.source)) {
+      result.set(e.source, (result.get(e.source) ?? 0) + lc);
+    }
+  }
+
+  // Implicit global contribution — only non-global sources pick this up.
+  const globalPlacementSum = nodes
+    .filter((n) => n.data.isGlobal)
+    .reduce((total, g) => {
+      const perGlobal = (g.data.placements ?? []).reduce(
+        (sum, p) => sum + p.linkCount,
+        0,
+      );
+      return total + perGlobal;
+    }, 0);
+
+  if (globalPlacementSum > 0) {
+    for (const n of nodes) {
+      if (n.data.isGlobal) continue; // D-02: global sources contribute 0 implicit
+      result.set(n.id, (result.get(n.id) ?? 0) + globalPlacementSum);
+    }
+  }
+
+  return result;
 }
 
 /**
