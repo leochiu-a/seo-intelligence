@@ -3,7 +3,7 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: MVP
 status: verifying
-stopped_at: Completed 999.5-04-PLAN.md
+stopped_at: Completed 999.5-05-PLAN.md
 last_updated: "2026-04-17T15:04:10.351Z"
 last_activity: "2026-04-17 - Completed quick task 260417-ljg: 連接點沒有對齊線"
 progress:
@@ -71,6 +71,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 999.5-topical-cluster-tags P02 | 5 | 2 tasks | 3 files |
 | Phase 999.5-topical-cluster-tags P03 | 5 | 2 tasks | 4 files |
 | Phase 999.5-topical-cluster-tags P04 | 5 | 1 tasks | 2 files |
+| Phase 999.5-topical-cluster-tags P05 | 2 | 1 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -126,6 +127,7 @@ Recent decisions affecting current work:
 - [Phase 999.5-topical-cluster-tags]: Enter keydown in cluster tag input calls e.stopPropagation to prevent document-level handleConfirm from firing
 - [Phase 999.5-topical-cluster-tags]: Stripe div uses absolute left-0 top-0 bottom-0 w-1 flex flex-col overflow-hidden rounded-l-xl pointer-events-none — anchors to existing relative outer div
 - [Phase 999.5-topical-cluster-tags]: Dim-persistence deferred to Plan 07 via TODO comment; Plan 04 renders stripe normally under current node.style.opacity inheritance
+- [Phase 999.5-topical-cluster-tags]: computeEdgeStroke extracted as pure helper for test isolation; EdgeLabelRenderer requires ReactFlowProvider in tests
 
 ### Pending Todos
 
@@ -150,5 +152,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-04-17T15:04:10.347Z
-Stopped at: Completed 999.5-04-PLAN.md
+Stopped at: Completed 999.5-05-PLAN.md
 Resume file: None
