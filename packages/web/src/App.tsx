@@ -460,26 +460,37 @@ function AppInner() {
     });
   }, [nodes, scores, weakNodes, allScoreValues, orphanNodes, unreachableNodes, depthMap, outboundMap]);
 
-  // Derive highlighted node IDs from active filter keys
+  // Derive highlighted node IDs from active filter keys (AND-combine across dimensions)
   const highlightedNodeIds = useMemo(() => {
-    if (activeFilters.size === 0) return null; // null means "no filtering active"
+    const placementKeys = [...activeFilters].filter((k) => k.startsWith('placement-name:'));
+    const clusterKeys = [...activeFilters].filter((k) => k.startsWith('cluster:'));
+    if (placementKeys.length === 0 && clusterKeys.length === 0) return null;
 
-    const ids = new Set<string>();
-    for (const key of activeFilters) {
-      if (key.startsWith('placement-name:')) {
-        // "placement-name:{name}" — highlight all global nodes carrying that placement name
-        const name = key.slice('placement-name:'.length);
-        for (const node of nodes) {
-          if (
-            node.data.isGlobal &&
-            node.data.placements?.some((p) => p.name === name)
-          ) {
-            ids.add(node.id);
-          }
+    const placementMatches = new Set<string>();
+    for (const key of placementKeys) {
+      const name = key.slice('placement-name:'.length);
+      for (const node of nodes) {
+        if (node.data.isGlobal && node.data.placements?.some((p) => p.name === name)) {
+          placementMatches.add(node.id);
         }
       }
     }
-    return ids;
+
+    const clusterMatches = new Set<string>();
+    for (const key of clusterKeys) {
+      const tag = key.slice('cluster:'.length);
+      for (const node of nodes) {
+        if (node.data.tags?.includes(tag)) {
+          clusterMatches.add(node.id);
+        }
+      }
+    }
+
+    if (placementKeys.length > 0 && clusterKeys.length > 0) {
+      return new Set([...placementMatches].filter((id) => clusterMatches.has(id)));
+    }
+    if (placementKeys.length > 0) return placementMatches;
+    return clusterMatches;
   }, [activeFilters, nodes]);
 
   // Apply dim flag based on active filters (stripe persists via sibling DOM structure in UrlNode)
