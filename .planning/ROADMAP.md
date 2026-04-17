@@ -203,7 +203,11 @@ Plans:
   1. System calculates total outbound links per node, combining explicit edges and global placement contributions
   2. Nodes exceeding 150 total outbound links display a red warning indicator directly on the canvas node
   3. Sidebar shows the outbound link count for each node and highlights the count in red when it exceeds the threshold
-**Plans**: TBD
+**Plans**: 2 plans
+
+Plans:
+- [ ] 10-01-PLAN.md — TDD: calculateOutboundLinks + OUTBOUND_WARNING_THRESHOLD pure function
+- [ ] 10-02-PLAN.md — UI wiring: App.tsx outboundMap memo + UrlNode subtitle indicator + ScoreSidebar inline count
 **UI hint**: yes
 
 ## Progress
