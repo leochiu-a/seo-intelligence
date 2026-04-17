@@ -654,6 +654,66 @@ describe('parseImportJson', () => {
     expect(result.edges[0].sourceHandle).toBe('handle-top-source');
     expect(result.edges[0].targetHandle).toBe('handle-bottom-target');
   });
+
+  it('accepts tags array when present', () => {
+    const raw = JSON.stringify({
+      nodes: [{ id: 'a', urlTemplate: '/a', pageCount: 1, tags: ['food', 'taipei'], x: 0, y: 0 }],
+      edges: [],
+    });
+    const { nodes } = parseImportJson(raw);
+    expect(nodes[0].data.tags).toEqual(['food', 'taipei']);
+  });
+
+  it('omits tags from data when absent from JSON (backward compat)', () => {
+    const raw = JSON.stringify({
+      nodes: [{ id: 'a', urlTemplate: '/a', pageCount: 1, x: 0, y: 0 }],
+      edges: [],
+    });
+    const { nodes } = parseImportJson(raw);
+    expect(nodes[0].data).not.toHaveProperty('tags');
+  });
+
+  it('omits tags when empty array', () => {
+    const raw = JSON.stringify({
+      nodes: [{ id: 'a', urlTemplate: '/a', pageCount: 1, tags: [], x: 0, y: 0 }],
+      edges: [],
+    });
+    const { nodes } = parseImportJson(raw);
+    expect(nodes[0].data).not.toHaveProperty('tags');
+  });
+
+  it('filters non-string entries from tags array', () => {
+    const raw = JSON.stringify({
+      nodes: [{ id: 'a', urlTemplate: '/a', pageCount: 1, tags: ['food', 42, null, 'hotel'], x: 0, y: 0 }],
+      edges: [],
+    });
+    const { nodes } = parseImportJson(raw);
+    expect(nodes[0].data.tags).toEqual(['food', 'hotel']);
+  });
+
+  it('round-trips tags through serialize → parse', () => {
+    // MAJOR-1 fix: single assertion verifying export→import symmetry.
+    // Construct a payload mirroring the shape App.tsx onExportJson produces
+    // for a tagged node, serialize it, parse it back, assert tags identity.
+    const originalTags = ['food', 'taipei'];
+    const exportShape = {
+      nodes: [
+        {
+          id: 'a',
+          urlTemplate: '/a',
+          pageCount: 1,
+          tags: originalTags,
+          x: 10,
+          y: 20,
+        },
+      ],
+      edges: [],
+    };
+    const serialized = JSON.stringify(exportShape);
+    const { nodes: parsedNodes } = parseImportJson(serialized);
+    expect(parsedNodes[0].data.tags).toEqual(originalTags);
+    // Also verify it is a fresh array (not a reference leak) — deep equality already covers this.
+  });
 });
 
 describe('HANDLE_IDS', () => {
