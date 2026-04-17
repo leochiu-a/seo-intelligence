@@ -1,18 +1,50 @@
-import { useState, useCallback, useRef, useEffect } from 'react';
+import { useState, useCallback, useRef, useEffect, useMemo } from 'react';
 import {
   BaseEdge,
   EdgeLabelRenderer,
   getSmoothStepPath,
+  useReactFlow,
   type EdgeProps,
+  type Node,
 } from 'reactflow';
+import type { UrlNodeData } from '../lib/graph-utils';
+import { getClusterColor } from '../lib/cluster-colors';
 
 export interface LinkCountEdgeData {
   linkCount: number;
   onLinkCountChange?: (edgeId: string, linkCount: number) => void;
 }
 
+/**
+ * Computes the stroke color for an edge based on shared cluster tags and selection state.
+ * Priority: selected indigo > cluster color > default gray.
+ * When multiple tags are shared, picks the first in alphabetical order (deterministic).
+ */
+export function computeEdgeStroke(
+  sourceTags: string[] | undefined,
+  targetTags: string[] | undefined,
+  selected: boolean,
+): string {
+  if (selected) return '#6366F1';
+
+  const src = sourceTags ?? [];
+  const tgt = targetTags ?? [];
+
+  if (src.length === 0 || tgt.length === 0) return '#9CA3AF';
+
+  const sourceSet = new Set(src);
+  const shared = tgt.filter((t) => sourceSet.has(t));
+
+  if (shared.length === 0) return '#9CA3AF';
+
+  shared.sort();
+  return getClusterColor(shared[0]).edge;
+}
+
 export function LinkCountEdge({
   id,
+  source,
+  target,
   sourceX,
   sourceY,
   targetX,
@@ -32,6 +64,22 @@ export function LinkCountEdge({
     targetY,
     targetPosition,
   });
+
+  const { getNode } = useReactFlow();
+
+  const clusterStrokeHex = useMemo(() => {
+    const sourceNode = getNode(source) as Node<UrlNodeData> | undefined;
+    const targetNode = getNode(target) as Node<UrlNodeData> | undefined;
+    const sourceTags = sourceNode?.data.tags ?? [];
+    const targetTags = targetNode?.data.tags ?? [];
+
+    const sourceSet = new Set(sourceTags);
+    const shared = targetTags.filter((t) => sourceSet.has(t));
+    if (shared.length === 0) return null;
+
+    shared.sort();
+    return getClusterColor(shared[0]).edge;
+  }, [source, target, getNode]);
 
   const [editing, setEditing] = useState(false);
   const [localCount, setLocalCount] = useState(data?.linkCount ?? 1);
@@ -62,7 +110,7 @@ export function LinkCountEdge({
         path={edgePath}
         markerEnd={markerEnd}
         style={{
-          stroke: selected ? '#6366F1' : '#9CA3AF',
+          stroke: selected ? '#6366F1' : (clusterStrokeHex ?? '#9CA3AF'),
           strokeWidth: 2,
           ...style,
         }}
