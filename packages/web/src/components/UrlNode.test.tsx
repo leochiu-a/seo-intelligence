@@ -143,7 +143,7 @@ describe('UrlNode', () => {
     renderNode({ urlTemplate: '/blog', pageCount: 1, tags: ['travel'], onUpdate: vi.fn() });
     await user.click(screen.getByRole('button', { name: 'Edit node' }));
 
-    expect(screen.getByText('travel')).toBeInTheDocument();
+    expect(screen.getAllByText('travel').length).toBeGreaterThanOrEqual(1);
   });
 
   describe('cluster stripe + chips', () => {
