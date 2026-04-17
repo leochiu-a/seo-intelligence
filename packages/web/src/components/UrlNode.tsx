@@ -3,6 +3,7 @@ import { Handle, Position, useReactFlow, type NodeProps, type Node } from 'react
 import { Pencil, TriangleAlert, Globe, Home, Unplug, Layers } from 'lucide-react';
 import { EditPopover } from './EditPopover';
 import { formatPageCount, type UrlNodeData, type ScoreTier, type Placement, HANDLE_IDS, collectPlacementSuggestions } from '../lib/graph-utils';
+import { getClusterColor } from '../lib/cluster-colors';
 
 export type { UrlNodeData } from '../lib/graph-utils';
 
@@ -17,6 +18,7 @@ interface UrlNodeExtendedData extends UrlNodeData {
   crawlDepth?: number;
   outboundCount?: number;
   isOverLinked?: boolean;
+  isDimmed?: boolean;
 }
 
 const TONE_MAP: Record<ScoreTier, { card: string; focus: string; badge: string; badgeLabel: string }> = {
@@ -68,6 +70,11 @@ function UrlNodeComponent({ id, data, selected }: NodeProps<UrlNodeExtendedData>
   const tier = data.scoreTier ?? 'neutral';
   const tone = TONE_MAP[tier];
 
+  // Tags for the stripe: up to 3 visible bands, rest are overflow count
+  const tags = data.tags ?? [];
+  const visibleBandTags = tags.slice(0, 3);
+  const overflowCount = tags.length > 3 ? tags.length - 3 : 0;
+
   const handleSave = (urlTemplate: string, pageCount: number, isGlobal: boolean, placements: Placement[]) => {
     if (data.onUpdate) {
       data.onUpdate(id, { urlTemplate, pageCount, isGlobal, placements });
@@ -91,84 +98,122 @@ function UrlNodeComponent({ id, data, selected }: NodeProps<UrlNodeExtendedData>
         style={{ background: '#ffffff', border: '2px solid var(--color-placeholder)', width: 12, height: 12 }}
       />
 
-      {/* Edit button — always absolute top-right */}
-      <button
-        className="nodrag absolute top-2 right-2 p-1 rounded hover:bg-gray-100 transition-colors"
-        aria-label="Edit node"
-        onClick={(e) => {
-          e.stopPropagation();
-          setShowPopover((prev) => !prev);
-        }}
-      >
-        <Pencil size={13} className="text-muted-fg hover:text-dark" />
-      </button>
-
-      {/* Badges — tier, global, and/or root */}
-      {(tier !== 'neutral' || data.isGlobal || data.isRoot) && (
-        <div className="mb-2 flex flex-wrap items-center gap-1">
-          {tier !== 'neutral' && (
-            <span className={`inline-flex items-center rounded-full px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${tone.badge}`}>
-              {tone.badgeLabel}
-            </span>
-          )}
-          {data.isGlobal && (
-            <span className="inline-flex items-center gap-1 rounded-full px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide bg-blue-100 text-blue-700">
-              <Globe size={9} />
-              Global
-            </span>
-          )}
-          {data.isRoot && (
-            <span className="inline-flex items-center gap-1 rounded-full px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide bg-violet-100 text-violet-700">
-              <Home size={9} />
-              Root
-            </span>
-          )}
+      {/* Cluster stripe - sibling of content wrapper, stays vivid when dimmed */}
+      {visibleBandTags.length > 0 && (
+        <div
+          data-testid="cluster-stripe"
+          className="absolute left-0 top-0 bottom-0 w-1 flex flex-col overflow-hidden rounded-l-xl pointer-events-none"
+          aria-hidden
+        >
+          {visibleBandTags.map((tag) => {
+            const color = getClusterColor(tag);
+            return <div key={tag} className={`flex-1 ${color.stripe}`} data-cluster-tag={tag} />;
+          })}
         </div>
       )}
 
-      {/* Title */}
-      <div className="mb-1 break-all pr-6 text-xs font-semibold text-dark">
-        {data.urlTemplate || <span className="text-placeholder">No URL template</span>}
-      </div>
+      {/* Content wrapper - receives dim opacity; stripe above is sibling and stays vivid */}
+      <div
+        data-testid="card-content"
+        data-dimmed={data.isDimmed ?? false}
+        style={{ opacity: data.isDimmed ? 0.2 : 1, transition: 'opacity 0.2s' }}
+      >
+        {/* Edit button — always absolute top-right */}
+        <button
+          className="nodrag absolute top-2 right-2 p-1 rounded hover:bg-gray-100 transition-colors"
+          aria-label="Edit node"
+          onClick={(e) => {
+            e.stopPropagation();
+            setShowPopover((prev) => !prev);
+          }}
+        >
+          <Pencil size={13} className="text-muted-fg hover:text-dark" />
+        </button>
 
-      {/* Subtitle */}
-      <div className="flex items-center gap-1.5 text-[11px] text-muted-fg">
-        <span>{formatPageCount(data.pageCount)}</span>
-        {data.isWeak && !data.isOrphan && !data.isUnreachable && (
-          <>
-            <span>·</span>
-            <TriangleAlert size={11} className="text-amber-500" aria-label="Weak page" />
-            <span className="text-amber-500">Weak</span>
-          </>
+        {/* Badges — tier, global, and/or root */}
+        {(tier !== 'neutral' || data.isGlobal || data.isRoot) && (
+          <div className="mb-2 flex flex-wrap items-center gap-1">
+            {tier !== 'neutral' && (
+              <span className={`inline-flex items-center rounded-full px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${tone.badge}`}>
+                {tone.badgeLabel}
+              </span>
+            )}
+            {data.isGlobal && (
+              <span className="inline-flex items-center gap-1 rounded-full px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide bg-blue-100 text-blue-700">
+                <Globe size={9} />
+                Global
+              </span>
+            )}
+            {data.isRoot && (
+              <span className="inline-flex items-center gap-1 rounded-full px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide bg-violet-100 text-violet-700">
+                <Home size={9} />
+                Root
+              </span>
+            )}
+          </div>
         )}
-        {data.isOrphan && (
-          <>
-            <span>·</span>
-            <Unplug size={11} className="text-red-500" aria-label="Orphan page" />
-            <span className="text-red-500">Orphan</span>
-          </>
-        )}
-        {data.isUnreachable && !data.isOrphan && (
-          <>
-            <span>·</span>
-            <Unplug size={11} className="text-red-500" aria-label="Unreachable page" />
-            <span className="text-red-500">Unreachable</span>
-          </>
-        )}
-        {typeof data.crawlDepth === 'number' && data.crawlDepth !== Infinity && data.crawlDepth > 3 && !data.isOrphan && !data.isUnreachable && (
-          <>
-            <span>·</span>
-            <Layers size={11} className="text-amber-500" aria-label="Deep page" />
-            <span className="text-amber-500">Depth {data.crawlDepth}</span>
-          </>
-        )}
-        {data.isOverLinked && typeof data.outboundCount === 'number' && (
-          <>
-            <span>·</span>
-            <TriangleAlert size={11} className="text-red-500" aria-label="Over-linked page" />
-            <span className="text-red-500">{data.outboundCount} links</span>
-          </>
-        )}
+
+        {/* Title */}
+        <div className="mb-1 break-all pr-6 text-xs font-semibold text-dark">
+          {data.urlTemplate || <span className="text-placeholder">No URL template</span>}
+        </div>
+
+        {/* Subtitle */}
+        <div className="flex flex-wrap items-center gap-1.5 text-[11px] text-muted-fg">
+          <span>{formatPageCount(data.pageCount)}</span>
+          {data.isWeak && !data.isOrphan && !data.isUnreachable && (
+            <>
+              <span>·</span>
+              <TriangleAlert size={11} className="text-amber-500" aria-label="Weak page" />
+              <span className="text-amber-500">Weak</span>
+            </>
+          )}
+          {data.isOrphan && (
+            <>
+              <span>·</span>
+              <Unplug size={11} className="text-red-500" aria-label="Orphan page" />
+              <span className="text-red-500">Orphan</span>
+            </>
+          )}
+          {data.isUnreachable && !data.isOrphan && (
+            <>
+              <span>·</span>
+              <Unplug size={11} className="text-red-500" aria-label="Unreachable page" />
+              <span className="text-red-500">Unreachable</span>
+            </>
+          )}
+          {typeof data.crawlDepth === 'number' && data.crawlDepth !== Infinity && data.crawlDepth > 3 && !data.isOrphan && !data.isUnreachable && (
+            <>
+              <span>·</span>
+              <Layers size={11} className="text-amber-500" aria-label="Deep page" />
+              <span className="text-amber-500">Depth {data.crawlDepth}</span>
+            </>
+          )}
+          {data.isOverLinked && typeof data.outboundCount === 'number' && (
+            <>
+              <span>·</span>
+              <TriangleAlert size={11} className="text-red-500" aria-label="Over-linked page" />
+              <span className="text-red-500">{data.outboundCount} links</span>
+            </>
+          )}
+          {/* Cluster tag chips */}
+          {tags.length > 0 && (
+            <>
+              <span>·</span>
+              {tags.map((tag, idx) => {
+                const color = getClusterColor(tag);
+                return (
+                  <span key={tag} className="inline-flex items-center gap-1">
+                    {idx > 0 && <span>·</span>}
+                    <span className={`inline-block w-2 h-2 rounded-full ${color.dot}`} aria-hidden />
+                    <span>{tag}</span>
+                  </span>
+                );
+              })}
+              {overflowCount > 0 && <span>+{overflowCount}</span>}
+            </>
+          )}
+        </div>
       </div>
 
       <Handle

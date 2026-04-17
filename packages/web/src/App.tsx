@@ -482,28 +482,17 @@ function AppInner() {
     return ids;
   }, [activeFilters, nodes]);
 
-  // Apply opacity styles based on active filters
+  // Apply dim flag based on active filters (stripe persists via sibling DOM structure in UrlNode)
   const styledNodes = useMemo(() => {
     if (highlightedNodeIds === null) {
-      // No filter active: strip any leftover opacity style
       return enrichedNodes.map((node) =>
-        node.style?.opacity != null
-          ? { ...node, style: { ...node.style, opacity: undefined } }
-          : node,
+        node.data.isDimmed ? { ...node, data: { ...node.data, isDimmed: false } } : node,
       );
     }
     return enrichedNodes.map((node) => {
-      const isHighlighted = highlightedNodeIds.has(node.id);
-      const targetOpacity = isHighlighted ? 1 : 0.2;
-      if (node.style?.opacity === targetOpacity) return node;
-      return {
-        ...node,
-        style: {
-          ...node.style,
-          opacity: targetOpacity,
-          ...(isHighlighted ? { filter: 'drop-shadow(0 0 6px rgba(59, 130, 246, 0.5))' } : {}),
-        },
-      };
+      const isDimmed = !highlightedNodeIds.has(node.id);
+      if (node.data.isDimmed === isDimmed) return node;
+      return { ...node, data: { ...node.data, isDimmed } };
     });
   }, [enrichedNodes, highlightedNodeIds]);
 
