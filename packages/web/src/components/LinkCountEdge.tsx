@@ -110,9 +110,13 @@ export function LinkCountEdge({
         path={edgePath}
         markerEnd={markerEnd}
         style={{
+          // Computed stroke MUST come after the inherited `...style` spread.
+          // ReactFlow passes `style` from edge state which may carry `stroke: '#9CA3AF'`
+          // (set during edge creation), and a trailing spread would overwrite the
+          // just-computed cluster color. UAT gap — Test 6.
+          ...style,
           stroke: selected ? '#6366F1' : (clusterStrokeHex ?? '#9CA3AF'),
           strokeWidth: 2,
-          ...style,
         }}
       />
       <EdgeLabelRenderer>
