@@ -12,6 +12,7 @@ export interface UrlNodeData {
   isGlobal?: boolean;
   placements?: Placement[];
   isRoot?: boolean;
+  tags?: string[];  // Phase 999.5 D-01. Optional array of cluster tag names. Empty/missing = unassigned.
 }
 
 export interface LinkCountEdgeData {
@@ -113,6 +114,14 @@ const MAX_ITER = 100;
 const EPSILON = 0.0001;
 
 /**
+ * Multiplicative bonus applied to edges whose source and target share ≥ 1 tag.
+ * Applied identically in the inbound rank-transfer loop and the totalWeightedOut
+ * precompute so PageRank math stays consistent. Module-private per Phase 999.5 D-08 —
+ * matches Phase 8/10 precedent for threshold constants. No UI knob.
+ */
+const CLUSTER_BONUS_FACTOR = 1.5;
+
+/**
  * Outbound-link warning threshold. A non-global node whose total outbound link
  * count (explicit edges + implicit global injection) exceeds this value is
  * flagged as over-linked. Colocated with DAMPING/MAX_ITER/EPSILON per Phase 10
@@ -120,6 +129,23 @@ const EPSILON = 0.0001;
  * plan 10-02 can reuse the single source of truth instead of duplicating 150.
  */
 export const OUTBOUND_WARNING_THRESHOLD = 150;
+
+/**
+ * Returns true when source and target tag arrays share at least one tag.
+ * Handles undefined/empty inputs by returning false. Used by calculatePageRank
+ * to decide whether an edge gets the CLUSTER_BONUS_FACTOR multiplier.
+ */
+export function hasSameCluster(
+  a: string[] | undefined,
+  b: string[] | undefined,
+): boolean {
+  if (!a || !b || a.length === 0 || b.length === 0) return false;
+  const setB = new Set(b);
+  for (const tag of a) {
+    if (setB.has(tag)) return true;
+  }
+  return false;
+}
 
 /**
  * Iterative PageRank with page count and link count weighting.
@@ -147,10 +173,10 @@ export function calculatePageRank(
     nodeMap.set(n.id, n.data);
   }
 
-  // Build inbound adjacency: targetId -> Array<{ sourceId, linkCount }>
-  const inbound = new Map<string, Array<{ sourceId: string; linkCount: number }>>();
-  // Build outbound adjacency: sourceId -> Array<{ targetId, linkCount }>
-  const outbound = new Map<string, Array<{ targetId: string; linkCount: number }>>();
+  // Build inbound adjacency: targetId -> Array<{ sourceId, linkCount, sameCluster }>
+  const inbound = new Map<string, Array<{ sourceId: string; linkCount: number; sameCluster: boolean }>>();
+  // Build outbound adjacency: sourceId -> Array<{ targetId, linkCount, sameCluster }>
+  const outbound = new Map<string, Array<{ targetId: string; linkCount: number; sameCluster: boolean }>>();
 
   for (const n of nodes) {
     inbound.set(n.id, []);
@@ -159,11 +185,15 @@ export function calculatePageRank(
 
   for (const e of edges) {
     const lc = e.data?.linkCount ?? 1;
-    inbound.get(e.target)?.push({ sourceId: e.source, linkCount: lc });
-    outbound.get(e.source)?.push({ targetId: e.target, linkCount: lc });
+    const srcTags = nodeMap.get(e.source)?.tags;
+    const tgtTags = nodeMap.get(e.target)?.tags;
+    const sameCluster = hasSameCluster(srcTags, tgtTags);
+    inbound.get(e.target)?.push({ sourceId: e.source, linkCount: lc, sameCluster });
+    outbound.get(e.source)?.push({ targetId: e.target, linkCount: lc, sameCluster });
   }
 
-  // Global node injection: every non-global node implicitly links to each global node
+  // Global node injection: every non-global node implicitly links to each global node.
+  // Synthetic edges carry sameCluster flag computed against tags of both ends (Phase 999.5 D-04).
   const globalNodes = nodes.filter((n) => n.data.isGlobal);
   const nonGlobalNodes = nodes.filter((n) => !n.data.isGlobal);
   for (const globalNode of globalNodes) {
@@ -174,24 +204,30 @@ export function calculatePageRank(
     if (totalPlacementLinks <= 0) continue;
 
     for (const sourceNode of nonGlobalNodes) {
+      const sameCluster = hasSameCluster(sourceNode.data.tags, globalNode.data.tags);
       inbound.get(globalNode.id)?.push({
         sourceId: sourceNode.id,
         linkCount: totalPlacementLinks,
+        sameCluster,
       });
       outbound.get(sourceNode.id)?.push({
         targetId: globalNode.id,
         linkCount: totalPlacementLinks,
+        sameCluster,
       });
     }
   }
 
-  // Precompute totalWeightedOutbound for each node
+  // Precompute totalWeightedOutbound for each node. Same-cluster edges contribute
+  // linkCount × CLUSTER_BONUS_FACTOR so rank transfer stays consistent with
+  // the bonused denominator (Phase 999.5 D-06).
   const totalWeightedOut = new Map<string, number>();
   for (const n of nodes) {
     let total = 0;
-    for (const { targetId, linkCount } of outbound.get(n.id) ?? []) {
+    for (const { targetId, linkCount, sameCluster } of outbound.get(n.id) ?? []) {
       const targetPageCount = nodeMap.get(targetId)?.pageCount ?? 1;
-      total += linkCount * targetPageCount;
+      const effectiveLinkCount = sameCluster ? linkCount * CLUSTER_BONUS_FACTOR : linkCount;
+      total += effectiveLinkCount * targetPageCount;
     }
     totalWeightedOut.set(n.id, total);
   }
@@ -222,11 +258,12 @@ export function calculatePageRank(
       const pageCount = nodeMap.get(n.id)?.pageCount ?? 1;
       let rank = (1 - DAMPING) + danglingShare;
 
-      for (const { sourceId, linkCount } of inbound.get(n.id) ?? []) {
+      for (const { sourceId, linkCount, sameCluster } of inbound.get(n.id) ?? []) {
         const sourceScore = scores.get(sourceId) ?? 1.0;
         const sourceTotal = totalWeightedOut.get(sourceId) ?? 0;
         if (sourceTotal > 0) {
-          rank += DAMPING * sourceScore * linkCount * pageCount / sourceTotal;
+          const effectiveLinkCount = sameCluster ? linkCount * CLUSTER_BONUS_FACTOR : linkCount;
+          rank += DAMPING * sourceScore * effectiveLinkCount * pageCount / sourceTotal;
         }
       }
 
@@ -489,6 +526,22 @@ export function collectPlacementSuggestions(
     .filter((n) => n.id !== currentNodeId && n.data.isGlobal && n.data.placements?.length)
     .flatMap((n) => (n.data.placements ?? []).map((p) => p.name).filter(Boolean));
   return [...new Set(names)];
+}
+
+/**
+ * Collects unique, non-empty tag names from all nodes EXCEPT the node with
+ * the given currentNodeId. Mirrors collectPlacementSuggestions shape.
+ * Phase 999.5 D-02 + Phase 6 PLACE-04: consumer uses empty array to hide
+ * autocomplete dropdown.
+ */
+export function collectClusterSuggestions(
+  nodes: Node<UrlNodeData>[],
+  currentNodeId: string,
+): string[] {
+  const tags = nodes
+    .filter((n) => n.id !== currentNodeId && n.data.tags?.length)
+    .flatMap((n) => (n.data.tags ?? []).filter((t) => t.trim() !== ''));
+  return [...new Set(tags)];
 }
 
 // ---------------------------------------------------------------------------

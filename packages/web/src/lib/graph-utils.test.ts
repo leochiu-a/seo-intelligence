@@ -1210,18 +1210,33 @@ describe('collectClusterSuggestions', () => {
 });
 
 describe('calculatePageRank — cluster bonus', () => {
-  it('Test 1 (same-cluster two-node): applies 1.5x bonus when source and target share >=1 tag', () => {
+  it('Test 1 (same-cluster bonus): B gets more equity than C when A->B is same-cluster and A->C is cross-cluster', () => {
+    // A links to B (same cluster: food) and C (different cluster: hotel)
+    // Same bonus applied equally to totalWeightedOut, but B edge has 1.5x effective
+    // while C edge stays at 1.0x — so B captures more of A's rank than C does.
+    const nodes: Node<UrlNodeData>[] = [
+      { id: 'a', type: 'urlNode', position: { x: 0, y: 0 }, data: { urlTemplate: '/a', pageCount: 1, tags: ['food'] } },
+      { id: 'b', type: 'urlNode', position: { x: 100, y: 0 }, data: { urlTemplate: '/b', pageCount: 1, tags: ['food'] } },
+      { id: 'c', type: 'urlNode', position: { x: 200, y: 0 }, data: { urlTemplate: '/c', pageCount: 1, tags: ['hotel'] } },
+    ];
+    const edges: Edge<LinkCountEdgeData>[] = [
+      { id: 'e1', source: 'a', target: 'b', data: { linkCount: 1 } },
+      { id: 'e2', source: 'a', target: 'c', data: { linkCount: 1 } },
+    ];
+    // Control: all same linkCount, no tags
     const baseNodes: Node<UrlNodeData>[] = [
       { id: 'a', type: 'urlNode', position: { x: 0, y: 0 }, data: { urlTemplate: '/a', pageCount: 1 } },
       { id: 'b', type: 'urlNode', position: { x: 100, y: 0 }, data: { urlTemplate: '/b', pageCount: 1 } },
+      { id: 'c', type: 'urlNode', position: { x: 200, y: 0 }, data: { urlTemplate: '/c', pageCount: 1 } },
     ];
-    const edges: Edge<LinkCountEdgeData>[] = [{ id: 'e1', source: 'a', target: 'b', data: { linkCount: 1 } }];
 
     const controlScores = calculatePageRank(baseNodes, edges);
-    const taggedNodes = baseNodes.map((n) => ({ ...n, data: { ...n.data, tags: ['food'] } }));
-    const bonusedScores = calculatePageRank(taggedNodes, edges);
+    const bonusedScores = calculatePageRank(nodes, edges);
 
-    expect(bonusedScores.get('b')!).toBeGreaterThan(controlScores.get('b')!);
+    // In control, B and C get equal equity from A (same linkCount, no bonus)
+    expect(controlScores.get('b')!).toBeCloseTo(controlScores.get('c')!, 4);
+    // With cluster bonus, B gets more equity than C (B is same-cluster, C is cross-cluster)
+    expect(bonusedScores.get('b')!).toBeGreaterThan(bonusedScores.get('c')!);
   });
 
   it('Test 2 (different-cluster): no bonus when tags are disjoint', () => {
@@ -1291,22 +1306,22 @@ describe('calculatePageRank — cluster bonus', () => {
     expect(multiScores.get('b')!).toBeCloseTo(singleScores.get('b')!, 4);
   });
 
-  it('Test 6 (global with matching cluster): synthetic inbound from non-global gets bonused when tags match', () => {
+  it('Test 6 (global with matching cluster): same-cluster global captures more equity than cross-cluster global when competing', () => {
+    // Two global nodes G1 and G2; non-global A with tags=['food'].
+    // G1 has tags=['food'] (same cluster as A), G2 has tags=['hotel'] (different cluster).
+    // Synthetic edge A->G1 gets 1.5x bonus; A->G2 stays at 1.0x.
+    // So G1 should score higher than G2 (more equity from A's rank transfer).
     const placements: Placement[] = [{ id: 'p1', name: 'Header', linkCount: 10 }];
-    const matchingTagNodes: Node<UrlNodeData>[] = [
+    const nodes: Node<UrlNodeData>[] = [
       { id: 'a', type: 'urlNode', position: { x: 0, y: 0 }, data: { urlTemplate: '/a', pageCount: 1, tags: ['food'] } },
-      { id: 'g', type: 'urlNode', position: { x: 100, y: 0 }, data: { urlTemplate: '/g', pageCount: 1, isGlobal: true, placements, tags: ['food'] } },
-    ];
-    const nonMatchingTagNodes: Node<UrlNodeData>[] = [
-      { id: 'a', type: 'urlNode', position: { x: 0, y: 0 }, data: { urlTemplate: '/a', pageCount: 1, tags: ['food'] } },
-      { id: 'g', type: 'urlNode', position: { x: 100, y: 0 }, data: { urlTemplate: '/g', pageCount: 1, isGlobal: true, placements, tags: ['hotel'] } },
+      { id: 'g1', type: 'urlNode', position: { x: 100, y: 0 }, data: { urlTemplate: '/g1', pageCount: 1, isGlobal: true, placements, tags: ['food'] } },
+      { id: 'g2', type: 'urlNode', position: { x: 200, y: 0 }, data: { urlTemplate: '/g2', pageCount: 1, isGlobal: true, placements, tags: ['hotel'] } },
     ];
 
-    const matchingScores = calculatePageRank(matchingTagNodes, []);
-    const nonMatchingScores = calculatePageRank(nonMatchingTagNodes, []);
+    const scores = calculatePageRank(nodes, []);
 
-    // When tags match, synthetic edge gets bonus → G scores higher
-    expect(matchingScores.get('g')!).toBeGreaterThan(nonMatchingScores.get('g')!);
+    // G1 shares cluster with A → synthetic edge gets bonus → G1 scores higher than G2
+    expect(scores.get('g1')!).toBeGreaterThan(scores.get('g2')!);
   });
 
   it('Test 7 (global without matching cluster): synthetic edge gets no bonus when tags differ', () => {
