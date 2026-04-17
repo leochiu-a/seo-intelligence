@@ -291,6 +291,89 @@ describe('ScoreSidebar hierarchy rendering', () => {
 });
 
 // ---------------------------------------------------------------------------
+// Wave 6 (RED 4): ScoreSidebar cluster dots
+// ---------------------------------------------------------------------------
+
+function makeNodeWithTags(id: string, urlTemplate: string, tags: string[]): Node<UrlNodeData> {
+  return {
+    id,
+    type: 'urlNode',
+    position: { x: 0, y: 0 },
+    data: { urlTemplate, pageCount: 1, tags },
+  };
+}
+
+describe('ScoreSidebar cluster dots', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('renders up to 3 cluster dots before URL template when node has tags', () => {
+    const node = makeNodeWithTags('n1', '/about', ['travel', 'hotels', 'flights']);
+    const scores = new Map([['n1', 0.5]]);
+    const { container } = renderSidebar([node], scores);
+    const dotsWrapper = container.querySelector('[data-testid="cluster-dots"]');
+    expect(dotsWrapper).toBeTruthy();
+    const dots = container.querySelectorAll('[data-testid="cluster-dots"] > span');
+    expect(dots.length).toBe(3);
+  });
+
+  it('renders no dots when node has no tags', () => {
+    const node = makeNode('n1', '/about');
+    const scores = new Map([['n1', 0.5]]);
+    const { container } = renderSidebar([node], scores);
+    const dotsWrapper = container.querySelector('[data-testid="cluster-dots"]');
+    expect(dotsWrapper).toBeNull();
+  });
+
+  it('caps at 3 dots for nodes with 4 or more tags', () => {
+    const node = makeNodeWithTags('n1', '/about', ['a', 'b', 'c', 'd']);
+    const scores = new Map([['n1', 0.5]]);
+    const { container } = renderSidebar([node], scores);
+    const dots = container.querySelectorAll('[data-testid="cluster-dots"] > span');
+    expect(dots.length).toBe(3);
+  });
+
+  it('dot span has rounded-full and correct palette color class', () => {
+    const node = makeNodeWithTags('n1', '/about', ['travel']);
+    const scores = new Map([['n1', 0.5]]);
+    const { container } = renderSidebar([node], scores);
+    const dot = container.querySelector('[data-testid="cluster-dots"] > span')!;
+    expect(dot.className).toMatch(/rounded-full/);
+    expect(dot.className).toMatch(/bg-\w+-400/);
+  });
+
+  it('orphan section rows also render dots when node has tags', () => {
+    const node = makeNodeWithTags('n1', '/orphan', ['travel', 'hotels']);
+    const scores = new Map([['n1', 0.1]]);
+    const orphanNodes = new Set(['n1']);
+    const { container } = renderSidebar([node], scores, new Set(), orphanNodes);
+    const dotsWrapper = container.querySelector('[data-testid="cluster-dots"]');
+    expect(dotsWrapper).toBeTruthy();
+    const dots = container.querySelectorAll('[data-testid="cluster-dots"] > span');
+    expect(dots.length).toBe(2);
+  });
+
+  it('orphan section rows render no dots when node has no tags', () => {
+    const node = makeNode('n1', '/orphan');
+    const scores = new Map([['n1', 0.1]]);
+    const orphanNodes = new Set(['n1']);
+    const { container } = renderSidebar([node], scores, new Set(), orphanNodes);
+    const dotsWrapper = container.querySelector('[data-testid="cluster-dots"]');
+    expect(dotsWrapper).toBeNull();
+  });
+
+  it('unreachable section rows render dots when node has tags', () => {
+    const node = makeNodeWithTags('n1', '/unreachable', ['travel']);
+    const scores = new Map([['n1', 0.0]]);
+    const unreachableNodes = new Set(['n1']);
+    const { container } = renderSidebar([node], scores, new Set(), new Set(), unreachableNodes);
+    const dotsWrapper = container.querySelector('[data-testid="cluster-dots"]');
+    expect(dotsWrapper).toBeTruthy();
+  });
+});
+
+// ---------------------------------------------------------------------------
 // Wave 5 (RED 3): ScoreSidebar resize handle
 // ---------------------------------------------------------------------------
 
