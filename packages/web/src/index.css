@@ -54,3 +54,28 @@ body {
   background: var(--color-disabled) !important;
 }
 
+/* React Flow handle centering — override default -4px offsets so any handle
+   size stays centered on the node border midline. */
+.react-flow__handle-top {
+  top: 0;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+.react-flow__handle-bottom {
+  top: 100%;
+  bottom: auto;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+.react-flow__handle-left {
+  top: 50%;
+  left: 0;
+  transform: translate(-50%, -50%);
+}
+.react-flow__handle-right {
+  top: 50%;
+  left: 100%;
+  right: auto;
+  transform: translate(-50%, -50%);
+}
+
