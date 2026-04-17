@@ -20,6 +20,8 @@ import {
   identifyOrphanNodes,
   calculateOutboundLinks,
   OUTBOUND_WARNING_THRESHOLD,
+  hasSameCluster,
+  collectClusterSuggestions,
 } from './graph-utils';
 import type { UrlNodeData, LinkCountEdgeData, Placement } from './graph-utils';
 
@@ -1147,5 +1149,181 @@ describe('calculateOutboundLinks', () => {
     const result = calculateOutboundLinks(nodes, edges);
     expect(result.get('src')).toBe(155);
     expect(result.get('src')! > OUTBOUND_WARNING_THRESHOLD).toBe(true);
+  });
+});
+
+// =============================================================================
+// Phase 999.5: Topical Cluster Tags — RED tests (written before implementation)
+// =============================================================================
+
+describe('hasSameCluster', () => {
+  it('Test A: returns true when arrays share 1 tag', () => {
+    expect(hasSameCluster(['food'], ['food', 'taipei'])).toBe(true);
+  });
+
+  it('Test B: returns true when arrays share 2+ tags', () => {
+    expect(hasSameCluster(['food', 'taipei'], ['taipei', 'food'])).toBe(true);
+  });
+
+  it('Test C: returns false when disjoint', () => {
+    expect(hasSameCluster(['food'], ['hotel'])).toBe(false);
+  });
+
+  it('Test D: returns false when either side is empty', () => {
+    expect(hasSameCluster([], ['food'])).toBe(false);
+    expect(hasSameCluster(['food'], [])).toBe(false);
+  });
+
+  it('Test E: returns false when either side is undefined', () => {
+    expect(hasSameCluster(undefined, ['food'])).toBe(false);
+    expect(hasSameCluster(['food'], undefined)).toBe(false);
+    expect(hasSameCluster(undefined, undefined)).toBe(false);
+  });
+});
+
+describe('collectClusterSuggestions', () => {
+  it('Test F: dedupes tags across nodes and excludes current node', () => {
+    const nodes: Node<UrlNodeData>[] = [
+      { id: 'a', type: 'urlNode', position: { x: 0, y: 0 }, data: { urlTemplate: '/a', pageCount: 1, tags: ['food', 'hotel'] } },
+      { id: 'b', type: 'urlNode', position: { x: 100, y: 0 }, data: { urlTemplate: '/b', pageCount: 1, tags: ['food', 'taipei'] } },
+      { id: 'c', type: 'urlNode', position: { x: 200, y: 0 }, data: { urlTemplate: '/c', pageCount: 1, tags: [] } },
+    ];
+    // From perspective of node 'a': other nodes (b,c) have tags ['food','taipei'] and []
+    // 'hotel' is only on 'a' (current), so it should NOT appear
+    const resultA = collectClusterSuggestions(nodes, 'a');
+    expect(new Set(resultA)).toEqual(new Set(['food', 'taipei']));
+
+    // From perspective of node 'c': other nodes (a,b) have tags ['food','hotel'] and ['food','taipei']
+    const resultC = collectClusterSuggestions(nodes, 'c');
+    expect(new Set(resultC)).toEqual(new Set(['food', 'hotel', 'taipei']));
+  });
+
+  it('Test G: returns [] when no other nodes have tags', () => {
+    const nodes: Node<UrlNodeData>[] = [
+      { id: 'x', type: 'urlNode', position: { x: 0, y: 0 }, data: { urlTemplate: '/x', pageCount: 1, tags: ['food'] } },
+      { id: 'y', type: 'urlNode', position: { x: 100, y: 0 }, data: { urlTemplate: '/y', pageCount: 1 } },
+    ];
+    // From perspective of 'x': only 'y' is a peer, and 'y' has no tags
+    const result = collectClusterSuggestions(nodes, 'x');
+    expect(result).toEqual([]);
+  });
+});
+
+describe('calculatePageRank — cluster bonus', () => {
+  it('Test 1 (same-cluster two-node): applies 1.5x bonus when source and target share >=1 tag', () => {
+    const baseNodes: Node<UrlNodeData>[] = [
+      { id: 'a', type: 'urlNode', position: { x: 0, y: 0 }, data: { urlTemplate: '/a', pageCount: 1 } },
+      { id: 'b', type: 'urlNode', position: { x: 100, y: 0 }, data: { urlTemplate: '/b', pageCount: 1 } },
+    ];
+    const edges: Edge<LinkCountEdgeData>[] = [{ id: 'e1', source: 'a', target: 'b', data: { linkCount: 1 } }];
+
+    const controlScores = calculatePageRank(baseNodes, edges);
+    const taggedNodes = baseNodes.map((n) => ({ ...n, data: { ...n.data, tags: ['food'] } }));
+    const bonusedScores = calculatePageRank(taggedNodes, edges);
+
+    expect(bonusedScores.get('b')!).toBeGreaterThan(controlScores.get('b')!);
+  });
+
+  it('Test 2 (different-cluster): no bonus when tags are disjoint', () => {
+    const nodes: Node<UrlNodeData>[] = [
+      { id: 'a', type: 'urlNode', position: { x: 0, y: 0 }, data: { urlTemplate: '/a', pageCount: 1, tags: ['food'] } },
+      { id: 'b', type: 'urlNode', position: { x: 100, y: 0 }, data: { urlTemplate: '/b', pageCount: 1, tags: ['hotel'] } },
+    ];
+    const baseNodes: Node<UrlNodeData>[] = [
+      { id: 'a', type: 'urlNode', position: { x: 0, y: 0 }, data: { urlTemplate: '/a', pageCount: 1 } },
+      { id: 'b', type: 'urlNode', position: { x: 100, y: 0 }, data: { urlTemplate: '/b', pageCount: 1 } },
+    ];
+    const edges: Edge<LinkCountEdgeData>[] = [{ id: 'e1', source: 'a', target: 'b', data: { linkCount: 1 } }];
+
+    const controlScores = calculatePageRank(baseNodes, edges);
+    const crossClusterScores = calculatePageRank(nodes, edges);
+
+    expect(crossClusterScores.get('b')!).toBeCloseTo(controlScores.get('b')!, 4);
+  });
+
+  it('Test 3 (one untagged): no bonus when source is untagged', () => {
+    const nodes: Node<UrlNodeData>[] = [
+      { id: 'a', type: 'urlNode', position: { x: 0, y: 0 }, data: { urlTemplate: '/a', pageCount: 1 } },
+      { id: 'b', type: 'urlNode', position: { x: 100, y: 0 }, data: { urlTemplate: '/b', pageCount: 1, tags: ['food'] } },
+    ];
+    const baseNodes: Node<UrlNodeData>[] = [
+      { id: 'a', type: 'urlNode', position: { x: 0, y: 0 }, data: { urlTemplate: '/a', pageCount: 1 } },
+      { id: 'b', type: 'urlNode', position: { x: 100, y: 0 }, data: { urlTemplate: '/b', pageCount: 1 } },
+    ];
+    const edges: Edge<LinkCountEdgeData>[] = [{ id: 'e1', source: 'a', target: 'b', data: { linkCount: 1 } }];
+
+    const controlScores = calculatePageRank(baseNodes, edges);
+    const mixedScores = calculatePageRank(nodes, edges);
+
+    expect(mixedScores.get('b')!).toBeCloseTo(controlScores.get('b')!, 4);
+  });
+
+  it('Test 4 (both untagged): no bonus when both nodes have no tags', () => {
+    const nodes: Node<UrlNodeData>[] = [
+      { id: 'a', type: 'urlNode', position: { x: 0, y: 0 }, data: { urlTemplate: '/a', pageCount: 1 } },
+      { id: 'b', type: 'urlNode', position: { x: 100, y: 0 }, data: { urlTemplate: '/b', pageCount: 1 } },
+    ];
+    const edges: Edge<LinkCountEdgeData>[] = [{ id: 'e1', source: 'a', target: 'b', data: { linkCount: 1 } }];
+
+    // Control run (no tags)
+    const controlScores = calculatePageRank(nodes, edges);
+    // Same nodes — should match exactly
+    const sameScores = calculatePageRank(nodes, edges);
+
+    expect(sameScores.get('b')!).toBeCloseTo(controlScores.get('b')!, 4);
+  });
+
+  it('Test 5 (multi-tag overlap applied once): bonus is 1.5x, not 2.25x for 2 shared tags', () => {
+    const singleOverlapNodes: Node<UrlNodeData>[] = [
+      { id: 'a', type: 'urlNode', position: { x: 0, y: 0 }, data: { urlTemplate: '/a', pageCount: 1, tags: ['food'] } },
+      { id: 'b', type: 'urlNode', position: { x: 100, y: 0 }, data: { urlTemplate: '/b', pageCount: 1, tags: ['food'] } },
+    ];
+    const multiOverlapNodes: Node<UrlNodeData>[] = [
+      { id: 'a', type: 'urlNode', position: { x: 0, y: 0 }, data: { urlTemplate: '/a', pageCount: 1, tags: ['food', 'taipei'] } },
+      { id: 'b', type: 'urlNode', position: { x: 100, y: 0 }, data: { urlTemplate: '/b', pageCount: 1, tags: ['food', 'taipei'] } },
+    ];
+    const edges: Edge<LinkCountEdgeData>[] = [{ id: 'e1', source: 'a', target: 'b', data: { linkCount: 1 } }];
+
+    const singleScores = calculatePageRank(singleOverlapNodes, edges);
+    const multiScores = calculatePageRank(multiOverlapNodes, edges);
+
+    // Bonus applied once regardless of overlap size — scores must be equal within epsilon
+    expect(multiScores.get('b')!).toBeCloseTo(singleScores.get('b')!, 4);
+  });
+
+  it('Test 6 (global with matching cluster): synthetic inbound from non-global gets bonused when tags match', () => {
+    const placements: Placement[] = [{ id: 'p1', name: 'Header', linkCount: 10 }];
+    const matchingTagNodes: Node<UrlNodeData>[] = [
+      { id: 'a', type: 'urlNode', position: { x: 0, y: 0 }, data: { urlTemplate: '/a', pageCount: 1, tags: ['food'] } },
+      { id: 'g', type: 'urlNode', position: { x: 100, y: 0 }, data: { urlTemplate: '/g', pageCount: 1, isGlobal: true, placements, tags: ['food'] } },
+    ];
+    const nonMatchingTagNodes: Node<UrlNodeData>[] = [
+      { id: 'a', type: 'urlNode', position: { x: 0, y: 0 }, data: { urlTemplate: '/a', pageCount: 1, tags: ['food'] } },
+      { id: 'g', type: 'urlNode', position: { x: 100, y: 0 }, data: { urlTemplate: '/g', pageCount: 1, isGlobal: true, placements, tags: ['hotel'] } },
+    ];
+
+    const matchingScores = calculatePageRank(matchingTagNodes, []);
+    const nonMatchingScores = calculatePageRank(nonMatchingTagNodes, []);
+
+    // When tags match, synthetic edge gets bonus → G scores higher
+    expect(matchingScores.get('g')!).toBeGreaterThan(nonMatchingScores.get('g')!);
+  });
+
+  it('Test 7 (global without matching cluster): synthetic edge gets no bonus when tags differ', () => {
+    const placements: Placement[] = [{ id: 'p1', name: 'Header', linkCount: 10 }];
+    const baselineNodes: Node<UrlNodeData>[] = [
+      { id: 'a', type: 'urlNode', position: { x: 0, y: 0 }, data: { urlTemplate: '/a', pageCount: 1 } },
+      { id: 'g', type: 'urlNode', position: { x: 100, y: 0 }, data: { urlTemplate: '/g', pageCount: 1, isGlobal: true, placements } },
+    ];
+    const diffTagNodes: Node<UrlNodeData>[] = [
+      { id: 'a', type: 'urlNode', position: { x: 0, y: 0 }, data: { urlTemplate: '/a', pageCount: 1, tags: ['food'] } },
+      { id: 'g', type: 'urlNode', position: { x: 100, y: 0 }, data: { urlTemplate: '/g', pageCount: 1, isGlobal: true, placements, tags: ['hotel'] } },
+    ];
+
+    const baselineScores = calculatePageRank(baselineNodes, []);
+    const diffTagScores = calculatePageRank(diffTagNodes, []);
+
+    // No bonus when tags are disjoint — G score should be the same as baseline (no tags)
+    expect(diffTagScores.get('g')!).toBeCloseTo(baselineScores.get('g')!, 4);
   });
 });
