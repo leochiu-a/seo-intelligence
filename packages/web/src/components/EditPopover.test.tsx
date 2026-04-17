@@ -11,6 +11,8 @@ const defaultProps = {
   isRoot: false,
   placements: [] as Placement[],
   placementSuggestions: [] as string[],
+  tags: [] as string[],
+  clusterSuggestions: [] as string[],
   onSave: vi.fn(),
   onRootToggle: vi.fn(),
   onClose: vi.fn(),
@@ -84,7 +86,7 @@ describe('EditPopover', () => {
       />,
     );
     fireEvent.click(screen.getByText('Confirm'));
-    expect(onSave).toHaveBeenCalledWith('/page/<id>', 5, true, [existingPlacement]);
+    expect(onSave).toHaveBeenCalledWith('/page/<id>', 5, true, [existingPlacement], []);
   });
 
   it('shows autocomplete input (combobox role) when placementSuggestions is non-empty', () => {
@@ -150,6 +152,81 @@ describe('EditPopover', () => {
       5,
       true,
       [{ id: 'p-1', name: 'home', linkCount: 1 }],
+      [],
     );
+  });
+
+  // ---- Cluster Tags tests ----
+
+  it('renders cluster tags section for any node (global or not)', () => {
+    render(<EditPopover {...defaultProps} />);
+    expect(screen.getByText('Cluster Tags')).toBeInTheDocument();
+  });
+
+  it('renders cluster tags section for global nodes too', () => {
+    render(<EditPopover {...defaultProps} isGlobal={true} />);
+    expect(screen.getByText('Cluster Tags')).toBeInTheDocument();
+  });
+
+  it('typing a tag and pressing Enter adds it to the visible chip list', () => {
+    render(<EditPopover {...defaultProps} />);
+    const input = screen.getByTestId('cluster-tag-input');
+    fireEvent.change(input, { target: { value: 'food' } });
+    fireEvent.keyDown(input, { key: 'Enter' });
+    expect(screen.getByText('food')).toBeInTheDocument();
+  });
+
+  it('clicking X on a tag chip removes it from local state', () => {
+    render(<EditPopover {...defaultProps} tags={['food']} />);
+    expect(screen.getByText('food')).toBeInTheDocument();
+    const removeBtn = screen.getByRole('button', { name: 'Remove tag food' });
+    fireEvent.click(removeBtn);
+    expect(screen.queryByText('food')).not.toBeInTheDocument();
+  });
+
+  it('onSave receives tags array as 5th positional argument', () => {
+    const onSave = vi.fn();
+    render(
+      <EditPopover
+        {...defaultProps}
+        tags={['food', 'taipei']}
+        onSave={onSave}
+      />,
+    );
+    fireEvent.click(screen.getByText('Confirm'));
+    expect(onSave).toHaveBeenCalledWith('/page/<id>', 5, false, [], ['food', 'taipei']);
+  });
+
+  it('when clusterSuggestions is empty, renders a plain input (no Autocomplete)', () => {
+    render(<EditPopover {...defaultProps} clusterSuggestions={[]} />);
+    // No combobox role when suggestions are empty
+    expect(screen.queryByRole('combobox')).not.toBeInTheDocument();
+    // But the plain cluster tag input should exist
+    expect(screen.getByTestId('cluster-tag-input')).toBeInTheDocument();
+  });
+
+  it('empty/whitespace-only tag strings are filtered out on save', () => {
+    const onSave = vi.fn();
+    render(
+      <EditPopover
+        {...defaultProps}
+        tags={['food', '  ']}
+        onSave={onSave}
+      />,
+    );
+    fireEvent.click(screen.getByText('Confirm'));
+    // Whitespace-only tag should be filtered
+    expect(onSave).toHaveBeenCalledWith('/page/<id>', 5, false, [], ['food']);
+  });
+
+  it('duplicate tags are not added', () => {
+    render(<EditPopover {...defaultProps} tags={['food']} />);
+    const input = screen.getByTestId('cluster-tag-input');
+    // Try to add 'food' again
+    fireEvent.change(input, { target: { value: 'food' } });
+    fireEvent.keyDown(input, { key: 'Enter' });
+    // Should still only have one 'food' chip
+    const foodChips = screen.getAllByText('food');
+    expect(foodChips).toHaveLength(1);
   });
 });

@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { X } from 'lucide-react';
 import { Autocomplete } from '@base-ui/react/autocomplete';
 import { type Placement } from '../lib/graph-utils';
+import { getClusterColor } from '../lib/cluster-colors';
 
 interface EditPopoverProps {
   nodeId: string;
@@ -11,25 +12,48 @@ interface EditPopoverProps {
   isRoot: boolean;
   placements: Placement[];
   placementSuggestions: string[];
-  onSave: (urlTemplate: string, pageCount: number, isGlobal: boolean, placements: Placement[]) => void;
+  tags: string[];
+  clusterSuggestions: string[];
+  onSave: (
+    urlTemplate: string,
+    pageCount: number,
+    isGlobal: boolean,
+    placements: Placement[],
+    tags: string[],
+  ) => void;
   onRootToggle: (nodeId: string) => void;
   onClose: () => void;
 }
 
-export function EditPopover({ nodeId, urlTemplate, pageCount, isGlobal, isRoot, placements, placementSuggestions, onSave, onRootToggle, onClose }: EditPopoverProps) {
+export function EditPopover({ nodeId, urlTemplate, pageCount, isGlobal, isRoot, placements, placementSuggestions, tags, clusterSuggestions, onSave, onRootToggle, onClose }: EditPopoverProps) {
   const [localTemplate, setLocalTemplate] = useState(urlTemplate);
   const [localCount, setLocalCount] = useState(pageCount);
   const [localIsGlobal, setLocalIsGlobal] = useState(isGlobal);
   const [localPlacements, setLocalPlacements] = useState<Placement[]>(placements);
+  const [localTags, setLocalTags] = useState<string[]>(tags);
+  const [tagDraft, setTagDraft] = useState('');
   const [error, setError] = useState('');
   const popoverRef = useRef<HTMLDivElement>(null);
+
+  const addTag = () => {
+    const name = tagDraft.trim();
+    if (!name) return;
+    if (localTags.includes(name)) { setTagDraft(''); return; }
+    setLocalTags((prev) => [...prev, name]);
+    setTagDraft('');
+  };
+
+  const removeTag = (tag: string) => {
+    setLocalTags((prev) => prev.filter((t) => t !== tag));
+  };
 
   const handleConfirm = () => {
     if (localTemplate.trim() === '') {
       setError('URL template cannot be empty');
       return;
     }
-    onSave(localTemplate.trim(), Math.max(1, localCount), localIsGlobal, localPlacements);
+    const cleanTags = localTags.map((t) => t.trim()).filter((t) => t.length > 0);
+    onSave(localTemplate.trim(), Math.max(1, localCount), localIsGlobal, localPlacements, cleanTags);
     onClose();
   };
 
@@ -39,7 +63,8 @@ export function EditPopover({ nodeId, urlTemplate, pageCount, isGlobal, isRoot, 
         if (localTemplate.trim() === '') {
           setError('URL template cannot be empty');
         } else {
-          onSave(localTemplate.trim(), Math.max(1, localCount), localIsGlobal, localPlacements);
+          const cleanTags = localTags.map((t) => t.trim()).filter((t) => t.length > 0);
+          onSave(localTemplate.trim(), Math.max(1, localCount), localIsGlobal, localPlacements, cleanTags);
           onClose();
         }
       }
@@ -47,7 +72,7 @@ export function EditPopover({ nodeId, urlTemplate, pageCount, isGlobal, isRoot, 
 
     document.addEventListener('mousedown', handleMouseDown);
     return () => document.removeEventListener('mousedown', handleMouseDown);
-  }, [localTemplate, localCount, localIsGlobal, localPlacements, onSave, onClose]);
+  }, [localTemplate, localCount, localIsGlobal, localPlacements, localTags, onSave, onClose]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -57,7 +82,7 @@ export function EditPopover({ nodeId, urlTemplate, pageCount, isGlobal, isRoot, 
 
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [localTemplate, localCount, localIsGlobal, localPlacements, onClose]);
+  }, [localTemplate, localCount, localIsGlobal, localPlacements, localTags, onClose]);
 
   return (
     <div
@@ -224,6 +249,93 @@ export function EditPopover({ nodeId, urlTemplate, pageCount, isGlobal, isRoot, 
             </button>
           </div>
         )}
+
+        <div>
+          <label className="block text-[11px] font-semibold uppercase tracking-wide text-muted-fg mb-1.5">
+            Cluster Tags
+          </label>
+
+          {localTags.length > 0 && (
+            <div className="flex flex-wrap gap-1 mb-2">
+              {localTags.map((tag) => {
+                const color = getClusterColor(tag);
+                return (
+                  <span
+                    key={tag}
+                    className="inline-flex items-center gap-1 rounded-full bg-gray-50 border border-border px-2 py-0.5 text-[11px] text-dark"
+                  >
+                    <span className={`inline-block w-1.5 h-1.5 rounded-full ${color.dot}`} aria-hidden />
+                    {tag}
+                    <button
+                      type="button"
+                      onClick={() => removeTag(tag)}
+                      aria-label={`Remove tag ${tag}`}
+                      className="text-muted-fg hover:text-red-500 transition-colors"
+                    >
+                      <X size={10} />
+                    </button>
+                  </span>
+                );
+              })}
+            </div>
+          )}
+
+          {clusterSuggestions.length > 0 ? (
+            <Autocomplete.Root
+              value={tagDraft}
+              onValueChange={(v) => setTagDraft(v)}
+              onItemHighlighted={() => {}}
+              items={clusterSuggestions.filter((s) => !localTags.includes(s))}
+              openOnInputClick
+            >
+              <Autocomplete.Portal container={popoverRef}>
+                <Autocomplete.Positioner sideOffset={4} className="z-[60]">
+                  <Autocomplete.Popup className="bg-white border border-border rounded-lg shadow-lg overflow-hidden max-h-40 overflow-y-auto">
+                    {clusterSuggestions.filter((s) => !localTags.includes(s)).map((tag) => (
+                      <Autocomplete.Item
+                        key={tag}
+                        value={tag}
+                        className="px-2 py-1.5 text-sm text-dark cursor-pointer hover:bg-gray-50 data-[highlighted]:bg-gray-100"
+                      >
+                        {tag}
+                      </Autocomplete.Item>
+                    ))}
+                    <Autocomplete.Empty className="px-2 py-1.5 text-sm text-muted-fg">
+                      Press Enter to add &quot;{tagDraft}&quot;
+                    </Autocomplete.Empty>
+                  </Autocomplete.Popup>
+                </Autocomplete.Positioner>
+              </Autocomplete.Portal>
+              <Autocomplete.Input
+                className="w-full h-7 text-sm text-dark border border-border rounded-lg px-2 focus:outline-none focus:ring-2 focus:ring-tier-neutral/50 focus:border-tier-neutral transition"
+                placeholder="e.g. food, taipei"
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    addTag();
+                  }
+                }}
+              />
+            </Autocomplete.Root>
+          ) : (
+            <input
+              type="text"
+              data-testid="cluster-tag-input"
+              className="w-full h-7 text-sm text-dark border border-border rounded-lg px-2 focus:outline-none focus:ring-2 focus:ring-tier-neutral/50 focus:border-tier-neutral transition"
+              placeholder="e.g. food, taipei"
+              value={tagDraft}
+              onChange={(e) => setTagDraft(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  addTag();
+                }
+              }}
+            />
+          )}
+        </div>
       </div>
 
       <div className="flex items-center justify-end gap-2 border-t border-border px-4 py-2.5">
