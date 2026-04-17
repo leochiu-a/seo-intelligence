@@ -77,7 +77,9 @@ export function EditPopover({ nodeId, urlTemplate, pageCount, isGlobal, isRoot, 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose();
-      if (e.key === 'Enter') handleConfirm();
+      // Skip Enter when focus is inside an input/textarea — those handle their own Enter behavior
+      // (e.g. tag input adds a chip; pressing Enter there must not also confirm the popover)
+      if (e.key === 'Enter' && !(e.target instanceof HTMLInputElement) && !(e.target instanceof HTMLTextAreaElement)) handleConfirm();
     };
 
     document.addEventListener('keydown', handleKeyDown);
