@@ -309,3 +309,13 @@ Plans:
 
 Plans:
 - [ ] TBD (promote with /gsd:review-backlog when ready)
+
+### Phase 999.13: Tag 輸入體驗 + Edge Color UX 改善 (BACKLOG) — P2
+
+**Goal:** 改善 cluster tag 相關的兩個 UX 問題：(1) tag 新增應支援 Tab 鍵（目前只有 Enter），降低輸入摩擦；(2) 重新評估 same-cluster edge 以 tag 顏色顯示的設計，判斷是否過於視覺干擾或語意不清
+**Context:** 從 999.5 使用回饋收集：Enter 以外的 Tab 鍵是表單 tag input 的常見習慣；edge 顏色目前與 node stripe 使用同一 palette，但 edge 顏色的語意（same cluster）對 PM 不夠直觀，可能需要 tooltip 或完全移除。
+**Requirements:** TBD
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (promote with /gsd:review-backlog when ready)
