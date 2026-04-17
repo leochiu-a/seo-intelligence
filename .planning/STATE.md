@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: MVP
-status: verifying
-stopped_at: Completed 999.5-01-PLAN.md
-last_updated: "2026-04-17T09:22:05.727Z"
-last_activity: "2026-04-17 - Completed quick task 260417-ljg: 連接點沒有對齊線"
+status: executing
+stopped_at: Phase 999.5 context gathered
+last_updated: "2026-04-17T09:15:50.552Z"
+last_activity: 2026-04-17 -- Phase 999.5 execution started
 progress:
   total_phases: 19
   completed_phases: 10
   total_plans: 26
-  completed_plans: 20
+  completed_plans: 19
   percent: 0
 ---
 
@@ -21,14 +21,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-16)
 
 **Core value:** Let PMs visually plan and simulate internal link structures — and immediately see which pages will rank highest — before any code is written or deployed.
-**Current focus:** Phase 10 — outbound-link-warning
+**Current focus:** Phase 999.5 — topical-cluster-tags
 
 ## Current Position
 
-Phase: 999.1
-Plan: Not started
-Status: Phase complete — ready for verification
-Last activity: 2026-04-17 - Completed quick task 260417-ljg: 連接點沒有對齊線
+Phase: 999.5 (topical-cluster-tags) — EXECUTING
+Plan: 1 of 8
+Status: Executing Phase 999.5
+Last activity: 2026-04-17 -- Phase 999.5 execution started
 
 Progress: [░░░░░░░░░░] 0%
 
@@ -68,7 +68,6 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 09-scenario-comparison P02 | 9 | 2 tasks | 4 files |
 | Phase 10-outbound-link-warning P01 | 2 | 2 tasks | 2 files |
 | Phase 10-outbound-link-warning P02 | 3 | 3 tasks | 5 files |
-| Phase 999.5 P01 | 4 | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -118,7 +117,6 @@ Recent decisions affecting current work:
 - [Phase 10-outbound-link-warning]: outboundMap included in JSON export payload to mirror depthMap precedent for debugging parity
 - [Phase 10-outbound-link-warning]: ScoreSidebar outboundMap prop is required (not optional) — mirrors depthMap shape; tests supply new Map() for empty branch
 - [Phase 10-outbound-link-warning]: UrlNode over-linked subtitle branch has no orphan/unreachable/weak exclusions — D-09 over-linked coexists with all reachability/strength indicators as last item in chain
-- [Phase 999.5]: Test cases for calculatePageRank cluster bonus must use multi-outbound scenarios (mixed cluster states) because CLUSTER_BONUS_FACTOR cancels in ratio when a node has only one outbound edge
 
 ### Pending Todos
 
@@ -142,6 +140,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-17T09:22:05.719Z
-Stopped at: Completed 999.5-01-PLAN.md
-Resume file: None
+Last session: 2026-04-17T08:21:33.407Z
+Stopped at: Phase 999.5 context gathered
+Resume file: .planning/phases/999.5-topical-cluster-tags/999.5-CONTEXT.md
