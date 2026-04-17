@@ -19,9 +19,12 @@
     "fumadocs-core": "16.7.16",
     "fumadocs-mdx": "14.3.0",
     "fumadocs-ui": "16.7.16",
+    "katex": "^0.16.45",
     "lucide-react": "^1.8.0",
     "react": "^19.2.5",
     "react-dom": "^19.2.5",
+    "rehype-katex": "^7.0.1",
+    "remark-math": "^6.0.0",
     "tailwind-merge": "^3.5.0",
     "vite": "^8.0.8"
   },
@@ -33,8 +36,8 @@
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^6.0.1",
     "nitro": "^3.0.260311-beta",
+    "oxlint": "^1.60.0",
     "tailwindcss": "^4.2.2",
-    "typescript": "^6.0.2",
-    "oxlint": "^1.60.0"
+    "typescript": "^6.0.2"
   }
 }

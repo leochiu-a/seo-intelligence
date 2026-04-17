@@ -1,0 +1,84 @@
+---
+title: 核心功能
+description: Canvas、PageRank、Global Nodes、Scenario 等主要功能說明
+icon: Layers
+---
+
+以下是目前專案已實作的主要功能，依使用流程分類。
+
+## 1. Canvas Editor（畫布編輯器）
+
+用流程圖方式建構網站 URL 結構。
+
+- 從 Sidebar 拖曳或雙擊空白處來 **新增 URL template 節點**
+- 每個節點可設定 **URL template**（如 `/category/<dest>/<cat>/list`）與 **page count**（該 template 代表幾個實體頁面）
+- 由節點四邊 handle 拉出 **有向邊**，每條邊可設定 **link count**（每頁平均放出幾條指向目標的連結）
+- 節點與邊支援選取、移動、刪除；畫布支援 pan / zoom
+- 節點雙擊即可開啟 inline popover 編輯屬性
+- **Import Dialog**：支援把既有的 JSON 結構匯入回 canvas
+
+## 2. PageRank Scoring（即時評分）
+
+每次編輯 graph 都會 **自動重算**，沒有「計算」按鈕。
+
+- 節點大小與顏色會依 score **即時變化**（high / mid / low 三層 tier）
+- 右側 **Score Sidebar** 依分數高低排序所有節點
+- **Weak page 警示**：分數低於 `mean − 1 stddev` 的節點會標註警告
+- 點擊 sidebar 項目會高亮對應的 canvas 節點
+
+演算法細節請看 [SEO 觀念與演算法](/docs/seo-concepts#pagerank-演算法)。
+
+## 3. Global Nodes & Placements（全站節點與版位）
+
+用來表達 Header、Footer、Breadcrumb 這類「**每頁都會出現**」的連結。
+
+- 任意節點可標記為 **global**，代表其他所有非 global 節點都會隱性連到它
+- 每個 global 節點可設定多個 **named placements**（如 `Header Nav`、`Footer Links`），各自有獨立的 link count
+- Global 節點在 canvas 上會顯示 🌐 badge
+- PageRank 計算時會自動把「非 global → 所有 global」的合成邊注入
+- **Placement autocomplete**：輸入版位名稱時，會出現其他 global 節點已使用過的名稱建議，降低打錯字、命名不一致
+
+## 4. Placement Filter Panel（版位過濾面板）
+
+複雜 graph 下快速定位特定版位的節點。
+
+- 面板以 **unique placement name** 作為頂層 checkbox（跨 global 節點去重）
+- 勾選 `Header` → 所有帶 Header 版位的 global 節點會 **高亮**，其他節點 **dim**（半透明）
+- 每個 placement 可展開看到實際使用它的 global 節點清單
+- 全部取消勾選即恢復正常
+
+## 5. Crawl Depth & Orphan Detection（爬取深度與孤島偵測）
+
+把 topology-only 分析延伸到實際 SEO 的可爬取性。
+
+- 指定任一節點為 **root**（通常是首頁），系統 BFS 計算每個節點到 root 的最短路徑深度
+- Sidebar 顯示每個節點的 **crawl depth**；深度 **>3 會出現警告**（3 次點擊以外的頁面，搜尋引擎較不易爬到）
+- **Unreachable 警示**：從 root 完全無法到達的節點另外標示
+- **Orphan 警示**：inbound edge = 0 的節點（不含 root），與 weak 節點 **分開** 提醒 — 孤島節點不是「分數低」而是「根本沒人連」
+
+## 6. Scenario Comparison（情境切換）
+
+在同一個瀏覽器中維護多個方案。
+
+- 頂部 **Scenario Tab Bar**：建立 / 切換 / 改名 / 刪除命名情境（如 `Current`、`Proposal A`）
+- 每個情境有完全獨立的 graph state（nodes + edges + root）
+- 全部情境持久化到 localStorage（key: `seo-planner-scenarios`）
+- **自動遷移**：舊版單一 graph 資料會在第一次開啟時自動遷移為 `Default` 情境
+
+> 側寫比較（side-by-side diff）與每節點分數 delta 為 v2.0 規劃中功能。
+
+## 7. 持久化與匯入／匯出
+
+- Graph 自動存到 localStorage，重新整理不會遺失
+- **JSON Export**：完整 nodes、edges、scores（可版控或分享）
+- **CSV Export**：`url_template, page_count, score` 的排名表（可貼進試算表）
+- **JSON Import**：用 Import Dialog 還原既有 graph
+
+## 規劃中的功能
+
+以下在 v2.0 roadmap 中尚未完成：
+
+- **Outbound link limit warning**：單一節點放出超過 150 條連結時警示
+- **Scenario side-by-side diff**：雙欄對照 + 每節點分數增減（+15%、−8%）
+- **"What if" simulation**：拖動連結時預覽分數變化
+- **Import crawl data**：從 crawler 匯出 CSV / sitemap 建立初始 graph

@@ -1,0 +1,132 @@
+---
+title: SEO 觀念與演算法
+description: PageRank、Crawl Depth、Orphan、Global Node 背後的 SEO 原理
+icon: BookOpen
+---
+
+本頁說明工具背後的 SEO 原理，幫助你解讀每個指標、判斷什麼時候該警示。
+
+## 為什麼是 PageRank，不是連結總數？
+
+常見的直覺是「哪個頁面被連最多次，SEO 就最強」。但實際上 Google 的 link equity 具有兩個特性：
+
+1. **遞迴傳遞**：被「強頁面」指到比被「弱頁面」指到更有價值
+2. **稀釋**：一個頁面若放出 100 條連結，每條連結能傳遞的權重就是 `1/100`
+
+純連結計數兩點都無法反映，這也是為什麼工具採用 **PageRank-style 迭代演算法**。
+
+## PageRank 演算法
+
+每次編輯 graph 都會重新計算，公式為：
+
+$$
+PR(u) = (1 - d) + d \sum_{v \in B(u)} \frac{PR(v) \cdot \mathrm{linkCount}(v \to u) \cdot \mathrm{pageCount}(u)}{\mathrm{totalOut}(v)}
+$$
+
+$$
+\mathrm{totalOut}(v) = \sum_{w \in F(v)} \mathrm{linkCount}(v \to w) \cdot \mathrm{pageCount}(w)
+$$
+
+其中 $B(u)$ 為所有指向 $u$ 的節點集合，$F(v)$ 為所有 $v$ 指出的節點集合。
+
+| 參數 | 值 | 意義 |
+|------|----|----|
+| `d` | `0.85` | Damping factor — 使用者繼續點下一個連結的機率 |
+| `max_iter` | `100` | 最多迭代次數 |
+| `ε` | `0.0001` | 收斂條件：最大 delta 小於此值即停止 |
+
+### 三個關鍵的 SEO 調整
+
+1. **Page count 加權**：一個 template 代表 100 頁時，它獲得的權重比代表 1 頁的 template 高
+2. **Link count 加權**：邊的 link count 越大，傳遞的權重越多
+3. **Dangling node 處理**：沒有 outbound edge 的節點會把自己的 rank **平均分配** 給所有節點，避免權重「漏光」
+
+### 分數 tier 劃分
+
+設 $r = \max(\text{scores}) - \min(\text{scores})$，分層如下：
+
+$$
+\text{tier}(s) = \begin{cases}
+\text{high} & s \geq \min + \tfrac{2}{3} r \\
+\text{mid} & \min + \tfrac{1}{3} r \leq s < \min + \tfrac{2}{3} r \\
+\text{low} & s < \min + \tfrac{1}{3} r \\
+\text{neutral} & r = 0
+\end{cases}
+$$
+
+> 分層是 **相對的**：就算所有節點分數都不低，最低的那一層仍會顯示 low。重點是看「相對差距」而不是絕對值。
+
+### Weak node 判定
+
+$$
+\text{threshold} = \mu - \sigma, \quad \text{weak} = \{\, n \mid \mathrm{score}(n) < \text{threshold} \,\}
+$$
+
+其中 $\mu$、$\sigma$ 為所有節點分數的平均值與標準差。這是統計上的「顯著低於平均」— 在大 graph 中能自動找出掉隊的頁面，不需人工設定閾值。
+
+## Global Node：正確建模全站連結
+
+### 為什麼要 Global Node？
+
+真實網站裡，Header、Footer、Breadcrumb 是 **每一頁** 都會指到的固定連結。如果要在 canvas 上手動拉邊，一個 100 節點的 graph 就得拉 100 條 Header 邊 — 完全不切實際。
+
+### 工具如何處理
+
+- 把 Header 節點標記為 `global`，設定一個 placement `Header Nav` 加 link count
+- PageRank 計算時會 **自動注入** 合成邊：每個 **非 global** 節點 → 每個 global 節點
+- Placement 的 link count 會 **加總** 成該 global 節點的 inbound link count
+
+### 命名規範：placement
+
+Placement 就是版位（如 `Header`、`Footer`、`Sidebar Recommended`）。讓 **多個 global 節點** 共享同一個 placement 名稱，可以在 Filter Panel 一次篩出「所有出現在 Header 的連結目標」。
+
+## Crawl Depth（爬取深度）
+
+### 背後原理
+
+搜尋引擎的 crawl budget 有限，**點擊深度** 是它決定要不要繼續爬的主要信號之一。Google 官方指引建議：**重要頁面應該在首頁 3 次點擊以內**。
+
+### 工具怎麼算
+
+從被指定為 root 的節點（通常是首頁）開始，BFS 計算所有節點的最短路徑距離：
+
+- `depth = 0` — root
+- `depth = 1` — 首頁直接連到的頁面
+- `depth > 3` — **警告**：搜尋引擎爬到的機率顯著下降
+- `depth = ∞` — **unreachable**：從 root 完全走不到，嚴重警告
+
+計算時會套用跟 PageRank 一樣的 **Global 邊注入** — 因為 Header / Footer 實際上確實把全站拉到 depth = 1。
+
+## Orphan Node：和 weak 不同的問題
+
+| 指標 | 定義 | 問題 |
+|------|------|------|
+| **Weak** | score < `mean − stddev` | 有連結但權重不夠 |
+| **Orphan** | inbound edge count = 0（不含 root） | **根本沒有任何頁面連到這裡** |
+| **Unreachable** | BFS 從 root 走不到 | 從 root 的路徑被切斷 |
+
+三者都會 **獨立提示**。Orphan 是最嚴重的 — 就算頁面存在、也被 sitemap 列出，沒有內部連結等於「搜尋引擎沒動機 crawl、使用者沒路徑進來」。
+
+## Outbound Link Limit（規劃中）
+
+Google 曾明確指出：單頁 outbound link 數超過 **~100–150** 會開始影響爬取。工具計算：
+
+$$
+\mathrm{outbound}(n) = \sum_{e \in E_\text{out}(n)} \mathrm{linkCount}(e) + \sum_{g \in G} \sum_{p \in \mathrm{placements}(g)} \mathrm{linkCount}(p)
+$$
+
+其中 $G$ 為所有 global 節點集合。超過 150 就在 canvas 與 sidebar 警示。
+
+## 使用時的 SEO 建議流程
+
+1. **先建 Current 情境**：照實際站點結構建立 graph，設定 root
+2. **檢查三個警示**：orphan、unreachable、depth > 3
+3. **看 tier 分佈**：重要商業頁面應該都在 high / mid tier；若落在 low，表示內部連結沒給夠權重
+4. **建立 Proposal 情境**：clone 後嘗試加連結、調整 Header / Footer placement，看哪個方案能把重要頁推上去
+5. **匯出 CSV** 給工程師實作
+
+## 參考閱讀
+
+- Page, L. et al. — [The PageRank Citation Ranking](http://ilpubs.stanford.edu:8090/422/) (1998)
+- Google Search Central — [How Google Search organizes information](https://developers.google.com/search/docs/fundamentals/how-search-works)
+- John Mueller on crawl depth — [Google SEO Office Hours](https://developers.google.com/search/blog)

@@ -1,4 +1,4 @@
-import { createFileRoute, notFound } from '@tanstack/react-router';
+import { createFileRoute, notFound, redirect } from '@tanstack/react-router';
 import { DocsLayout } from 'fumadocs-ui/layouts/docs';
 import { createServerFn } from '@tanstack/react-start';
 import { getPageMarkdownUrl, source } from '@/lib/source';
@@ -20,7 +20,15 @@ import { useMDXComponents } from '@/components/mdx';
 export const Route = createFileRoute('/docs/$')({
   component: Page,
   loader: async ({ params }) => {
-    const slugs = params._splat?.split('/') ?? [];
+    const splat = params._splat ?? '';
+    if (splat === '' || splat === '/') {
+      throw redirect({
+        to: '/docs/$',
+        params: { _splat: 'features' },
+        statusCode: 301,
+      });
+    }
+    const slugs = splat.split('/');
     const data = await serverLoader({ data: slugs });
     await clientLoader.preload(data.path);
     return data;
