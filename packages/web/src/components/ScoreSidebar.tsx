@@ -1,9 +1,10 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { TriangleAlert, Unplug } from 'lucide-react';
 import { useReactFlow } from 'reactflow';
 import type { Node } from 'reactflow';
 import type { UrlNodeData, UrlTreeNode } from '../lib/graph-utils';
 import { buildUrlTree, OUTBOUND_WARNING_THRESHOLD } from '../lib/graph-utils';
+import { getClusterColor } from '../lib/cluster-colors';
 
 interface ScoreSidebarProps {
   nodes: Node<UrlNodeData>[];
@@ -14,6 +15,26 @@ interface ScoreSidebarProps {
   depthMap: Map<string, number>;
   outboundMap: Map<string, number>;
   rootId: string | null;
+}
+
+/** Renders up to 3 small colored dots for a node's cluster tags. Returns null if no tags. */
+function renderClusterDots(tags: string[] | undefined) {
+  if (!tags || tags.length === 0) return null;
+  const visible = tags.slice(0, 3);
+  return (
+    <span className="inline-flex items-center gap-0.5 mr-1 flex-shrink-0" data-testid="cluster-dots">
+      {visible.map((tag) => {
+        const color = getClusterColor(tag);
+        return (
+          <span
+            key={tag}
+            className={`inline-block w-1.5 h-1.5 rounded-full ${color.dot}`}
+            aria-hidden
+          />
+        );
+      })}
+    </span>
+  );
 }
 
 /** Depth-first flatten of a URL tree into an ordered list for rendering. */
@@ -36,6 +57,8 @@ export function ScoreSidebar({ nodes, scores, weakNodes, orphanNodes, unreachabl
   // Refs hold drag state so mousemove handlers never go stale
   const dragStartX = useRef<number | null>(null);
   const dragStartWidth = useRef<number | null>(null);
+
+  const nodeById = useMemo(() => new Map(nodes.map((n) => [n.id, n])), [nodes]);
 
   const tree = buildUrlTree(nodes, scores);
   const ranked = flattenTree(tree);
@@ -125,7 +148,10 @@ export function ScoreSidebar({ nodes, scores, weakNodes, orphanNodes, unreachabl
                   onClick={() => handleClick(node.id)}
                 >
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm text-dark truncate">{node.data.urlTemplate}</p>
+                    <p className="text-sm text-dark truncate flex items-center">
+                      {renderClusterDots(node.data.tags)}
+                      <span className="truncate">{node.data.urlTemplate}</span>
+                    </p>
                     <p className="text-[11px] text-muted-fg font-mono">
                       {(scores.get(node.id) ?? 0).toFixed(4)} · <span className="text-red-500">No inbound links</span>
                     </p>
@@ -155,7 +181,10 @@ export function ScoreSidebar({ nodes, scores, weakNodes, orphanNodes, unreachabl
                   onClick={() => handleClick(node.id)}
                 >
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm text-dark truncate">{node.data.urlTemplate}</p>
+                    <p className="text-sm text-dark truncate flex items-center">
+                      {renderClusterDots(node.data.tags)}
+                      <span className="truncate">{node.data.urlTemplate}</span>
+                    </p>
                     <p className="text-[11px] text-muted-fg font-mono">
                       {(scores.get(node.id) ?? 0).toFixed(4)} · <span className="text-red-500">Unreachable</span>
                     </p>
@@ -174,7 +203,10 @@ export function ScoreSidebar({ nodes, scores, weakNodes, orphanNodes, unreachabl
         </h2>
       </div>
       <ul className="divide-y divide-border">
-        {mainRanked.map((item) => (
+        {mainRanked.map((item) => {
+          const sourceNode = nodeById.get(item.id);
+          const tags = sourceNode?.data.tags;
+          return (
           <li key={item.id}>
             <button
               className="w-full text-left py-2.5 pr-3 hover:bg-surface transition-colors flex items-start gap-2"
@@ -182,7 +214,10 @@ export function ScoreSidebar({ nodes, scores, weakNodes, orphanNodes, unreachabl
               onClick={() => handleClick(item.id)}
             >
               <div className="flex-1 min-w-0">
-                <p className="text-sm text-dark truncate">{item.urlTemplate}</p>
+                <p className="text-sm text-dark truncate flex items-center">
+                  {renderClusterDots(tags)}
+                  <span className="truncate">{item.urlTemplate}</span>
+                </p>
                 <p className="text-[11px] text-muted-fg font-mono">
                   {item.score.toFixed(4)}
                   {depthMap.size > 0 && (() => {
@@ -218,7 +253,8 @@ export function ScoreSidebar({ nodes, scores, weakNodes, orphanNodes, unreachabl
               )}
             </button>
           </li>
-        ))}
+          );
+        })}
       </ul>
       {mainRanked.length === 0 && (
         <p className="px-3 py-4 text-[11px] text-muted-fg text-center">
