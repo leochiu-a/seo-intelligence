@@ -186,6 +186,7 @@ function renderSidebar(
   unreachableNodes: Set<string> = new Set(),
   depthMap: Map<string, number> = new Map(),
   rootId: string | null = null,
+  outboundMap: Map<string, number> = new Map(),
 ) {
   return render(
     <ReactFlowProvider>
@@ -196,6 +197,7 @@ function renderSidebar(
         orphanNodes={orphanNodes}
         unreachableNodes={unreachableNodes}
         depthMap={depthMap}
+        outboundMap={outboundMap}
         rootId={rootId}
       />
     </ReactFlowProvider>,
@@ -265,6 +267,26 @@ describe('ScoreSidebar hierarchy rendering', () => {
   it('renders empty state message when nodes = []', () => {
     renderSidebar([], new Map());
     expect(screen.getByText('Add nodes to see scores')).toBeTruthy();
+  });
+
+  it('renders `{count} links` inline on the score line when outboundMap has a value under threshold', () => {
+    const about = makeNode('n1', '/about');
+    const scores = new Map([['n1', 0.5]]);
+    const outboundMap = new Map([['n1', 50]]);
+    renderSidebar([about], scores, new Set(), new Set(), new Set(), new Map(), null, outboundMap);
+    const span = screen.getByText('50 links');
+    expect(span).toBeTruthy();
+    expect(span.className).not.toMatch(/text-red-500/);
+  });
+
+  it('renders `{count} links` in text-red-500 when count exceeds OUTBOUND_WARNING_THRESHOLD (150)', () => {
+    const about = makeNode('n1', '/about');
+    const scores = new Map([['n1', 0.5]]);
+    const outboundMap = new Map([['n1', 200]]);
+    renderSidebar([about], scores, new Set(), new Set(), new Set(), new Map(), null, outboundMap);
+    const span = screen.getByText('200 links');
+    expect(span).toBeTruthy();
+    expect(span.className).toMatch(/text-red-500/);
   });
 });
 

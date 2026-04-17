@@ -3,7 +3,7 @@ import { TriangleAlert, Unplug } from 'lucide-react';
 import { useReactFlow } from 'reactflow';
 import type { Node } from 'reactflow';
 import type { UrlNodeData, UrlTreeNode } from '../lib/graph-utils';
-import { buildUrlTree } from '../lib/graph-utils';
+import { buildUrlTree, OUTBOUND_WARNING_THRESHOLD } from '../lib/graph-utils';
 
 interface ScoreSidebarProps {
   nodes: Node<UrlNodeData>[];
@@ -12,6 +12,7 @@ interface ScoreSidebarProps {
   orphanNodes: Set<string>;
   unreachableNodes: Set<string>;
   depthMap: Map<string, number>;
+  outboundMap: Map<string, number>;
   rootId: string | null;
 }
 
@@ -29,7 +30,7 @@ const MIN_WIDTH = 160;
 const MAX_WIDTH = 480;
 const DEFAULT_WIDTH = 240;
 
-export function ScoreSidebar({ nodes, scores, weakNodes, orphanNodes, unreachableNodes, depthMap, rootId }: ScoreSidebarProps) {
+export function ScoreSidebar({ nodes, scores, weakNodes, orphanNodes, unreachableNodes, depthMap, outboundMap, rootId }: ScoreSidebarProps) {
   const { fitView, setNodes } = useReactFlow();
   const [width, setWidth] = useState(DEFAULT_WIDTH);
   // Refs hold drag state so mousemove handlers never go stale
@@ -193,6 +194,19 @@ export function ScoreSidebar({ nodes, scores, weakNodes, orphanNodes, unreachabl
                         {' · '}
                         <span className={isDeep ? 'text-amber-500' : ''}>
                           Depth {depth}{isDeep ? ' ⚠' : ''}
+                        </span>
+                      </>
+                    );
+                  })()}
+                  {outboundMap.size > 0 && (() => {
+                    const outbound = outboundMap.get(item.id);
+                    if (outbound == null) return null;
+                    const isOver = outbound > OUTBOUND_WARNING_THRESHOLD;
+                    return (
+                      <>
+                        {' · '}
+                        <span className={isOver ? 'text-red-500' : ''}>
+                          {outbound} links
                         </span>
                       </>
                     );
