@@ -1,6 +1,6 @@
 import type { Node } from 'reactflow';
-import { collectPlacementGroups } from '../lib/graph-utils';
-import type { UrlNodeData, PlacementGroup } from '../lib/graph-utils';
+import { collectPlacementGroups, collectClusterGroups } from '../lib/graph-utils';
+import type { UrlNodeData, PlacementGroup, ClusterGroup } from '../lib/graph-utils';
 
 interface FilterPanelProps {
   nodes: Node<UrlNodeData>[];
@@ -10,7 +10,8 @@ interface FilterPanelProps {
 }
 
 export function FilterPanel({ nodes, activeFilters, onToggle, onClear }: FilterPanelProps) {
-  const groups: PlacementGroup[] = collectPlacementGroups(nodes);
+  const placementGroups: PlacementGroup[] = collectPlacementGroups(nodes);
+  const clusterGroups: ClusterGroup[] = collectClusterGroups(nodes);
 
   return (
     <aside
@@ -19,17 +20,17 @@ export function FilterPanel({ nodes, activeFilters, onToggle, onClear }: FilterP
     >
       <div className="px-3 py-2.5 border-b border-border">
         <h2 className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-fg">
-          Placement Filters
+          By placement
         </h2>
       </div>
 
-      {groups.length === 0 ? (
+      {placementGroups.length === 0 ? (
         <p className="px-3 py-4 text-[11px] text-muted-fg text-center" data-testid="filter-empty">
           No placement filters
         </p>
       ) : (
-        <ul className="flex-1 overflow-y-auto divide-y divide-border">
-          {groups.map((group) => {
+        <ul className="divide-y divide-border">
+          {placementGroups.map((group) => {
             const filterKey = `placement-name:${group.placementName}`;
             return (
               <li key={group.placementName} className="py-2 px-3">
@@ -67,6 +68,54 @@ export function FilterPanel({ nodes, activeFilters, onToggle, onClear }: FilterP
             );
           })}
         </ul>
+      )}
+
+      {clusterGroups.length > 0 && (
+        <>
+          <div className="px-3 py-2.5 border-b border-t border-border">
+            <h2 className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-fg">
+              By cluster
+            </h2>
+          </div>
+          <ul className="divide-y divide-border" data-testid="cluster-filter-list">
+            {clusterGroups.map((group) => {
+              const filterKey = `cluster:${group.tagName}`;
+              return (
+                <li key={group.tagName} className="py-2 px-3">
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      id={`filter-cluster-${group.tagName}`}
+                      checked={activeFilters.has(filterKey)}
+                      onChange={() => onToggle(filterKey)}
+                      className="rounded border-border accent-blue-600"
+                    />
+                    <label
+                      htmlFor={`filter-cluster-${group.tagName}`}
+                      className="text-xs text-dark truncate cursor-pointer select-none font-medium"
+                      title={group.tagName}
+                    >
+                      {group.tagName}
+                    </label>
+                  </div>
+
+                  {/* Sub-items: node URL templates in this cluster */}
+                  <ul className="mt-1.5 space-y-0.5 pl-4">
+                    {group.nodeLabels.map((label, idx) => (
+                      <li
+                        key={group.nodeIds[idx]}
+                        className="text-[11px] text-muted-fg truncate"
+                        title={label}
+                      >
+                        {label}
+                      </li>
+                    ))}
+                  </ul>
+                </li>
+              );
+            })}
+          </ul>
+        </>
       )}
 
       {activeFilters.size > 0 && (

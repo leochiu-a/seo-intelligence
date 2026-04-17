@@ -25,6 +25,7 @@ interface TestNodeData extends UrlNodeData {
   outboundCount?: number;
   isOverLinked?: boolean;
   tags?: string[];
+  isDimmed?: boolean;
 }
 
 function makeNodeProps(data: TestNodeData): NodeProps<TestNodeData> {
@@ -144,6 +145,42 @@ describe('UrlNode', () => {
     await user.click(screen.getByRole('button', { name: 'Edit node' }));
 
     expect(screen.getAllByText('travel').length).toBeGreaterThanOrEqual(1);
+  });
+
+  it('card-content has opacity 0.2 when isDimmed is true', () => {
+    renderNode({
+      urlTemplate: '/page/<id>',
+      pageCount: 1,
+      isDimmed: true,
+      onUpdate: vi.fn(),
+    });
+    const content = screen.getByTestId('card-content');
+    expect(content).toHaveStyle({ opacity: '0.2' });
+  });
+
+  it('card-content has opacity 1 when isDimmed is false or undefined', () => {
+    renderNode({
+      urlTemplate: '/page/<id>',
+      pageCount: 1,
+      isDimmed: false,
+      onUpdate: vi.fn(),
+    });
+    const content = screen.getByTestId('card-content');
+    expect(content).toHaveStyle({ opacity: '1' });
+  });
+
+  it('stripe and card-content are siblings (neither contains the other)', () => {
+    renderNode({
+      urlTemplate: '/page/<id>',
+      pageCount: 1,
+      tags: ['food'],
+      onUpdate: vi.fn(),
+    });
+    const stripe = screen.getByTestId('cluster-stripe');
+    const content = screen.getByTestId('card-content');
+    expect(stripe.contains(content)).toBe(false);
+    expect(content.contains(stripe)).toBe(false);
+    expect(stripe.parentElement).toBe(content.parentElement);
   });
 
   describe('cluster stripe + chips', () => {

@@ -9,11 +9,12 @@ const makeNode = (
   urlTemplate: string,
   isGlobal?: boolean,
   placements?: UrlNodeData['placements'],
+  tags?: string[],
 ): Node<UrlNodeData> => ({
   id,
   type: 'urlNode',
   position: { x: 0, y: 0 },
-  data: { urlTemplate, pageCount: 1, isGlobal, placements },
+  data: { urlTemplate, pageCount: 1, isGlobal, placements, tags },
 });
 
 const defaultProps = {
@@ -137,5 +138,33 @@ describe('FilterPanel (placement-centric)', () => {
     expect(checkboxes).toHaveLength(1);
     expect(screen.getByText('/global-1')).toBeInTheDocument();
     expect(screen.getByText('/global-2')).toBeInTheDocument();
+  });
+
+  it('renders By placement section header', () => {
+    render(<FilterPanel {...defaultProps} nodes={[]} />);
+    expect(screen.getByText(/by placement/i)).toBeInTheDocument();
+  });
+});
+
+describe('FilterPanel (cluster section)', () => {
+  it('renders By cluster section when at least one node has tags', () => {
+    const nodes = [makeNode('n1', '/food/ramen', false, undefined, ['food'])];
+    render(<FilterPanel {...defaultProps} nodes={nodes} />);
+    expect(screen.getByTestId('cluster-filter-list')).toBeInTheDocument();
+    expect(screen.getByText(/by cluster/i)).toBeInTheDocument();
+  });
+
+  it('hides By cluster section when no node has tags', () => {
+    const nodes = [makeNode('n1', '/page', false, undefined, undefined)];
+    render(<FilterPanel {...defaultProps} nodes={nodes} />);
+    expect(screen.queryByTestId('cluster-filter-list')).toBeNull();
+  });
+
+  it('calls onToggle with cluster:{name} key when cluster checkbox is clicked', () => {
+    const onToggle = vi.fn();
+    const nodes = [makeNode('n1', '/food/ramen', false, undefined, ['food'])];
+    render(<FilterPanel {...defaultProps} nodes={nodes} onToggle={onToggle} />);
+    fireEvent.click(screen.getByLabelText('food'));
+    expect(onToggle).toHaveBeenCalledWith('cluster:food');
   });
 });

@@ -22,8 +22,9 @@ import {
   OUTBOUND_WARNING_THRESHOLD,
   hasSameCluster,
   collectClusterSuggestions,
+  collectClusterGroups,
 } from './graph-utils';
-import type { UrlNodeData, LinkCountEdgeData, Placement } from './graph-utils';
+import type { UrlNodeData, LinkCountEdgeData, Placement, ClusterGroup } from './graph-utils';
 
 describe('createDefaultNode', () => {
   beforeEach(() => {
@@ -1340,5 +1341,49 @@ describe('calculatePageRank — cluster bonus', () => {
 
     // No bonus when tags are disjoint — G score should be the same as baseline (no tags)
     expect(diffTagScores.get('g')!).toBeCloseTo(baselineScores.get('g')!, 4);
+  });
+});
+
+describe('collectClusterGroups', () => {
+  it('returns [] when no node has tags', () => {
+    const nodes = [{ id: 'a', type: 'urlNode', position: { x: 0, y: 0 }, data: { urlTemplate: '/a', pageCount: 1 } }];
+    expect(collectClusterGroups(nodes)).toEqual([]);
+  });
+
+  it('groups nodes by tag name and dedupes across nodes', () => {
+    const nodes = [
+      { id: 'a', type: 'urlNode', position: { x: 0, y: 0 }, data: { urlTemplate: '/food/ramen', pageCount: 1, tags: ['food'] } },
+      { id: 'b', type: 'urlNode', position: { x: 0, y: 0 }, data: { urlTemplate: '/food/sushi', pageCount: 1, tags: ['food', 'taipei'] } },
+    ];
+    const groups = collectClusterGroups(nodes);
+    expect(groups.map((g) => g.tagName)).toEqual(['food', 'taipei']);
+    expect(groups[0].nodeIds).toEqual(['a', 'b']);
+    expect(groups[1].nodeIds).toEqual(['b']);
+  });
+
+  it('includes both global and non-global nodes', () => {
+    const nodes = [
+      { id: 'g', type: 'urlNode', position: { x: 0, y: 0 }, data: { urlTemplate: '/', pageCount: 1, isGlobal: true, tags: ['food'] } },
+      { id: 'a', type: 'urlNode', position: { x: 0, y: 0 }, data: { urlTemplate: '/a', pageCount: 1, tags: ['food'] } },
+    ];
+    const groups = collectClusterGroups(nodes);
+    expect(groups[0].nodeIds.sort()).toEqual(['a', 'g']);
+  });
+
+  it('dedupes duplicate tags within a node and skips empties', () => {
+    const nodes = [
+      { id: 'a', type: 'urlNode', position: { x: 0, y: 0 }, data: { urlTemplate: '/a', pageCount: 1, tags: ['food', 'food', '', '  '] } },
+    ];
+    const groups = collectClusterGroups(nodes);
+    expect(groups).toHaveLength(1);
+    expect(groups[0].tagName).toBe('food');
+    expect(groups[0].nodeIds).toEqual(['a']);
+  });
+
+  it('sorts groups alphabetically by tagName', () => {
+    const nodes = [
+      { id: 'a', type: 'urlNode', position: { x: 0, y: 0 }, data: { urlTemplate: '/a', pageCount: 1, tags: ['zebra', 'apple', 'mango'] } },
+    ];
+    expect(collectClusterGroups(nodes).map((g) => g.tagName)).toEqual(['apple', 'mango', 'zebra']);
   });
 });

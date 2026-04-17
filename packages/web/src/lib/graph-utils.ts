@@ -423,6 +423,38 @@ export function collectPlacementGroups(nodes: Node<UrlNodeData>[]): PlacementGro
     .sort((a, b) => a.placementName.localeCompare(b.placementName));
 }
 
+export interface ClusterGroup {
+  tagName: string;
+  nodeIds: string[];
+  nodeLabels: string[];
+}
+
+/**
+ * Groups nodes (global + non-global) by unique cluster tag names.
+ * Dedupes duplicates, skips empty strings, sorts alphabetically.
+ */
+export function collectClusterGroups(nodes: Node<UrlNodeData>[]): ClusterGroup[] {
+  const groups = new Map<string, { nodeIds: string[]; nodeLabels: string[] }>();
+
+  for (const node of nodes) {
+    if (!node.data.tags?.length) continue;
+    const seen = new Set<string>();
+    for (const rawTag of node.data.tags) {
+      const tag = rawTag.trim();
+      if (!tag || seen.has(tag)) continue;
+      seen.add(tag);
+      if (!groups.has(tag)) groups.set(tag, { nodeIds: [], nodeLabels: [] });
+      const g = groups.get(tag)!;
+      g.nodeIds.push(node.id);
+      g.nodeLabels.push(node.data.urlTemplate);
+    }
+  }
+
+  return Array.from(groups.entries())
+    .map(([tagName, { nodeIds, nodeLabels }]) => ({ tagName, nodeIds, nodeLabels }))
+    .sort((a, b) => a.tagName.localeCompare(b.tagName));
+}
+
 /**
  * BFS shortest-path distance from the designated root node to all other nodes.
  * Follows directed edges (source -> target). Also includes synthetic edges
