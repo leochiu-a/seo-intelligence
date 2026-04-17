@@ -15,6 +15,8 @@ interface UrlNodeExtendedData extends UrlNodeData {
   isOrphan?: boolean;
   isUnreachable?: boolean;
   crawlDepth?: number;
+  outboundCount?: number;
+  isOverLinked?: boolean;
 }
 
 const TONE_MAP: Record<ScoreTier, { card: string; focus: string; badge: string; badgeLabel: string }> = {
@@ -158,6 +160,13 @@ function UrlNodeComponent({ id, data, selected }: NodeProps<UrlNodeExtendedData>
             <span>·</span>
             <Layers size={11} className="text-amber-500" aria-label="Deep page" />
             <span className="text-amber-500">Depth {data.crawlDepth}</span>
+          </>
+        )}
+        {data.isOverLinked && typeof data.outboundCount === 'number' && (
+          <>
+            <span>·</span>
+            <TriangleAlert size={11} className="text-red-500" aria-label="Over-linked page" />
+            <span className="text-red-500">{data.outboundCount} links</span>
           </>
         )}
       </div>

@@ -21,6 +21,8 @@ interface TestNodeData extends UrlNodeData {
   onZIndexChange?: (id: string, zIndex: number) => void;
   scoreTier?: 'high' | 'mid' | 'low' | 'neutral';
   isWeak?: boolean;
+  outboundCount?: number;
+  isOverLinked?: boolean;
 }
 
 function makeNodeProps(data: TestNodeData): NodeProps<TestNodeData> {
@@ -46,7 +48,7 @@ function renderNode(data: TestNodeData) {
   const props = makeNodeProps(data);
   return render(
     <ReactFlowProvider>
-      <UrlNode {...(props as NodeProps<UrlNodeData & { onUpdate?: (id: string, data: Partial<UrlNodeData>) => void; onZIndexChange?: (id: string, zIndex: number) => void; scoreTier?: 'high' | 'mid' | 'low' | 'neutral'; isWeak?: boolean }>)} />
+      <UrlNode {...(props as NodeProps<UrlNodeData & { onUpdate?: (id: string, data: Partial<UrlNodeData>) => void; onZIndexChange?: (id: string, zIndex: number) => void; scoreTier?: 'high' | 'mid' | 'low' | 'neutral'; isWeak?: boolean; outboundCount?: number; isOverLinked?: boolean }>)} />
     </ReactFlowProvider>,
   );
 }
@@ -93,5 +95,29 @@ describe('UrlNode', () => {
     await user.keyboard('{Escape}');
 
     expect(onZIndexChange).toHaveBeenCalledWith('node-1', 0);
+  });
+
+  it('renders red TriangleAlert with `{count} links` label when isOverLinked is true', () => {
+    renderNode({
+      urlTemplate: '/page/<id>',
+      pageCount: 5,
+      outboundCount: 167,
+      isOverLinked: true,
+      onUpdate: vi.fn(),
+    });
+    expect(screen.getByLabelText('Over-linked page')).toBeInTheDocument();
+    expect(screen.getByText('167 links')).toBeInTheDocument();
+  });
+
+  it('does NOT render the over-linked indicator when isOverLinked is false', () => {
+    renderNode({
+      urlTemplate: '/page/<id>',
+      pageCount: 5,
+      outboundCount: 120,
+      isOverLinked: false,
+      onUpdate: vi.fn(),
+    });
+    expect(screen.queryByLabelText('Over-linked page')).not.toBeInTheDocument();
+    expect(screen.queryByText('120 links')).not.toBeInTheDocument();
   });
 });
