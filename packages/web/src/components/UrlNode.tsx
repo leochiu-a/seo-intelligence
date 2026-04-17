@@ -3,6 +3,7 @@ import { Handle, Position, useReactFlow, type NodeProps, type Node } from 'react
 import { Pencil, TriangleAlert, Globe, Home, Unplug, Layers } from 'lucide-react';
 import { EditPopover } from './EditPopover';
 import { formatPageCount, type UrlNodeData, type ScoreTier, type Placement, HANDLE_IDS, collectPlacementSuggestions, collectClusterSuggestions } from '../lib/graph-utils';
+import { getClusterColor } from '../lib/cluster-colors';
 
 export type { UrlNodeData } from '../lib/graph-utils';
 
@@ -17,6 +18,7 @@ interface UrlNodeExtendedData extends UrlNodeData {
   crawlDepth?: number;
   outboundCount?: number;
   isOverLinked?: boolean;
+  tags?: string[];
 }
 
 const TONE_MAP: Record<ScoreTier, { card: string; focus: string; badge: string; badgeLabel: string }> = {
@@ -85,10 +87,35 @@ function UrlNodeComponent({ id, data, selected }: NodeProps<UrlNodeExtendedData>
     }
   };
 
+  const tags = data.tags ?? [];
+  const visibleBandTags = tags.slice(0, 3);
+  const overflowCount = Math.max(0, tags.length - 3);
+
   return (
     <div
       className={`relative w-[200px] rounded-xl border-2 p-2.5 shadow-md shadow-black/8 transition ${tone.card} ${selected ? tone.focus : ''}`}
     >
+      {/* TODO Plan 07: Ensure stripe stays full saturation when card is filter-dimmed.
+          Plan 07 will replace node.style.opacity with an inner-wrapper opacity or
+          move to filter-based dimming so this stripe remains vivid. */}
+      {visibleBandTags.length > 0 && (
+        <div
+          data-testid="cluster-stripe"
+          className="absolute left-0 top-0 bottom-0 w-1 flex flex-col overflow-hidden rounded-l-xl pointer-events-none"
+          aria-hidden
+        >
+          {visibleBandTags.map((tag) => {
+            const color = getClusterColor(tag);
+            return (
+              <div
+                key={tag}
+                className={`flex-1 ${color.stripe}`}
+                data-cluster-tag={tag}
+              />
+            );
+          })}
+        </div>
+      )}
       <Handle
         type="source"
         id={HANDLE_IDS.top}
@@ -178,6 +205,23 @@ function UrlNodeComponent({ id, data, selected }: NodeProps<UrlNodeExtendedData>
             <span>·</span>
             <TriangleAlert size={11} className="text-red-500" aria-label="Over-linked page" />
             <span className="text-red-500">{data.outboundCount} links</span>
+          </>
+        )}
+        {tags.length > 0 && (
+          <>
+            <span>·</span>
+            {visibleBandTags.map((tag) => {
+              const color = getClusterColor(tag);
+              return (
+                <span key={tag} className="inline-flex items-center gap-0.5" data-testid="cluster-chip">
+                  <span className={`inline-block w-1.5 h-1.5 rounded-full ${color.dot}`} aria-hidden />
+                  <span>{tag}</span>
+                </span>
+              );
+            })}
+            {overflowCount > 0 && (
+              <span className="text-muted-fg" data-testid="cluster-overflow">+{overflowCount}</span>
+            )}
           </>
         )}
       </div>

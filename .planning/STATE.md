@@ -3,7 +3,7 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: MVP
 status: verifying
-stopped_at: Completed 999.5-03-PLAN.md
+stopped_at: Completed 999.5-04-PLAN.md
 last_updated: "2026-04-17T15:04:10.351Z"
 last_activity: "2026-04-17 - Completed quick task 260417-ljg: 連接點沒有對齊線"
 progress:
@@ -70,6 +70,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 10-outbound-link-warning P02 | 3 | 3 tasks | 5 files |
 | Phase 999.5-topical-cluster-tags P02 | 5 | 2 tasks | 3 files |
 | Phase 999.5-topical-cluster-tags P03 | 5 | 2 tasks | 4 files |
+| Phase 999.5-topical-cluster-tags P04 | 5 | 1 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -123,6 +124,8 @@ Recent decisions affecting current work:
 - [Phase 999.5-topical-cluster-tags]: 8-entry palette (teal/cyan/sky/pink/rose/orange/lime/fuchsia) avoids reserved UI colors (green/amber/red/indigo/blue/violet)
 - [Phase 999.5-topical-cluster-tags]: Cluster Tags section placed outside localIsGlobal conditional so both global and non-global nodes can carry tags (D-04)
 - [Phase 999.5-topical-cluster-tags]: Enter keydown in cluster tag input calls e.stopPropagation to prevent document-level handleConfirm from firing
+- [Phase 999.5-topical-cluster-tags]: Stripe div uses absolute left-0 top-0 bottom-0 w-1 flex flex-col overflow-hidden rounded-l-xl pointer-events-none — anchors to existing relative outer div
+- [Phase 999.5-topical-cluster-tags]: Dim-persistence deferred to Plan 07 via TODO comment; Plan 04 renders stripe normally under current node.style.opacity inheritance
 
 ### Pending Todos
 
@@ -147,5 +150,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-04-17T15:04:10.347Z
-Stopped at: Completed 999.5-03-PLAN.md
+Stopped at: Completed 999.5-04-PLAN.md
 Resume file: None
