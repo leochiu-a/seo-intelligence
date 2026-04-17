@@ -40,13 +40,17 @@ Let PMs visually plan and simulate internal link structures — and immediately 
 
 ### Active
 
-- [ ] Nodes with >150 total outbound links flagged with warning
+- (none — all v2.0 SEO Analysis Depth requirements validated)
 
 ### Validated (Phase 9)
 
 - [x] User can create, switch, rename, and delete named scenarios (e.g. "Current", "Proposal A") — Validated in Phase 9: Scenario Comparison
 - [x] Each scenario has its own fully independent graph state — Validated in Phase 9: Scenario Comparison
 - [x] Scenarios persist in localStorage under `seo-planner-scenarios`; auto-migrates old single-graph data to "Default" scenario — Validated in Phase 9: Scenario Comparison
+
+### Validated (Phase 10)
+
+- [x] Nodes with >150 total outbound links flagged with red warning on canvas subtitle and red-highlighted count in sidebar; total = explicit edge linkCounts + implicit global-node placement sum for non-global sources — Validated in Phase 10: Outbound Link Warning
 
 ### Out of Scope
 
@@ -94,4 +98,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-16 — Phase 9 complete: multi-scenario management with tab bar, localStorage persistence, and auto-migration*
+*Last updated: 2026-04-17 — Phase 10 complete: outbound link warning (>150) on canvas subtitle + sidebar inline count; v2.0 SEO Analysis Depth milestone fully validated*

@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: MVP
 status: verifying
-stopped_at: Phase 10 context gathered
-last_updated: "2026-04-17T07:00:57.390Z"
-last_activity: 2026-04-16
+stopped_at: Completed 10-outbound-link-warning-02-PLAN.md
+last_updated: "2026-04-17T07:28:59.250Z"
+last_activity: 2026-04-17
 progress:
   total_phases: 21
-  completed_phases: 9
-  total_plans: 16
-  completed_plans: 17
+  completed_phases: 10
+  total_plans: 18
+  completed_plans: 19
   percent: 0
 ---
 
@@ -21,14 +21,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-16)
 
 **Core value:** Let PMs visually plan and simulate internal link structures — and immediately see which pages will rank highest — before any code is written or deployed.
-**Current focus:** Phase 09 — scenario-comparison
+**Current focus:** Phase 10 — outbound-link-warning
 
 ## Current Position
 
 Phase: 999.1
 Plan: Not started
 Status: Phase complete — ready for verification
-Last activity: 2026-04-16
+Last activity: 2026-04-17 - Completed quick task 260417-ljg: 連接點沒有對齊線
 
 Progress: [░░░░░░░░░░] 0%
 
@@ -66,6 +66,8 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 08-crawl-depth-orphan-detection P02 | 12 | 3 tasks | 7 files |
 | Phase 09-scenario-comparison P01 | 8 | 1 tasks | 3 files |
 | Phase 09-scenario-comparison P02 | 9 | 2 tasks | 4 files |
+| Phase 10-outbound-link-warning P01 | 2 | 2 tasks | 2 files |
+| Phase 10-outbound-link-warning P02 | 3 | 3 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -109,6 +111,12 @@ Recent decisions affecting current work:
 - [Phase 09-scenario-comparison]: structuredClone used for scenario clone mode — no shared references, faster than JSON round-trip
 - [Phase 09-scenario-comparison]: wireCallbacks helper extracted inline in AppInner to centralize node/edge runtime callback re-attachment across restore, switch, create, delete paths
 - [Phase 09-scenario-comparison]: App.test.tsx migration test made StrictMode-safe: asserts old key deleted and new key present without checking scenario name due to double useState initialization
+- [Phase 10-outbound-link-warning]: OUTBOUND_WARNING_THRESHOLD exported (not module-private) so Plan 10-02 can import it from UrlNode.tsx and ScoreSidebar.tsx — single source of truth for the magic number 150, overriding CONTEXT.md D-05 per PLAN authorization
+- [Phase 10-outbound-link-warning]: calculateOutboundLinks uses a single precomputed globalPlacementSum applied uniformly to every non-global source — D-02 implicit contribution does not vary per source
+- [Phase 10-outbound-link-warning]: Global source nodes skip implicit contribution (continue guard) to mirror Phase 4 D-01 global→global no-inject rule
+- [Phase 10-outbound-link-warning]: outboundMap included in JSON export payload to mirror depthMap precedent for debugging parity
+- [Phase 10-outbound-link-warning]: ScoreSidebar outboundMap prop is required (not optional) — mirrors depthMap shape; tests supply new Map() for empty branch
+- [Phase 10-outbound-link-warning]: UrlNode over-linked subtitle branch has no orphan/unreachable/weak exclusions — D-09 over-linked coexists with all reachability/strength indicators as last item in chain
 
 ### Pending Todos
 
@@ -128,9 +136,10 @@ None yet.
 | 260414-t72 | Fix canvas disappearing after page refresh (isFirstRender save guard) | 2026-04-14 | 1693672 | [260414-t72-fix-canvas-disappearing-after-page-refre](./quick/260414-t72-fix-canvas-disappearing-after-page-refre/) |
 | 260414-tkz | Add multiple handles to UrlNode for graph routing (8 handles + getClosestHandleIds) | 2026-04-14 | 7cde4b7 | [260414-tkz-add-multiple-handles-to-urlnode-for-grap](./quick/260414-tkz-add-multiple-handles-to-urlnode-for-grap/) |
 | 260415-m0h | fix popover z-index covered by step node and remove redundant right node sidebar | 2026-04-15 | 085f6cd | [260415-m0h-fix-popover-z-index-covered-by-step-node](./quick/260415-m0h-fix-popover-z-index-covered-by-step-node/) |
+| 260417-ljg | 連接點沒有對齊線 — center React Flow handles on node border midline | 2026-04-17 | 9f9b67b | [260417-ljg-center-handles-on-border-midline](./quick/260417-ljg-center-handles-on-border-midline/) |
 
 ## Session Continuity
 
-Last session: 2026-04-17T07:00:57.382Z
-Stopped at: Phase 10 context gathered
-Resume file: .planning/phases/10-outbound-link-warning/10-CONTEXT.md
+Last session: 2026-04-17T07:25:04.263Z
+Stopped at: Completed 10-outbound-link-warning-02-PLAN.md
+Resume file: None

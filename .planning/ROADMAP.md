@@ -28,7 +28,7 @@ Four phases deliver a browser-based visual tool for modeling internal link struc
 
 - [x] **Phase 8: Crawl Depth & Orphan Detection** - BFS-based crawl depth from root node with depth warnings, plus dedicated orphan node alerts distinct from weak-node indicators (completed 2026-04-16)
 - [ ] **Phase 9: Scenario Comparison** - Multi-scenario management with independent graph state, localStorage persistence, and side-by-side score delta diff
-- [ ] **Phase 10: Outbound Link Warning** - Per-node total outbound link calculation with threshold warning at >150 links on canvas and sidebar
+- [x] **Phase 10: Outbound Link Warning** - Per-node total outbound link calculation with threshold warning at >150 links on canvas and sidebar (completed 2026-04-17)
 
 ## Phase Details
 
@@ -206,8 +206,8 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 10-01-PLAN.md — TDD: calculateOutboundLinks + OUTBOUND_WARNING_THRESHOLD pure function
-- [ ] 10-02-PLAN.md — UI wiring: App.tsx outboundMap memo + UrlNode subtitle indicator + ScoreSidebar inline count
+- [x] 10-01-PLAN.md — TDD: calculateOutboundLinks + OUTBOUND_WARNING_THRESHOLD pure function
+- [x] 10-02-PLAN.md — UI wiring: App.tsx outboundMap memo + UrlNode subtitle indicator + ScoreSidebar inline count
 **UI hint**: yes
 
 ## Progress
@@ -226,7 +226,7 @@ Plans:
 | 7. Placement-Centric Filter | 1/1 | Complete   | 2026-04-15 |
 | 8. Crawl Depth & Orphan Detection | 2/2 | Complete   | 2026-04-16 |
 | 9. Scenario Comparison | 0/2 | Not started | - |
-| 10. Outbound Link Warning | 0/? | Not started | - |
+| 10. Outbound Link Warning | 2/2 | Complete    | 2026-04-17 |
 
 ## Backlog
 

@@ -105,9 +105,9 @@
 
 ### Outbound Link Warning
 
-- [ ] **OUTBOUND-01**: System calculates total outbound links per node (explicit edges + global placements)
-- [ ] **OUTBOUND-02**: Nodes exceeding 150 outbound links display a red warning indicator on canvas
-- [ ] **OUTBOUND-03**: Sidebar shows outbound link count with warning threshold highlight
+- [x] **OUTBOUND-01**: System calculates total outbound links per node (explicit edges + global placements)
+- [x] **OUTBOUND-02**: Nodes exceeding 150 outbound links display a red warning indicator on canvas
+- [x] **OUTBOUND-03**: Sidebar shows outbound link count with warning threshold highlight
 
 ## Future Requirements
 
