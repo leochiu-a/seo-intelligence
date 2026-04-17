@@ -1,4 +1,4 @@
-import { memo, useState, useEffect, useMemo } from 'react';
+import { memo, useState, useEffect } from 'react';
 import { Handle, Position, useReactFlow, type NodeProps, type Node } from 'reactflow';
 import { Pencil, TriangleAlert, Globe, Home, Unplug, Layers } from 'lucide-react';
 import { EditPopover } from './EditPopover';
@@ -63,15 +63,12 @@ function UrlNodeComponent({ id, data, selected }: NodeProps<UrlNodeExtendedData>
     }
   }, [showPopover, id, onZIndexChange]);
 
-  const placementSuggestions = useMemo(
-    () => collectPlacementSuggestions(getNodes() as Node<UrlNodeData>[], id),
-    [id, getNodes],
-  );
-
-  const clusterSuggestions = useMemo(
-    () => collectClusterSuggestions(getNodes() as Node<UrlNodeData>[], id),
-    [id, getNodes],
-  );
+  // NOTE: Do NOT wrap in useMemo. `getNodes` from useReactFlow is a stable
+  // reference that never changes when node data mutates via setNodes, so a
+  // memo keyed on [id, getNodes] becomes permanently stale (UAT gap — Test 5).
+  const allNodes = getNodes() as Node<UrlNodeData>[];
+  const placementSuggestions = collectPlacementSuggestions(allNodes, id);
+  const clusterSuggestions = collectClusterSuggestions(allNodes, id);
 
   const tier = data.scoreTier ?? 'neutral';
   const tone = TONE_MAP[tier];
