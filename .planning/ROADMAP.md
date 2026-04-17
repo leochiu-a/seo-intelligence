@@ -230,39 +230,10 @@ Plans:
 
 ## Backlog
 
-### Phase 999.1: 之後要怎麼找到 (BACKLOG)
-
-**Goal:** [Captured for future planning]
-**Requirements:** TBD
-**Plans:** 2/2 plans complete
-
-Plans:
-- [ ] TBD (promote with /gsd:review-backlog when ready)
-
-### Phase 999.2: Crawl Depth 指標 + 3-Click 警告 (BACKLOG) — P0
-
-**Goal:** Sidebar 顯示每個節點到 root 節點的最短路徑深度，超過 3 層的節點標示警告
-**Context:** SEO 共識是重要頁面要在 3 次點擊內可達，Google 對深層頁面爬取頻率明顯較低。目前工具只看 PageRank 分數，但高分卻深層的頁面照樣爬不到。
-**Requirements:** TBD
-**Plans:** 0 plans
-
-Plans:
-- [ ] TBD (promote with /gsd:review-backlog when ready)
-
 ### Phase 999.3: Scenario Diff（Current vs Proposed）(BACKLOG) — P0
 
 **Goal:** 支援 2 份 scenario 並排比對，顯示每個節點的 score delta（+15% / -8%），讓 PM 回答「這次改版比現況好多少」
 **Context:** 這是 pre-deploy simulation 工具的殺手功能，現有 audit 工具做不到。PM 最想回答的問題是改版效果量化。
-**Requirements:** TBD
-**Plans:** 0 plans
-
-Plans:
-- [ ] TBD (promote with /gsd:review-backlog when ready)
-
-### Phase 999.4: Orphan Node 獨立警示（inbound=0）(BACKLOG) — P0
-
-**Goal:** 區分「score 低（weak）」和「完全沒有 inbound（orphan）」兩種 case，orphan 獨立警示
-**Context:** `identifyWeakNodes` 用 mean - stddev 但沒區分兩者。完全沒有 inbound 的頁面 Google 根本爬不到，比 weak node 嚴重得多。
 **Requirements:** TBD
 **Plans:** 0 plans
 
@@ -299,16 +270,6 @@ Plans:
 Plans:
 - [ ] TBD (promote with /gsd:review-backlog when ready)
 
-### Phase 999.8: Total Outbound Links 警示（>150 紅字）(BACKLOG) — P2
-
-**Goal:** 每個節點顯示 total outbound links 總和，超過 150 條紅字警示
-**Context:** 符合 Shopify / Google 的 per-page link 上限建議。
-**Requirements:** TBD
-**Plans:** 0 plans
-
-Plans:
-- [ ] TBD (promote with /gsd:review-backlog when ready)
-
 ### Phase 999.9: 匯出改版建議清單 (BACKLOG) — P2
 
 **Goal:** 匯出可執行的改版建議（e.g.「`/category/*` 應增加 inbound 3 條」），讓 PM 直接丟給工程 ticket
@@ -323,6 +284,26 @@ Plans:
 
 **Goal:** 支援多人協作和雲端存檔，讓團隊共用 scenario
 **Context:** 目前 MVP 不需要，但從 PM 工具角度遲早要。
+**Requirements:** TBD
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (promote with /gsd:review-backlog when ready)
+
+### Phase 999.11: URL Prefix 自動推斷 Cluster 預設值 (BACKLOG) — P2
+
+**Goal:** 根據 URL prefix 自動填入 cluster 欄位作為預設值，PM 仍可手動覆寫，大幅降低 999.5 的使用成本
+**Context:** 999.5 要求手動打 cluster tag，節點多時（50+）繁瑣。多數網站 URL 已有主題結構（`/food/*`、`/hotel/*`），應能從 prefix 自動推斷。依賴 999.5。
+**Requirements:** TBD
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (promote with /gsd:review-backlog when ready)
+
+### Phase 999.12: 內容 Embedding 相似度（Google Layer 3 模擬）(BACKLOG) — P2
+
+**Goal:** PM 貼 meta description，工具用 LLM/Embedding API 算頁面向量，PageRank 加權時考慮兩端 cosine similarity
+**Context:** 999.5 的 cluster tag 是人工分類，無法捕捉「不同 cluster 但實際語意相關」的頁面。Google 實際上是用 neural embedding 比對語意（Layer 3），這是最接近真實演算法的模擬方式。依賴 999.5、需要 LLM API。
 **Requirements:** TBD
 **Plans:** 0 plans
 
