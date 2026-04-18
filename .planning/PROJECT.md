@@ -52,6 +52,10 @@ Let PMs visually plan and simulate internal link structures — and immediately 
 
 - [x] Nodes with >150 total outbound links flagged with red warning on canvas subtitle and red-highlighted count in sidebar; total = explicit edge linkCounts + implicit global-node placement sum for non-global sources — Validated in Phase 10: Outbound Link Warning
 
+### Validated (Phase 11.1)
+
+- [x] PM Health Check Panel: [Score | Health] tab toggle on right sidebar, Health tab renders HealthPanel with 3-metric badges (Links, Depth, Tags), warnings-first sort, "Show warnings only" toggle, and summary line — Validated in Phase 11.1: PM Health Check Panel
+
 ### Out of Scope
 
 - Real website crawling / importing live URL data — focus is simulation, not auditing
@@ -98,4 +102,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-17 — Phase 10 complete: outbound link warning (>150) on canvas subtitle + sidebar inline count; v2.0 SEO Analysis Depth milestone fully validated*
+*Last updated: 2026-04-18 — Phase 11.1 complete: PM Health Check Panel with [Score|Health] tab toggle, 3-metric badges (Links/Depth/Tags), warnings-first sort, and Show Warnings filter*
