@@ -28,7 +28,7 @@ See: .planning/PROJECT.md (updated 2026-04-16)
 Phase: 12
 Plan: Not started
 Status: Ready to execute
-Last activity: 2026-04-18
+Last activity: 2026-04-18 - Completed quick task 260418-uhb: Add tooltip to warning icon in score ranking panel
 
 Progress: [░░░░░░░░░░] 0%
 
@@ -162,6 +162,7 @@ None yet.
 | 260415-m0h | fix popover z-index covered by step node and remove redundant right node sidebar | 2026-04-15 | 085f6cd | [260415-m0h-fix-popover-z-index-covered-by-step-node](./quick/260415-m0h-fix-popover-z-index-covered-by-step-node/) |
 | 260417-ljg | 連接點沒有對齊線 — center React Flow handles on node border midline | 2026-04-17 | 9f9b67b | [260417-ljg-center-handles-on-border-midline](./quick/260417-ljg-center-handles-on-border-midline/) |
 | 260418-gy5 | Unify Placement and Cluster UX: derive Global Node from placements length and replace Cluster text input with add-button pattern | 2026-04-18 | 1a3f8f2 | [260418-gy5-unify-placement-and-cluster-ux-derive-gl](./quick/260418-gy5-unify-placement-and-cluster-ux-derive-gl/) |
+| 260418-uhb | Add tooltip to warning icon in Score Ranking panel explaining weak-page criterion | 2026-04-18 | 21901e0 | [260418-uhb-add-tooltip-to-warning-icon-in-score-ran](./quick/260418-uhb-add-tooltip-to-warning-icon-in-score-ran/) |
 
 ## Session Continuity
 

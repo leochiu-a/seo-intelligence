@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { ReactFlowProvider } from '@xyflow/react';
 import type { Node } from '@xyflow/react';
 import { buildUrlTree } from '../lib/graph-utils';
@@ -249,6 +250,24 @@ describe('ScoreSidebar hierarchy rendering', () => {
     const weakNodes = new Set(['n2']);
     renderSidebar([blog, cat], scores, weakNodes);
     expect(screen.getByLabelText('Weak page')).toBeTruthy();
+  });
+
+  it('weak node renders tooltip trigger with explanatory content', async () => {
+    const blog = makeNode('n1', '/blog');
+    const cat = makeNode('n2', '/blog/category');
+    const scores = new Map([['n1', 0.8], ['n2', 0.3]]);
+    const weakNodes = new Set(['n2']);
+    renderSidebar([blog, cat], scores, weakNodes);
+    const trigger = screen.getByTestId('score-weak-warning');
+    await userEvent.hover(trigger);
+    expect(await screen.findByText(/below average/i)).toBeTruthy();
+  });
+
+  it('non-weak nodes do NOT render the tooltip trigger', () => {
+    const blog = makeNode('n1', '/blog');
+    const scores = new Map([['n1', 0.8]]);
+    renderSidebar([blog], scores, new Set());
+    expect(screen.queryByTestId('score-weak-warning')).toBeNull();
   });
 
   it('clicking a child node calls setNodes and fitView with correct id', async () => {
