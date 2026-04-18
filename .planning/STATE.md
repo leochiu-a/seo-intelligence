@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: MVP
 status: verifying
-stopped_at: Phase 11.1 context gathered
-last_updated: "2026-04-18T07:21:37.058Z"
+stopped_at: Completed 11.1-01-PLAN.md
+last_updated: "2026-04-18T07:43:55.071Z"
 last_activity: "2026-04-18 - Completed quick task 260418-gy5: Unify Placement and Cluster UX"
 progress:
-  total_phases: 13
-  completed_phases: 8
-  total_plans: 22
-  completed_plans: 22
+  total_phases: 17
+  completed_phases: 10
+  total_plans: 26
+  completed_plans: 26
   percent: 0
 ---
 
@@ -74,12 +74,9 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 999.5-topical-cluster-tags P05 | 2 | 1 tasks | 2 files |
 | Phase 999.5-topical-cluster-tags P06 | 2 | 1 tasks | 2 files |
 | Phase 999.5-topical-cluster-tags P07 | 15 | 3 tasks | 7 files |
+| Phase 11.1-pm-internal-link-deep-placement-text-filter-warning P01 | 5 | 2 tasks | 2 files |
 
 ## Accumulated Context
-
-### Roadmap Evolution
-
-- Phase 11.1 inserted after Phase 11: PM 指標健診面板 — 在單一頁面檢查 Internal Link Deep Placement Text 是否達標並 filter warning 危險頁面 (URGENT)
 
 ### Decisions
 
@@ -138,6 +135,7 @@ Recent decisions affecting current work:
 - [Phase 999.5-topical-cluster-tags]: Drop-shadow filter dropped from styledNodes; dim migrated to data.isDimmed via plain object spread in App.tsx
 - [Phase 999.5-topical-cluster-tags]: UrlNode cluster stripe absolute sibling of card-content; content wrapper receives inline opacity; handles remain at outer level
 - [Phase 999.5-topical-cluster-tags]: AND-combine: placementKeys and clusterKeys split by prefix; per-dimension Sets intersected when both dimensions active
+- [Phase 11.1-pm-internal-link-deep-placement-text-filter-warning]: getHealthStatus placed after calculateOutboundLinks in graph-utils.ts; depthMap.size===0 + !depthMap.has covers 'na' branch; hasAnyWarning uses ===warn to exclude 'na' from warnings
 
 ### Pending Todos
 
@@ -162,6 +160,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-18T07:21:37.055Z
-Stopped at: Phase 11.1 context gathered
-Resume file: .planning/phases/11.1-pm-internal-link-deep-placement-text-filter-warning/11.1-CONTEXT.md
+Last session: 2026-04-18T07:43:55.067Z
+Stopped at: Completed 11.1-01-PLAN.md
+Resume file: None
