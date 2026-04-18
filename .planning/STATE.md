@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: MVP
 status: executing
-stopped_at: Phase 11.1 context gathered
-last_updated: "2026-04-18T07:40:39.808Z"
-last_activity: 2026-04-18 -- Phase 11.1 execution started
+stopped_at: Completed 11.1-02-PLAN.md
+last_updated: "2026-04-18T07:49:59.623Z"
+last_activity: 2026-04-18
 progress:
   total_phases: 13
-  completed_phases: 8
+  completed_phases: 9
   total_plans: 24
-  completed_plans: 22
+  completed_plans: 24
   percent: 0
 ---
 
@@ -26,9 +26,9 @@ See: .planning/PROJECT.md (updated 2026-04-16)
 ## Current Position
 
 Phase: 11.1 (pm-internal-link-deep-placement-text-filter-warning) — EXECUTING
-Plan: 1 of 2
-Status: Executing Phase 11.1
-Last activity: 2026-04-18 -- Phase 11.1 execution started
+Plan: 2 of 2
+Status: Ready to execute
+Last activity: 2026-04-18
 
 Progress: [░░░░░░░░░░] 0%
 
@@ -74,6 +74,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 999.5-topical-cluster-tags P05 | 2 | 1 tasks | 2 files |
 | Phase 999.5-topical-cluster-tags P06 | 2 | 1 tasks | 2 files |
 | Phase 999.5-topical-cluster-tags P07 | 15 | 3 tasks | 7 files |
+| Phase 11.1-pm-internal-link-deep-placement-text-filter-warning P02 | 4 | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -138,6 +139,8 @@ Recent decisions affecting current work:
 - [Phase 999.5-topical-cluster-tags]: Drop-shadow filter dropped from styledNodes; dim migrated to data.isDimmed via plain object spread in App.tsx
 - [Phase 999.5-topical-cluster-tags]: UrlNode cluster stripe absolute sibling of card-content; content wrapper receives inline opacity; handles remain at outer level
 - [Phase 999.5-topical-cluster-tags]: AND-combine: placementKeys and clusterKeys split by prefix; per-dimension Sets intersected when both dimensions active
+- [Phase 11.1-pm-internal-link-deep-placement-text-filter-warning]: data-testid on span wrapper around lucide icons (not SVG) — SVGAnimatedString className breaks .toMatch() in tests
+- [Phase 11.1-pm-internal-link-deep-placement-text-filter-warning]: Tab underline style (border-b-2 border-blue-500) chosen over pill tabs to match sidebar header aesthetic
 
 ### Pending Todos
 
@@ -162,6 +165,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-18T07:21:37.055Z
-Stopped at: Phase 11.1 context gathered
-Resume file: .planning/phases/11.1-pm-internal-link-deep-placement-text-filter-warning/11.1-CONTEXT.md
+Last session: 2026-04-18T07:49:59.620Z
+Stopped at: Completed 11.1-02-PLAN.md
+Resume file: None
