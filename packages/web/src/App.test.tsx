@@ -56,7 +56,7 @@ const SCENARIOS_KEY = 'seo-planner-scenarios';
 function makeSerializedGraph() {
   return JSON.stringify({
     nodes: [
-      { id: 'n1', type: 'urlNode', position: { x: 100, y: 100 }, data: { urlTemplate: '/page-a', pageCount: 5 } },
+      { id: 'n1', type: 'urlNode', position: { x: 100, y: 100 }, data: { urlTemplate: '/page-a', pageCount: 5, tags: ['food'] } },
       { id: 'n2', type: 'urlNode', position: { x: 300, y: 100 }, data: { urlTemplate: '/page-b', pageCount: 3 } },
     ],
     edges: [
@@ -81,7 +81,7 @@ function makeScenariosStore() {
         id,
         name: 'Scenario 1',
         nodes: [
-          { id: 'n1', type: 'urlNode', position: { x: 100, y: 100 }, data: { urlTemplate: '/page-a', pageCount: 5 } },
+          { id: 'n1', type: 'urlNode', position: { x: 100, y: 100 }, data: { urlTemplate: '/page-a', pageCount: 5, tags: ['food'] } },
           { id: 'n2', type: 'urlNode', position: { x: 300, y: 100 }, data: { urlTemplate: '/page-b', pageCount: 3 } },
         ],
         edges: [
@@ -193,6 +193,43 @@ describe('App localStorage persistence', () => {
       expect(afterRemount).not.toBeNull();
       const reparsed = JSON.parse(afterRemount!);
       expect(reparsed.scenarios[0].nodes).toHaveLength(2);
+    });
+  });
+
+  it('preserves tags through save → remount → restore cycle', async () => {
+    seedScenariosStorage();
+
+    const { unmount } = render(
+      <StrictMode>
+        <App />
+      </StrictMode>,
+    );
+
+    await act(async () => {
+      await new Promise((r) => setTimeout(r, 0));
+    });
+
+    unmount();
+
+    // Remount — simulates page refresh
+    render(
+      <StrictMode>
+        <App />
+      </StrictMode>,
+    );
+
+    await act(async () => {
+      await new Promise((r) => setTimeout(r, 0));
+    });
+
+    await waitFor(() => {
+      const raw = localStorage.getItem(SCENARIOS_KEY);
+      expect(raw).not.toBeNull();
+      const store = JSON.parse(raw!);
+      const n1 = store.scenarios[0].nodes.find((n: { id: string }) => n.id === 'n1');
+      expect(n1?.data.tags).toEqual(['food']);
+      const n2 = store.scenarios[0].nodes.find((n: { id: string }) => n.id === 'n2');
+      expect(n2?.data.tags).toBeUndefined();
     });
   });
 });
