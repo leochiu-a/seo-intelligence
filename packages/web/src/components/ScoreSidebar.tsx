@@ -284,6 +284,7 @@ export function ScoreSidebar({ nodes, scores, weakNodes, orphanNodes, unreachabl
                   {weakNodes.has(item.id) && (
                     <Tooltip>
                       <TooltipTrigger
+                        render={<span />}
                         data-testid="score-weak-warning"
                         className="flex-shrink-0 cursor-default inline-flex outline-none mt-0.5"
                         onClick={(e) => e.stopPropagation()}
