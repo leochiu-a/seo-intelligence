@@ -6,6 +6,7 @@ import type { UrlNodeData, UrlTreeNode } from '../lib/graph-utils';
 import { buildUrlTree, OUTBOUND_WARNING_THRESHOLD } from '../lib/graph-utils';
 import { getClusterColor } from '../lib/cluster-colors';
 import { HealthPanel } from './HealthPanel';
+import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
 
 interface ScoreSidebarProps {
   nodes: Node<UrlNodeData>[];
@@ -281,7 +282,18 @@ export function ScoreSidebar({ nodes, scores, weakNodes, orphanNodes, unreachabl
                     </p>
                   </div>
                   {weakNodes.has(item.id) && (
-                    <TriangleAlert size={14} className="text-amber-500 mt-0.5 flex-shrink-0" aria-label="Weak page" />
+                    <Tooltip>
+                      <TooltipTrigger
+                        data-testid="score-weak-warning"
+                        className="flex-shrink-0 cursor-default inline-flex outline-none mt-0.5"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <TriangleAlert size={14} className="text-amber-500" aria-label="Weak page" />
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        This page&apos;s PageRank score is significantly below average (below mean − 1σ). Consider adding more inbound internal links to strengthen it.
+                      </TooltipContent>
+                    </Tooltip>
                   )}
                 </button>
               </li>

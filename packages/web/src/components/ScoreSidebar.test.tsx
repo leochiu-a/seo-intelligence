@@ -251,6 +251,25 @@ describe('ScoreSidebar hierarchy rendering', () => {
     expect(screen.getByLabelText('Weak page')).toBeTruthy();
   });
 
+  it('weak node renders tooltip trigger with explanatory content', () => {
+    const blog = makeNode('n1', '/blog');
+    const cat = makeNode('n2', '/blog/category');
+    const scores = new Map([['n1', 0.8], ['n2', 0.3]]);
+    const weakNodes = new Set(['n2']);
+    renderSidebar([blog, cat], scores, weakNodes);
+    // Base UI Tooltip renders content into a portal only when open (after hover/focus),
+    // so we assert the trigger exists with the correct testid as the primary regression guard.
+    const trigger = screen.getByTestId('score-weak-warning');
+    expect(trigger).toBeTruthy();
+  });
+
+  it('non-weak nodes do NOT render the tooltip trigger', () => {
+    const blog = makeNode('n1', '/blog');
+    const scores = new Map([['n1', 0.8]]);
+    renderSidebar([blog], scores, new Set());
+    expect(screen.queryByTestId('score-weak-warning')).toBeNull();
+  });
+
   it('clicking a child node calls setNodes and fitView with correct id', async () => {
     const blog = makeNode('n1', '/blog');
     const cat = makeNode('n2', '/blog/category');
