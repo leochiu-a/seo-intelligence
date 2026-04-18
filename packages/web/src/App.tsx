@@ -67,9 +67,9 @@ const edgeTypes = { linkCountEdge: LinkCountEdge };
 function serializeGraph(
   nodes: Node<AppNodeData>[],
   edges: Edge[],
-): { nodes: Array<{ id: string; type?: string; position: { x: number; y: number }; data: { urlTemplate: string; pageCount: number; isGlobal?: boolean; placements?: Placement[]; isRoot?: boolean } }>; edges: Array<{ id: string; source: string; target: string; sourceHandle?: string | null; targetHandle?: string | null; type?: string; markerEnd?: unknown; data: { linkCount: number } }> } {
+): { nodes: Array<{ id: string; type?: string; position: { x: number; y: number }; data: { urlTemplate: string; pageCount: number; isGlobal?: boolean; placements?: Placement[]; isRoot?: boolean; tags?: string[] } }>; edges: Array<{ id: string; source: string; target: string; sourceHandle?: string | null; targetHandle?: string | null; type?: string; markerEnd?: unknown; data: { linkCount: number } }> } {
   return {
-    nodes: nodes.map(({ id, type, position, data: { urlTemplate, pageCount, isGlobal, placements, isRoot } }) => ({
+    nodes: nodes.map(({ id, type, position, data: { urlTemplate, pageCount, isGlobal, placements, isRoot, tags } }) => ({
       id,
       type,
       position,
@@ -79,6 +79,7 @@ function serializeGraph(
         ...(isGlobal && { isGlobal }),
         ...(placements?.length && { placements }),
         ...(isRoot && { isRoot }),
+        ...(tags?.length && { tags }),
       },
     })),
     edges: edges.map(({ id, source, target, sourceHandle, targetHandle, type, markerEnd, data }) => ({
