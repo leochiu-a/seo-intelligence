@@ -374,6 +374,56 @@ describe('ScoreSidebar cluster dots', () => {
 });
 
 // ---------------------------------------------------------------------------
+// Phase 11.1: ScoreSidebar [Score|Health] tabs
+// ---------------------------------------------------------------------------
+
+describe('ScoreSidebar [Score|Health] tabs', () => {
+  function renderSidebar(nodes: Node<UrlNodeData>[] = []) {
+    return render(
+      <ReactFlowProvider>
+        <ScoreSidebar
+          nodes={nodes}
+          scores={new Map()}
+          weakNodes={new Set()}
+          orphanNodes={new Set()}
+          unreachableNodes={new Set()}
+          depthMap={new Map()}
+          outboundMap={new Map()}
+          rootId={null}
+        />
+      </ReactFlowProvider>,
+    );
+  }
+
+  it('renders both tab buttons', () => {
+    renderSidebar();
+    expect(screen.getByTestId('tab-score')).toBeInTheDocument();
+    expect(screen.getByTestId('tab-health')).toBeInTheDocument();
+  });
+
+  it('defaults to Score tab — Score Ranking header visible, HealthPanel hidden', () => {
+    renderSidebar([makeNode('a', '/a')]);
+    expect(screen.getByText(/Score Ranking/i)).toBeInTheDocument();
+    expect(screen.queryByTestId('health-panel')).toBeNull();
+  });
+
+  it('clicking Health tab shows HealthPanel and hides Score Ranking', () => {
+    renderSidebar([makeNode('a', '/a')]);
+    fireEvent.click(screen.getByTestId('tab-health'));
+    expect(screen.getByTestId('health-panel')).toBeInTheDocument();
+    expect(screen.queryByText(/Score Ranking/i)).toBeNull();
+  });
+
+  it('clicking Score tab after Health returns to Score view', () => {
+    renderSidebar([makeNode('a', '/a')]);
+    fireEvent.click(screen.getByTestId('tab-health'));
+    fireEvent.click(screen.getByTestId('tab-score'));
+    expect(screen.getByText(/Score Ranking/i)).toBeInTheDocument();
+    expect(screen.queryByTestId('health-panel')).toBeNull();
+  });
+});
+
+// ---------------------------------------------------------------------------
 // Wave 5 (RED 3): ScoreSidebar resize handle
 // ---------------------------------------------------------------------------
 
