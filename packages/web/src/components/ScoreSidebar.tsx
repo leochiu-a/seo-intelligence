@@ -5,6 +5,7 @@ import type { Node } from 'reactflow';
 import type { UrlNodeData, UrlTreeNode } from '../lib/graph-utils';
 import { buildUrlTree, OUTBOUND_WARNING_THRESHOLD } from '../lib/graph-utils';
 import { getClusterColor } from '../lib/cluster-colors';
+import { HealthPanel } from './HealthPanel';
 
 interface ScoreSidebarProps {
   nodes: Node<UrlNodeData>[];
@@ -54,6 +55,7 @@ const DEFAULT_WIDTH = 240;
 export function ScoreSidebar({ nodes, scores, weakNodes, orphanNodes, unreachableNodes, depthMap, outboundMap, rootId }: ScoreSidebarProps) {
   const { fitView, setNodes } = useReactFlow();
   const [width, setWidth] = useState(DEFAULT_WIDTH);
+  const [activeTab, setActiveTab] = useState<'score' | 'health'>('score');
   // Refs hold drag state so mousemove handlers never go stale
   const dragStartX = useRef<number | null>(null);
   const dragStartWidth = useRef<number | null>(null);
@@ -122,144 +124,180 @@ export function ScoreSidebar({ nodes, scores, weakNodes, orphanNodes, unreachabl
         className="absolute left-0 top-0 bottom-0 w-1 cursor-col-resize hover:bg-blue-400/40 z-10"
       />
 
-      {/* Root prompt — shown when no root set and nodes exist */}
-      {!rootId && nodes.length > 0 && (
-        <div className="px-3 py-3 bg-amber-50 border-b border-border">
-          <p className="text-[11px] text-amber-700">
-            Set a root node to see crawl depth. Click a node's edit button and enable "Root (Homepage)".
-          </p>
-        </div>
-      )}
-
-      {/* Orphan section */}
-      {orphanList.length > 0 && (
-        <div>
-          <div className="px-3 py-2 bg-red-50 border-b border-border">
-            <h2 className="text-[11px] font-semibold uppercase tracking-[0.14em] text-red-600 flex items-center gap-1.5">
-              <Unplug size={12} />
-              Orphan Pages ({orphanList.length})
-            </h2>
-          </div>
-          <ul className="divide-y divide-border">
-            {orphanList.map((node) => (
-              <li key={node.id}>
-                <button
-                  className="w-full text-left px-3 py-2.5 hover:bg-surface transition-colors flex items-start gap-2"
-                  onClick={() => handleClick(node.id)}
-                >
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm text-dark truncate flex items-center">
-                      {renderClusterDots(node.data.tags)}
-                      <span className="truncate">{node.data.urlTemplate}</span>
-                    </p>
-                    <p className="text-[11px] text-muted-fg font-mono">
-                      {(scores.get(node.id) ?? 0).toFixed(4)} · <span className="text-red-500">No inbound links</span>
-                    </p>
-                  </div>
-                  <Unplug size={14} className="text-red-500 mt-0.5 flex-shrink-0" aria-label="Orphan page" />
-                </button>
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
-
-      {/* Unreachable section */}
-      {unreachableOnlyList.length > 0 && (
-        <div>
-          <div className="px-3 py-2 bg-red-50 border-b border-border">
-            <h2 className="text-[11px] font-semibold uppercase tracking-[0.14em] text-red-600 flex items-center gap-1.5">
-              <Unplug size={12} />
-              Unreachable ({unreachableOnlyList.length})
-            </h2>
-          </div>
-          <ul className="divide-y divide-border">
-            {unreachableOnlyList.map((node) => (
-              <li key={node.id}>
-                <button
-                  className="w-full text-left px-3 py-2.5 hover:bg-surface transition-colors flex items-start gap-2"
-                  onClick={() => handleClick(node.id)}
-                >
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm text-dark truncate flex items-center">
-                      {renderClusterDots(node.data.tags)}
-                      <span className="truncate">{node.data.urlTemplate}</span>
-                    </p>
-                    <p className="text-[11px] text-muted-fg font-mono">
-                      {(scores.get(node.id) ?? 0).toFixed(4)} · <span className="text-red-500">Unreachable</span>
-                    </p>
-                  </div>
-                  <Unplug size={14} className="text-red-500 mt-0.5 flex-shrink-0" aria-label="Unreachable page" />
-                </button>
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
-
-      <div className="px-3 py-2.5 border-b border-border">
-        <h2 className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-fg">
-          Score Ranking
-        </h2>
+      {/* Phase 11.1 D-01: [Score | Health] tab toggle */}
+      <div className="flex border-b border-border" data-testid="sidebar-tabs">
+        <button
+          type="button"
+          data-testid="tab-score"
+          onClick={() => setActiveTab('score')}
+          className={`flex-1 px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.14em] transition-colors ${
+            activeTab === 'score'
+              ? 'text-dark border-b-2 border-blue-500 -mb-px'
+              : 'text-muted-fg hover:text-dark'
+          }`}
+        >
+          Score
+        </button>
+        <button
+          type="button"
+          data-testid="tab-health"
+          onClick={() => setActiveTab('health')}
+          className={`flex-1 px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.14em] transition-colors ${
+            activeTab === 'health'
+              ? 'text-dark border-b-2 border-blue-500 -mb-px'
+              : 'text-muted-fg hover:text-dark'
+          }`}
+        >
+          Health
+        </button>
       </div>
-      <ul className="divide-y divide-border">
-        {mainRanked.map((item) => {
-          const sourceNode = nodeById.get(item.id);
-          const tags = sourceNode?.data.tags;
-          return (
-          <li key={item.id}>
-            <button
-              className="w-full text-left py-2.5 pr-3 hover:bg-surface transition-colors flex items-start gap-2"
-              style={{ paddingLeft: 12 + item.depth * 16 }}
-              onClick={() => handleClick(item.id)}
-            >
-              <div className="flex-1 min-w-0">
-                <p className="text-sm text-dark truncate flex items-center">
-                  {renderClusterDots(tags)}
-                  <span className="truncate">{item.urlTemplate}</span>
-                </p>
-                <p className="text-[11px] text-muted-fg font-mono">
-                  {item.score.toFixed(4)}
-                  {depthMap.size > 0 && (() => {
-                    const depth = depthMap.get(item.id);
-                    if (depth == null || depth === Infinity) return null;
-                    const isDeep = depth > 3;
-                    return (
-                      <>
-                        {' · '}
-                        <span className={isDeep ? 'text-amber-500' : ''}>
-                          Depth {depth}{isDeep ? ' ⚠' : ''}
-                        </span>
-                      </>
-                    );
-                  })()}
-                  {outboundMap.size > 0 && (() => {
-                    const outbound = outboundMap.get(item.id);
-                    if (outbound == null) return null;
-                    const isOver = outbound > OUTBOUND_WARNING_THRESHOLD;
-                    return (
-                      <>
-                        {' · '}
-                        <span className={isOver ? 'text-red-500' : ''}>
-                          {outbound} links
-                        </span>
-                      </>
-                    );
-                  })()}
-                </p>
+
+      {activeTab === 'score' && (
+        <>
+          {/* Root prompt — shown when no root set and nodes exist */}
+          {!rootId && nodes.length > 0 && (
+            <div className="px-3 py-3 bg-amber-50 border-b border-border">
+              <p className="text-[11px] text-amber-700">
+                Set a root node to see crawl depth. Click a node's edit button and enable "Root (Homepage)".
+              </p>
+            </div>
+          )}
+
+          {/* Orphan section */}
+          {orphanList.length > 0 && (
+            <div>
+              <div className="px-3 py-2 bg-red-50 border-b border-border">
+                <h2 className="text-[11px] font-semibold uppercase tracking-[0.14em] text-red-600 flex items-center gap-1.5">
+                  <Unplug size={12} />
+                  Orphan Pages ({orphanList.length})
+                </h2>
               </div>
-              {weakNodes.has(item.id) && (
-                <TriangleAlert size={14} className="text-amber-500 mt-0.5 flex-shrink-0" aria-label="Weak page" />
-              )}
-            </button>
-          </li>
-          );
-        })}
-      </ul>
-      {mainRanked.length === 0 && (
-        <p className="px-3 py-4 text-[11px] text-muted-fg text-center">
-          Add nodes to see scores
-        </p>
+              <ul className="divide-y divide-border">
+                {orphanList.map((node) => (
+                  <li key={node.id}>
+                    <button
+                      className="w-full text-left px-3 py-2.5 hover:bg-surface transition-colors flex items-start gap-2"
+                      onClick={() => handleClick(node.id)}
+                    >
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm text-dark truncate flex items-center">
+                          {renderClusterDots(node.data.tags)}
+                          <span className="truncate">{node.data.urlTemplate}</span>
+                        </p>
+                        <p className="text-[11px] text-muted-fg font-mono">
+                          {(scores.get(node.id) ?? 0).toFixed(4)} · <span className="text-red-500">No inbound links</span>
+                        </p>
+                      </div>
+                      <Unplug size={14} className="text-red-500 mt-0.5 flex-shrink-0" aria-label="Orphan page" />
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          {/* Unreachable section */}
+          {unreachableOnlyList.length > 0 && (
+            <div>
+              <div className="px-3 py-2 bg-red-50 border-b border-border">
+                <h2 className="text-[11px] font-semibold uppercase tracking-[0.14em] text-red-600 flex items-center gap-1.5">
+                  <Unplug size={12} />
+                  Unreachable ({unreachableOnlyList.length})
+                </h2>
+              </div>
+              <ul className="divide-y divide-border">
+                {unreachableOnlyList.map((node) => (
+                  <li key={node.id}>
+                    <button
+                      className="w-full text-left px-3 py-2.5 hover:bg-surface transition-colors flex items-start gap-2"
+                      onClick={() => handleClick(node.id)}
+                    >
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm text-dark truncate flex items-center">
+                          {renderClusterDots(node.data.tags)}
+                          <span className="truncate">{node.data.urlTemplate}</span>
+                        </p>
+                        <p className="text-[11px] text-muted-fg font-mono">
+                          {(scores.get(node.id) ?? 0).toFixed(4)} · <span className="text-red-500">Unreachable</span>
+                        </p>
+                      </div>
+                      <Unplug size={14} className="text-red-500 mt-0.5 flex-shrink-0" aria-label="Unreachable page" />
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          <div className="px-3 py-2.5 border-b border-border">
+            <h2 className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-fg">
+              Score Ranking
+            </h2>
+          </div>
+          <ul className="divide-y divide-border">
+            {mainRanked.map((item) => {
+              const sourceNode = nodeById.get(item.id);
+              const tags = sourceNode?.data.tags;
+              return (
+              <li key={item.id}>
+                <button
+                  className="w-full text-left py-2.5 pr-3 hover:bg-surface transition-colors flex items-start gap-2"
+                  style={{ paddingLeft: 12 + item.depth * 16 }}
+                  onClick={() => handleClick(item.id)}
+                >
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm text-dark truncate flex items-center">
+                      {renderClusterDots(tags)}
+                      <span className="truncate">{item.urlTemplate}</span>
+                    </p>
+                    <p className="text-[11px] text-muted-fg font-mono">
+                      {item.score.toFixed(4)}
+                      {depthMap.size > 0 && (() => {
+                        const depth = depthMap.get(item.id);
+                        if (depth == null || depth === Infinity) return null;
+                        const isDeep = depth > 3;
+                        return (
+                          <>
+                            {' · '}
+                            <span className={isDeep ? 'text-amber-500' : ''}>
+                              Depth {depth}{isDeep ? ' ⚠' : ''}
+                            </span>
+                          </>
+                        );
+                      })()}
+                      {outboundMap.size > 0 && (() => {
+                        const outbound = outboundMap.get(item.id);
+                        if (outbound == null) return null;
+                        const isOver = outbound > OUTBOUND_WARNING_THRESHOLD;
+                        return (
+                          <>
+                            {' · '}
+                            <span className={isOver ? 'text-red-500' : ''}>
+                              {outbound} links
+                            </span>
+                          </>
+                        );
+                      })()}
+                    </p>
+                  </div>
+                  {weakNodes.has(item.id) && (
+                    <TriangleAlert size={14} className="text-amber-500 mt-0.5 flex-shrink-0" aria-label="Weak page" />
+                  )}
+                </button>
+              </li>
+              );
+            })}
+          </ul>
+          {mainRanked.length === 0 && (
+            <p className="px-3 py-4 text-[11px] text-muted-fg text-center">
+              Add nodes to see scores
+            </p>
+          )}
+        </>
+      )}
+
+      {activeTab === 'health' && (
+        <HealthPanel nodes={nodes} depthMap={depthMap} outboundMap={outboundMap} />
       )}
     </aside>
   );

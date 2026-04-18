@@ -237,7 +237,8 @@ describe('ScoreSidebar hierarchy rendering', () => {
     const about = makeNode('n1', '/about');
     const scores = new Map([['n1', 0.5]]);
     renderSidebar([about], scores);
-    const [btn] = screen.getAllByRole('button');
+    // Find the score-row button (not the tab buttons) by matching the URL template text
+    const btn = screen.getAllByRole('button').find((b) => b.textContent?.includes('/about'))!;
     expect(btn.style.paddingLeft).toBe('12px');
   });
 
