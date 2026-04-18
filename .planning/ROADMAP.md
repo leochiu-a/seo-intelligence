@@ -16,10 +16,10 @@ Four phases deliver a browser-based visual tool for modeling internal link struc
 - [x] **Phase 0: Project Setup** - Scaffold Vite + React + TypeScript project with Tailwind CSS and React Flow (completed 2026-04-13)
 - [x] **Phase 1: Canvas Editor** - Interactive canvas with URL template nodes, directed edges, and inline configuration (completed 2026-04-13)
 - [x] **Phase 2: Scoring & Analysis** - PageRank engine with visual node scoring and ranked sidebar (completed 2026-04-13)
-- [ ] **Phase 3: Scenarios & Export** - localStorage graph persistence plus CSV/JSON export (scenarios dropped per D-01)
-- [ ] **Phase 4: Global Nodes** - Global node designation with named placements and PageRank injection
-- [ ] **Phase 5: Global Filter Panel** - Filter panel with placement checkboxes and canvas dimming
-- [ ] **Phase 6: Placement Autocomplete** - Typing a placement name in the edit popover shows suggestions from existing placement names across all other global nodes
+- [x] **Phase 3: Scenarios & Export** - localStorage graph persistence plus CSV/JSON export (completed 2026-04-13)
+- [x] **Phase 4: Global Nodes** - Global node designation with named placements and PageRank injection
+- [x] **Phase 5: Global Filter Panel** - Filter panel with placement checkboxes and canvas dimming
+- [x] **Phase 6: Placement Autocomplete** - Typing a placement name in the edit popover shows suggestions from existing placement names across all other global nodes
 - [x] **Phase 7: Placement-Centric Filter** - Filter panel redesigned to group by unique placement name so checking "Header" highlights every global node that carries a Header placement (completed 2026-04-15)
 
 ---
@@ -27,7 +27,7 @@ Four phases deliver a browser-based visual tool for modeling internal link struc
 ## v2.0 SEO Analysis Depth — Phases 8-10
 
 - [x] **Phase 8: Crawl Depth & Orphan Detection** - BFS-based crawl depth from root node with depth warnings, plus dedicated orphan node alerts distinct from weak-node indicators (completed 2026-04-16)
-- [ ] **Phase 9: Scenario Comparison** - Multi-scenario management with independent graph state, localStorage persistence, and side-by-side score delta diff
+- [x] **Phase 9: Scenario Comparison** - Multi-scenario management with independent graph state, localStorage persistence (completed 2026-04-16)
 - [x] **Phase 10: Outbound Link Warning** - Per-node total outbound link calculation with threshold warning at >150 links on canvas and sidebar (completed 2026-04-17)
 - [ ] **Phase 11: Topical Cluster Tags** - Tag nodes by topic cluster, bonus weight for same-cluster edges, visual cluster color coding
 - [ ] **Phase 12: Anchor Text Type on Edge** - Label edges with anchor text type (exact/partial/branded/generic) and display inbound anchor diversity per node
@@ -80,22 +80,6 @@ Plans:
 Plans:
 - [x] 02-01: Implement iterative PageRank algorithm (dampening factor, page count and link count weighting) that recalculates on every graph state change
 - [x] 02-02: Implement score-driven node size/color scaling and ranked sidebar with weak-page flags and click-to-highlight
-
-**UI hint**: yes
-
-### Phase 3: Scenarios & Export
-**Goal**: Graph data persists across browser refresh and users can export data as JSON or CSV for external use
-**Depends on**: Phase 2
-**Requirements**: EXPORT-01, EXPORT-02
-**Success Criteria** (what must be TRUE):
-  1. Graph (nodes + edges) persists across browser refresh via localStorage
-  2. User can export the current graph as a JSON file containing nodes, edges, and scores
-  3. User can export the current score ranking as a CSV file with columns: url_template, page_count, score
-**Plans**: 2 plans
-
-Plans:
-- [x] 03-01-PLAN.md — localStorage graph persistence (save on change, restore on mount)
-- [x] 03-02-PLAN.md — JSON and CSV export buttons in toolbar with file download
 
 **UI hint**: yes
 
@@ -181,22 +165,6 @@ Plans:
 - [x] 08-02-PLAN.md — Root toggle in EditPopover, depth/orphan indicators in UrlNode, sidebar sections, App.tsx wiring + localStorage
 **UI hint**: yes
 
-### Phase 9: Scenario Comparison
-**Goal**: Users can create, switch, and manage multiple named graph scenarios with independent state and localStorage persistence (SCENE-01, SCENE-02, SCENE-03). Side-by-side score delta comparison (SCENE-04, SCENE-05) deferred per D-06.
-**Depends on**: Phase 8
-**Requirements**: SCENE-01, SCENE-02, SCENE-03, SCENE-04, SCENE-05
-**Success Criteria** (what must be TRUE):
-  1. User can create a new named scenario (e.g. "Current", "Proposal A") and switch between them; each scenario has its own fully independent graph state
-  2. Scenarios persist in localStorage so switching tabs or refreshing does not lose work
-  3. User can open a side-by-side comparison view showing two scenarios simultaneously with each node's score delta (e.g. +15%, -8%) displayed — DEFERRED
-  4. Score delta display uses green for improvements and red for regressions, making the impact immediately readable — DEFERRED
-**Plans**: 2 plans
-
-Plans:
-- [x] 09-01-PLAN.md — TDD: useScenarios hook with scenario types, CRUD, switch, localStorage persistence, auto-migration
-- [x] 09-02-PLAN.md — ScenarioTabBar component + App.tsx wiring (replace single-graph with multi-scenario)
-**UI hint**: yes
-
 ### Phase 10: Outbound Link Warning
 **Goal**: Users are warned when any node carries more outbound links than the recommended SEO threshold, so over-linked pages can be identified and corrected before deployment
 **Depends on**: Phase 9
@@ -256,13 +224,13 @@ Plans:
 | 0. Project Setup | 1/1 | Complete   | 2026-04-13 |
 | 1. Canvas Editor | 3/3 | Complete   | 2026-04-13 |
 | 2. Scoring & Analysis | 2/2 | Complete   | 2026-04-13 |
-| 3. Scenarios & Export | 0/2 | Not started | - |
-| 4. Global Nodes | 0/2 | Complete    | 2026-04-14 |
+| 3. Scenarios & Export | 2/2 | Complete   | 2026-04-13 |
+| 4. Global Nodes | 2/2 | Complete    | 2026-04-14 |
 | 5. Global Filter Panel | 1/1 | Complete   | 2026-04-14 |
-| 6. Placement Autocomplete | 0/1 | Not started | - |
+| 6. Placement Autocomplete | 1/1 | Complete   | 2026-04-14 |
 | 7. Placement-Centric Filter | 1/1 | Complete   | 2026-04-15 |
 | 8. Crawl Depth & Orphan Detection | 2/2 | Complete   | 2026-04-16 |
-| 9. Scenario Comparison | 0/2 | Not started | - |
+| 9. Scenario Comparison | 2/2 | Complete   | 2026-04-16 |
 | 10. Outbound Link Warning | 2/2 | Complete    | 2026-04-17 |
 | 11. Topical Cluster Tags | 3/8 | In progress | - |
 | 12. Anchor Text Type on Edge | 0/0 | Not started | - |
