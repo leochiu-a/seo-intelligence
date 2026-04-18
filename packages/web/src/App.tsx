@@ -190,7 +190,7 @@ function AppInner() {
   // Helper: re-attach runtime callbacks onto serialized nodes/edges from a scenario record
   const wireCallbacks = useCallback(
     (
-      serializedNodes: Array<{ id: string; type?: string; position: { x: number; y: number }; data: { urlTemplate: string; pageCount: number; isGlobal?: boolean; placements?: Placement[]; isRoot?: boolean } }>,
+      serializedNodes: Array<{ id: string; type?: string; position: { x: number; y: number }; data: { urlTemplate: string; pageCount: number; isGlobal?: boolean; placements?: Placement[]; isRoot?: boolean; tags?: string[] } }>,
       serializedEdges: Array<{ id: string; source: string; target: string; sourceHandle?: string | null; targetHandle?: string | null; type?: string; markerEnd?: unknown; data: { linkCount: number } }>,
     ): { wiredNodes: Node<AppNodeData>[]; wiredEdges: Edge[] } => {
       const wiredNodes: Node<AppNodeData>[] = serializedNodes.map((n) => ({
@@ -202,6 +202,7 @@ function AppInner() {
           ...(n.data.isGlobal != null && { isGlobal: n.data.isGlobal }),
           ...(n.data.placements != null && { placements: n.data.placements }),
           ...(n.data.isRoot != null && { isRoot: n.data.isRoot }),
+          ...(n.data.tags?.length && { tags: n.data.tags }),
           onUpdate: onNodeDataUpdate,
           onRootToggle,
           onZIndexChange: onNodeZIndexChange,
