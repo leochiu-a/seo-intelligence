@@ -1,6 +1,6 @@
 ---
 title: 核心功能
-description: Canvas、PageRank、Global Nodes、Scenario 等主要功能說明
+description: Canvas、PageRank、Global Nodes、Cluster Tags、Scenario 等主要功能說明
 icon: Layers
 ---
 
@@ -38,16 +38,36 @@ icon: Layers
 - PageRank 計算時會自動把「非 global → 所有 global」的合成邊注入
 - **Placement autocomplete**：輸入版位名稱時，會出現其他 global 節點已使用過的名稱建議，降低打錯字、命名不一致
 
-## 4. Placement Filter Panel（版位過濾面板）
+## 4. Cluster Tags（主題群組標籤）
 
-複雜 graph 下快速定位特定版位的節點。
+把頁面依主題分群，讓 PageRank 加分給主題一致的連結。
 
+- 在 Edit Popover 的 **Cluster Tags** 區塊，可為節點加上一或多個 tag（如 `blog`、`seo`、`products`）
+- **Tag autocomplete**：輸入時會自動提示其他節點已使用過的 tag 名稱
+- **同 cluster 邊框著色**：兩端共享至少一個 tag 的邊會顯示對應 cluster 的淡色，而非預設灰色
+- **1.5× PageRank 加成**：同 cluster 邊的 link weight 乘以 1.5，反映主題一致的內部連結對 SEO 的實際優勢
+- 三種視覺層：
+  - 節點卡片左側 **色帶**（最多 3 條，每個 tag 一色）
+  - 節點卡片底部的 **tag chips**
+  - Score Sidebar 每行 URL 前的 **彩色小圓點**
+
+## 5. Placement Filter Panel（版位過濾面板）
+
+複雜 graph 下快速定位特定版位或主題群組的節點。
+
+**版位過濾（By Placement）**
 - 面板以 **unique placement name** 作為頂層 checkbox（跨 global 節點去重）
 - 勾選 `Header` → 所有帶 Header 版位的 global 節點會 **高亮**，其他節點 **dim**（半透明）
 - 每個 placement 可展開看到實際使用它的 global 節點清單
-- 全部取消勾選即恢復正常
 
-## 5. Crawl Depth & Orphan Detection（爬取深度與孤島偵測）
+**Cluster 過濾（By Cluster）**
+- 面板列出所有已使用的 cluster tag
+- 勾選某個 tag → 帶該 tag 的節點高亮，相關邊保持可見，其他內容 dim
+- 可與版位過濾同時使用
+
+全部取消勾選即恢復正常。
+
+## 6. Crawl Depth & Orphan Detection（爬取深度與孤島偵測）
 
 把 topology-only 分析延伸到實際 SEO 的可爬取性。
 
@@ -56,7 +76,7 @@ icon: Layers
 - **Unreachable 警示**：從 root 完全無法到達的節點另外標示
 - **Orphan 警示**：inbound edge = 0 的節點（不含 root），與 weak 節點 **分開** 提醒 — 孤島節點不是「分數低」而是「根本沒人連」
 
-## 6. Scenario Comparison（情境切換）
+## 7. Scenario Comparison（情境切換）
 
 在同一個瀏覽器中維護多個方案。
 
@@ -67,12 +87,12 @@ icon: Layers
 
 > 側寫比較（side-by-side diff）與每節點分數 delta 為 v2.0 規劃中功能。
 
-## 7. 持久化與匯入／匯出
+## 8. 持久化與匯入／匯出
 
-- Graph 自動存到 localStorage，重新整理不會遺失
-- **JSON Export**：完整 nodes、edges、scores（可版控或分享）
+- Graph（nodes、edges、tags、placements）自動存到 localStorage，重新整理不會遺失
+- **JSON Export**：完整 nodes、edges、tags、scores（可版控或分享）
 - **CSV Export**：`url_template, page_count, score` 的排名表（可貼進試算表）
-- **JSON Import**：用 Import Dialog 還原既有 graph
+- **JSON Import**：用 Import Dialog 還原既有 graph；支援欄位：`id`、`urlTemplate`、`pageCount`、`x`、`y`、`isGlobal`、`isRoot`、`placements`、`tags`
 
 ## 規劃中的功能
 

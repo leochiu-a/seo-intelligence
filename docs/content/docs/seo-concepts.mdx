@@ -35,11 +35,12 @@ $$
 | `max_iter` | `100` | 最多迭代次數 |
 | `ε` | `0.0001` | 收斂條件：最大 delta 小於此值即停止 |
 
-### 三個關鍵的 SEO 調整
+### 四個關鍵的 SEO 調整
 
 1. **Page count 加權**：一個 template 代表 100 頁時，它獲得的權重比代表 1 頁的 template 高
 2. **Link count 加權**：邊的 link count 越大，傳遞的權重越多
 3. **Dangling node 處理**：沒有 outbound edge 的節點會把自己的 rank **平均分配** 給所有節點，避免權重「漏光」
+4. **Cluster bonus（同主題加成）**：當來源節點與目標節點共享至少一個 cluster tag 時，該邊的 link weight 乘以 `1.5`。這反映了主題一致的內部連結（例如 SEO 文章互相引用）在實際 SEO 上比跨主題連結傳遞更多 authority 的現象。計算式中 $\mathrm{linkCount}(v \to u)$ 替換為 $\mathrm{linkCount}(v \to u) \times 1.5$ 當兩端 tags 有交集時。
 
 ### 分數 tier 劃分
 
