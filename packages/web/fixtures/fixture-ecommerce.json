@@ -1,0 +1,70 @@
+{
+  "nodes": [
+    {
+      "id": "node-1",
+      "urlTemplate": "/",
+      "pageCount": 1,
+      "x": 600,
+      "y": 60,
+      "isRoot": true,
+      "isGlobal": true,
+      "placements": [
+        { "id": "p1-1", "name": "Header Nav", "linkCount": 1 }
+      ]
+    },
+    {
+      "id": "node-2",
+      "urlTemplate": "/products",
+      "pageCount": 1,
+      "x": 600,
+      "y": 220,
+      "isGlobal": true,
+      "placements": [
+        { "id": "p2-1", "name": "Header Nav", "linkCount": 1 }
+      ],
+      "tags": ["products"]
+    },
+    {
+      "id": "node-3",
+      "urlTemplate": "/products/<category>",
+      "pageCount": 8,
+      "x": 600,
+      "y": 420,
+      "tags": ["products"]
+    },
+    {
+      "id": "node-4",
+      "urlTemplate": "/products/<category>/<id>",
+      "pageCount": 24000,
+      "x": 600,
+      "y": 660,
+      "tags": ["products"]
+    }
+  ],
+  "edges": [
+    {
+      "id": "e1-2",
+      "source": "node-1",
+      "target": "node-2",
+      "linkCount": 1
+    },
+    {
+      "id": "e2-3",
+      "source": "node-2",
+      "target": "node-3",
+      "linkCount": 10
+    },
+    {
+      "id": "e3-4",
+      "source": "node-3",
+      "target": "node-4",
+      "linkCount": 10
+    },
+    {
+      "id": "e4-3",
+      "source": "node-4",
+      "target": "node-3",
+      "linkCount": 1
+    }
+  ]
+}
