@@ -33,6 +33,17 @@ A visual internal-link planning tool for PMs and SEO engineers. Build a directed
 - PageRank automatically injects the "every non-global node → all global nodes" links into the calculation
 - **Placement autocomplete**: when naming a placement, suggestions appear from placement names already used on other global nodes — reduces typos and keeps naming consistent
 
+### Cluster Tags
+- Assign one or more **cluster tags** to any node (e.g. `blog`, `seo`, `products`) via the Edit Popover
+- Tags drive three visual signals:
+  - **Left-edge stripe** on each node card — up to 3 color bands, one per tag
+  - **Tag chips** in the node subtitle row
+  - **Colored dots** before each URL in the Score Sidebar
+- **Same-cluster edges**: when two connected nodes share at least one tag, the edge renders with a muted cluster color instead of gray
+- **Cluster bonus**: same-cluster edges carry `1.5×` link weight in the PageRank calculation, modeling the real-world SEO benefit of topically coherent internal links
+- **Tag autocomplete**: typing in the Cluster Tags input shows suggestions drawn from tags already used on other nodes
+- **Cluster filter**: the Filter Panel includes a "By cluster" section — checking a tag highlights only nodes and edges in that cluster
+
 ### Placement Filter Panel
 - Filter panel groups by **unique placement name** (deduplicated across all global nodes) as the top-level checkbox
 - Checking "Header" highlights every global node that carries a Header placement; all other nodes dim so you stay oriented in complex graphs
@@ -40,10 +51,10 @@ A visual internal-link planning tool for PMs and SEO engineers. Build a directed
 - Unchecking all filters restores the canvas to normal opacity
 
 ### Persistence & Import / Export
-- Graph (nodes + edges) auto-persists to `localStorage` and restores on refresh
-- **JSON export** of nodes, edges, and scores
+- Graph (nodes, edges, tags, placements) auto-persists to `localStorage` and restores on refresh
+- **JSON export** of nodes, edges, tags, and scores
 - **CSV export** of the score ranking (`url_template, page_count, score`)
-- **JSON import** via the Import Dialog to restore an existing graph
+- **JSON import** via the Import Dialog — supported node fields: `id`, `urlTemplate`, `pageCount`, `x`, `y`, `isGlobal`, `isRoot`, `placements`, `tags`
 
 ## Tech Stack
 
@@ -92,9 +103,10 @@ src/
 │   ├── ImportDialog.tsx       # JSON import dialog
 │   └── ui/                    # shadcn / Base UI primitives
 ├── hooks/
-│   └── useFilterState.ts      # Filter checkbox state
+│   └── useFilterState.ts      # Filter checkbox state (placement + cluster filters)
 └── lib/
-    ├── graph-utils.ts         # PageRank, node/edge factory, serialization
+    ├── graph-utils.ts         # PageRank, cluster bonus, node/edge factory, serialization
+    ├── cluster-colors.ts      # Deterministic tag → color palette mapping
     └── utils.ts               # cn() and other shared helpers
 ```
 
