@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { render, screen, fireEvent, within } from '@testing-library/react';
 import type { Node } from 'reactflow';
 import type { UrlNodeData } from '../lib/graph-utils';
-import { HealthPanel } from './HealthPanel';
+import { HealthPanel, buildTooltipContent } from './HealthPanel';
 
 function makeNode(
   id: string,
@@ -20,9 +20,9 @@ function makeNode(
 describe('HealthPanel', () => {
   it('renders summary line with "X / N pages have warnings"', () => {
     const nodes = [
-      makeNode('a', '/a', { tags: ['food'] }),              // ok
-      makeNode('b', '/b'),                                    // warn (no tags)
-      makeNode('c', '/c'),                                    // warn (no tags)
+      makeNode('a', '/a', { tags: ['food'] }),
+      makeNode('b', '/b'),
+      makeNode('c', '/c'),
     ];
     render(<HealthPanel nodes={nodes} depthMap={new Map()} outboundMap={new Map()} />);
     expect(screen.getByTestId('health-summary')).toHaveTextContent('2 / 3 pages have warnings');
@@ -33,97 +33,95 @@ describe('HealthPanel', () => {
     expect(screen.getByTestId('health-summary')).toHaveTextContent('0 / 0 pages have warnings');
   });
 
-  it('renders one row per node via data-testid="health-row"', () => {
-    const nodes = [makeNode('a', '/a', { tags: ['t'] }), makeNode('b', '/b', { tags: ['t'] })];
+  it('defaults to showing warnings only (warningsOnly starts true)', () => {
+    const nodes = [
+      makeNode('a', '/ok', { tags: ['t'] }),
+      makeNode('b', '/warn'),
+    ];
     render(<HealthPanel nodes={nodes} depthMap={new Map()} outboundMap={new Map()} />);
+    const rows = screen.getAllByTestId('health-row');
+    expect(rows).toHaveLength(1);
+    expect(screen.getByText('/warn')).toBeInTheDocument();
+    expect(screen.queryByText('/ok')).toBeNull();
+  });
+
+  it('shows all rows when Show warnings only is unchecked', () => {
+    const nodes = [
+      makeNode('a', '/ok', { tags: ['t'] }),
+      makeNode('b', '/warn'),
+    ];
+    render(<HealthPanel nodes={nodes} depthMap={new Map()} outboundMap={new Map()} />);
+    fireEvent.click(screen.getByTestId('warnings-only-toggle'));
     expect(screen.getAllByTestId('health-row')).toHaveLength(2);
   });
 
-  it('renders Links badge with text-red-500 when outbound > 150', () => {
-    const nodes = [makeNode('a', '/a', { tags: ['t'] })];
-    const outboundMap = new Map([['a', 200]]);
-    render(<HealthPanel nodes={nodes} depthMap={new Map()} outboundMap={outboundMap} />);
-    expect(screen.getByTestId('badge-links').className).toMatch(/text-red-500/);
-  });
-
-  it('renders Links badge with text-muted-fg when outbound <= 150', () => {
-    const nodes = [makeNode('a', '/a', { tags: ['t'] })];
-    const outboundMap = new Map([['a', 100]]);
-    render(<HealthPanel nodes={nodes} depthMap={new Map()} outboundMap={outboundMap} />);
-    expect(screen.getByTestId('badge-links').className).toMatch(/text-muted-fg/);
-  });
-
-  it('hides Depth badge entirely when depthMap is empty', () => {
-    const nodes = [makeNode('a', '/a', { tags: ['t'] })];
+  it('shows warning icon for rows with any warning', () => {
+    const nodes = [makeNode('a', '/a')]; // no tags → warn
     render(<HealthPanel nodes={nodes} depthMap={new Map()} outboundMap={new Map()} />);
-    expect(screen.queryByTestId('badge-depth')).toBeNull();
+    fireEvent.click(screen.getByTestId('warnings-only-toggle')); // show all
+    expect(screen.getByTestId('warning-icon')).toBeInTheDocument();
   });
 
-  it('renders Depth badge red when depth > 3', () => {
-    const nodes = [makeNode('a', '/a', { tags: ['t'] })];
-    const depthMap = new Map([['a', 5]]);
-    render(<HealthPanel nodes={nodes} depthMap={depthMap} outboundMap={new Map()} />);
-    expect(screen.getByTestId('badge-depth').className).toMatch(/text-red-500/);
-  });
-
-  it('renders Depth badge red when depth === Infinity (unreachable)', () => {
-    const nodes = [makeNode('a', '/a', { tags: ['t'] })];
-    const depthMap = new Map([['a', Infinity]]);
-    render(<HealthPanel nodes={nodes} depthMap={depthMap} outboundMap={new Map()} />);
-    expect(screen.getByTestId('badge-depth').className).toMatch(/text-red-500/);
-  });
-
-  it('renders Tags badge red when node has no tags', () => {
-    const nodes = [makeNode('a', '/a')]; // no tags
-    render(<HealthPanel nodes={nodes} depthMap={new Map()} outboundMap={new Map()} />);
-    expect(screen.getByTestId('badge-tags').className).toMatch(/text-red-500/);
-  });
-
-  it('renders Tags badge muted when node has tags', () => {
+  it('does not show warning icon for healthy rows', () => {
     const nodes = [makeNode('a', '/a', { tags: ['food'] })];
     render(<HealthPanel nodes={nodes} depthMap={new Map()} outboundMap={new Map()} />);
-    expect(screen.getByTestId('badge-tags').className).toMatch(/text-muted-fg/);
+    fireEvent.click(screen.getByTestId('warnings-only-toggle')); // show all
+    expect(screen.queryByTestId('warning-icon')).toBeNull();
   });
 
   it('sorts warnings-first, then alphabetical by urlTemplate', () => {
     const nodes = [
-      makeNode('a', '/z-ok', { tags: ['t'] }),    // all ok
-      makeNode('b', '/a-ok', { tags: ['t'] }),    // all ok
-      makeNode('c', '/z-warn'),                   // warn (no tags)
-      makeNode('d', '/a-warn'),                   // warn (no tags)
+      makeNode('a', '/z-ok', { tags: ['t'] }),
+      makeNode('b', '/a-ok', { tags: ['t'] }),
+      makeNode('c', '/z-warn'),
+      makeNode('d', '/a-warn'),
     ];
     render(<HealthPanel nodes={nodes} depthMap={new Map()} outboundMap={new Map()} />);
+    fireEvent.click(screen.getByTestId('warnings-only-toggle')); // show all
     const rows = screen.getAllByTestId('health-row');
     const templates = rows.map((r) => within(r).getByText(/\/.*/).textContent);
     expect(templates).toEqual(['/a-warn', '/z-warn', '/a-ok', '/z-ok']);
   });
 
-  it('hides all-ok rows when Show warnings only is checked', () => {
-    const nodes = [
-      makeNode('a', '/ok', { tags: ['t'] }),
-      makeNode('b', '/warn'),  // no tags → warn
-    ];
-    render(<HealthPanel nodes={nodes} depthMap={new Map()} outboundMap={new Map()} />);
-    expect(screen.getAllByTestId('health-row')).toHaveLength(2);
-    fireEvent.click(screen.getByTestId('warnings-only-toggle'));
-    expect(screen.getAllByTestId('health-row')).toHaveLength(1);
-    expect(screen.getByText('/warn')).toBeInTheDocument();
-  });
-
   it('rows do NOT respond to click (read-only)', () => {
     const nodes = [makeNode('a', '/a', { tags: ['t'] })];
-    render(
-      <HealthPanel nodes={nodes} depthMap={new Map()} outboundMap={new Map()} />,
-    );
+    render(<HealthPanel nodes={nodes} depthMap={new Map()} outboundMap={new Map()} />);
+    fireEvent.click(screen.getByTestId('warnings-only-toggle')); // show all
     const row = screen.getByTestId('health-row');
-    // li has no onClick handler — clicking should not throw and no callback exists
     fireEvent.click(row);
-    // Just assert render is stable — no cursor-pointer class on <li>
     expect(row.className).not.toMatch(/cursor-pointer/);
   });
 
   it('shows empty state when nodes is empty', () => {
     render(<HealthPanel nodes={[]} depthMap={new Map()} outboundMap={new Map()} />);
     expect(screen.getByText(/No nodes to check/i)).toBeInTheDocument();
+  });
+});
+
+describe('buildTooltipContent', () => {
+  it('returns "Outbound links > 150" for links warn', () => {
+    expect(buildTooltipContent({ links: 'warn', depth: 'ok', tags: 'ok' })).toBe('Outbound links > 150');
+  });
+
+  it('returns "Crawl depth > 3" for depth warn', () => {
+    expect(buildTooltipContent({ links: 'ok', depth: 'warn', tags: 'ok' })).toBe('Crawl depth > 3');
+  });
+
+  it('returns "No tags assigned" for tags warn', () => {
+    expect(buildTooltipContent({ links: 'ok', depth: 'ok', tags: 'warn' })).toBe('No tags assigned');
+  });
+
+  it('joins multiple issues with newline', () => {
+    expect(buildTooltipContent({ links: 'warn', depth: 'warn', tags: 'warn' })).toBe(
+      'Outbound links > 150\nCrawl depth > 3\nNo tags assigned'
+    );
+  });
+
+  it('returns empty string when all ok', () => {
+    expect(buildTooltipContent({ links: 'ok', depth: 'ok', tags: 'ok' })).toBe('');
+  });
+
+  it('depth na does not produce a warning line', () => {
+    expect(buildTooltipContent({ links: 'ok', depth: 'na', tags: 'ok' })).toBe('');
   });
 });

@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { Link2, Layers, Tag } from 'lucide-react';
+import { AlertTriangle } from 'lucide-react';
 import type { Node } from 'reactflow';
 import {
   getHealthStatus,
@@ -7,6 +7,8 @@ import {
   type UrlNodeData,
   type HealthStatus,
 } from '../lib/graph-utils';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Tooltip } from '@/components/ui/tooltip';
 
 interface HealthPanelProps {
   nodes: Node<UrlNodeData>[];
@@ -21,11 +23,16 @@ interface HealthRow {
   hasWarn: boolean;
 }
 
-const WARN_CLASS = 'text-red-500';
-const OK_CLASS = 'text-muted-fg';
+function buildTooltipContent(status: HealthStatus): string {
+  const issues: string[] = [];
+  if (status.links === 'warn') issues.push('Outbound links > 150');
+  if (status.depth === 'warn') issues.push('Crawl depth > 3');
+  if (status.tags === 'warn') issues.push('No tags assigned');
+  return issues.join('\n');
+}
 
 export function HealthPanel({ nodes, depthMap, outboundMap }: HealthPanelProps) {
-  const [warningsOnly, setWarningsOnly] = useState(false);
+  const [warningsOnly, setWarningsOnly] = useState(true);
 
   const rows = useMemo<HealthRow[]>(() => {
     const computed = nodes.map((n) => {
@@ -37,7 +44,6 @@ export function HealthPanel({ nodes, depthMap, outboundMap }: HealthPanelProps) 
         hasWarn: hasAnyWarning(status),
       };
     });
-    // Warnings-first sort, then alphabetical (D-09)
     computed.sort((a, b) => {
       if (a.hasWarn !== b.hasWarn) return a.hasWarn ? -1 : 1;
       return a.urlTemplate.localeCompare(b.urlTemplate);
@@ -57,15 +63,13 @@ export function HealthPanel({ nodes, depthMap, outboundMap }: HealthPanelProps) 
         <p className="text-[11px] text-muted-fg mt-1" data-testid="health-summary">
           {warningCount} / {rows.length} pages have warnings
         </p>
-        <label className="flex items-center gap-1.5 mt-2 cursor-pointer">
-          <input
-            type="checkbox"
+        <label className="flex items-center gap-2 mt-2 cursor-pointer">
+          <Checkbox
             checked={warningsOnly}
-            onChange={(e) => setWarningsOnly(e.target.checked)}
+            onCheckedChange={(checked) => setWarningsOnly(checked === true)}
             data-testid="warnings-only-toggle"
-            className="h-3 w-3"
           />
-          <span className="text-[11px] text-dark">Show warnings only</span>
+          <span className="text-[11px] text-dark select-none">Show warnings only</span>
         </label>
       </div>
 
@@ -84,31 +88,19 @@ export function HealthPanel({ nodes, depthMap, outboundMap }: HealthPanelProps) 
               <span className="flex-1 min-w-0 text-sm text-dark truncate">
                 {row.urlTemplate}
               </span>
-              <span className="flex items-center gap-1.5 flex-shrink-0">
-                <span
-                  data-testid="badge-links"
-                  className={row.status.links === 'warn' ? WARN_CLASS : OK_CLASS}
-                  aria-label={row.status.links === 'warn' ? 'Over-linked' : 'Links ok'}
+              {row.hasWarn && (
+                <Tooltip
+                  content={
+                    <span className="whitespace-pre-line">
+                      {buildTooltipContent(row.status)}
+                    </span>
+                  }
                 >
-                  <Link2 size={14} />
-                </span>
-                {row.status.depth !== 'na' && (
-                  <span
-                    data-testid="badge-depth"
-                    className={row.status.depth === 'warn' ? WARN_CLASS : OK_CLASS}
-                    aria-label={row.status.depth === 'warn' ? 'Too deep' : 'Depth ok'}
-                  >
-                    <Layers size={14} />
+                  <span data-testid="warning-icon" className="text-amber-500 flex-shrink-0">
+                    <AlertTriangle size={14} />
                   </span>
-                )}
-                <span
-                  data-testid="badge-tags"
-                  className={row.status.tags === 'warn' ? WARN_CLASS : OK_CLASS}
-                  aria-label={row.status.tags === 'warn' ? 'Untagged' : 'Tagged'}
-                >
-                  <Tag size={14} />
-                </span>
-              </span>
+                </Tooltip>
+              )}
             </li>
           ))}
         </ul>
@@ -116,3 +108,5 @@ export function HealthPanel({ nodes, depthMap, outboundMap }: HealthPanelProps) 
     </div>
   );
 }
+
+export { buildTooltipContent };
