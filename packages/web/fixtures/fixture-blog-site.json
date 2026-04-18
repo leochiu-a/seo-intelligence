@@ -1,14 +1,14 @@
 {
   "nodes": [
     { "id": "node-1",  "urlTemplate": "/",                        "pageCount": 1,  "x": 600, "y": 60  },
-    { "id": "node-2",  "urlTemplate": "/blog",                    "pageCount": 1,  "x": 220, "y": 220 },
-    { "id": "node-3",  "urlTemplate": "/products",                "pageCount": 1,  "x": 820, "y": 220 },
-    { "id": "node-4",  "urlTemplate": "/blog/seo",                "pageCount": 8,  "x": 0,   "y": 420 },
-    { "id": "node-5",  "urlTemplate": "/blog/tutorial",           "pageCount": 12, "x": 520, "y": 420 },
-    { "id": "node-6",  "urlTemplate": "/blog/seo/<slug>",         "pageCount": 1,  "x": 160, "y": 660 },
-    { "id": "node-7",  "urlTemplate": "/blog/tutorial/<slug>",    "pageCount": 1,  "x": 400, "y": 660 },
-    { "id": "node-8",  "urlTemplate": "/products/<category>",     "pageCount": 5,  "x": 760, "y": 420 },
-    { "id": "node-9",  "urlTemplate": "/products/<category>/<id>","pageCount": 1,  "x": 760, "y": 660 },
+    { "id": "node-2",  "urlTemplate": "/blog",                    "pageCount": 1,  "x": 220, "y": 220, "tags": ["blog"] },
+    { "id": "node-3",  "urlTemplate": "/products",                "pageCount": 1,  "x": 820, "y": 220, "tags": ["products"] },
+    { "id": "node-4",  "urlTemplate": "/blog/seo",                "pageCount": 8,  "x": 0,   "y": 420, "tags": ["blog", "seo"] },
+    { "id": "node-5",  "urlTemplate": "/blog/tutorial",           "pageCount": 12, "x": 520, "y": 420, "tags": ["blog", "tutorial"] },
+    { "id": "node-6",  "urlTemplate": "/blog/seo/<slug>",         "pageCount": 1,  "x": 160, "y": 660, "tags": ["blog", "seo"] },
+    { "id": "node-7",  "urlTemplate": "/blog/tutorial/<slug>",    "pageCount": 1,  "x": 400, "y": 660, "tags": ["blog", "tutorial"] },
+    { "id": "node-8",  "urlTemplate": "/products/<category>",     "pageCount": 5,  "x": 760, "y": 420, "tags": ["products"] },
+    { "id": "node-9",  "urlTemplate": "/products/<category>/<id>","pageCount": 1,  "x": 760, "y": 660, "tags": ["products"] },
     { "id": "node-10", "urlTemplate": "/about",                   "pageCount": 1,  "x": 1060, "y": 220 }
   ],
   "edges": [
