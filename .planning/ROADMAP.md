@@ -9,7 +9,7 @@ Four phases deliver a browser-based visual tool for modeling internal link struc
 - 🚧 **v1.0 MVP** - Phases 0-3 (in progress)
 - 📋 **v1.1 Global Navigation** - Phases 4-5 (planned)
 - 📋 **v1.1 UX Polish** - Phases 6-7 (planned)
-- 📋 **v2.0 SEO Analysis Depth** - Phases 8-10 (planned)
+- 📋 **v2.0 SEO Analysis Depth** - Phases 8-12 (planned)
 
 ## Phases
 
@@ -29,6 +29,8 @@ Four phases deliver a browser-based visual tool for modeling internal link struc
 - [x] **Phase 8: Crawl Depth & Orphan Detection** - BFS-based crawl depth from root node with depth warnings, plus dedicated orphan node alerts distinct from weak-node indicators (completed 2026-04-16)
 - [ ] **Phase 9: Scenario Comparison** - Multi-scenario management with independent graph state, localStorage persistence, and side-by-side score delta diff
 - [x] **Phase 10: Outbound Link Warning** - Per-node total outbound link calculation with threshold warning at >150 links on canvas and sidebar (completed 2026-04-17)
+- [ ] **Phase 11: Topical Cluster Tags** - Tag nodes by topic cluster, bonus weight for same-cluster edges, visual cluster color coding
+- [ ] **Phase 12: Anchor Text Type on Edge** - Label edges with anchor text type (exact/partial/branded/generic) and display inbound anchor diversity per node
 
 ## Phase Details
 
@@ -210,9 +212,44 @@ Plans:
 - [x] 10-02-PLAN.md — UI wiring: App.tsx outboundMap memo + UrlNode subtitle indicator + ScoreSidebar inline count
 **UI hint**: yes
 
+### Phase 11: Topical Cluster Tags
+**Goal**: Users can tag nodes with topic cluster labels; same-cluster edges carry a bonus PageRank weight; nodes and edges are color-coded by cluster to visually communicate topical authority groupings
+**Depends on**: Phase 10
+**Requirements**: TBD
+**Success Criteria** (what must be TRUE):
+  1. User can assign one or more cluster tags to any node from the edit popover
+  2. Edges between nodes sharing at least one cluster tag receive a configurable bonus weight in the PageRank calculation
+  3. Nodes and same-cluster edges are visually color-coded by cluster on the canvas
+  4. PageRank scores and sidebar rankings update immediately when cluster tags change
+**Plans**: 8 plans (3 executed from prior backlog work)
+
+Plans:
+- [x] 999.5-01-PLAN.md — (carried from backlog)
+- [x] 999.5-02-PLAN.md — (carried from backlog)
+- [x] 999.5-03-PLAN.md — (carried from backlog)
+- [ ] 999.5-04-PLAN.md — (carried from backlog, not yet executed)
+- [ ] 999.5-05-PLAN.md — (carried from backlog, not yet executed)
+- [ ] 999.5-06-PLAN.md — (carried from backlog, not yet executed)
+- [ ] 999.5-07-PLAN.md — (carried from backlog, not yet executed)
+- [ ] 999.5-08-PLAN.md — (carried from backlog, not yet executed)
+**UI hint**: yes
+
+### Phase 12: Anchor Text Type on Edge
+**Goal**: Users can label each edge with an anchor text type (exact match / partial match / branded / generic) and see inbound anchor diversity per node, surfacing topical relevance gaps
+**Depends on**: Phase 11
+**Requirements**: TBD
+**Success Criteria** (what must be TRUE):
+  1. User can set an anchor text type on any edge from the edge edit panel
+  2. Each node displays a summary of its inbound anchor type distribution (e.g. 3 exact, 2 partial, 1 branded)
+  3. Nodes with low diversity (e.g. all generic) show a warning indicator
+**Plans**: 0 plans
+
+Plans:
+- [ ] TBD
+
 ## Progress
 
-**Execution Order:** 0 -> 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9 -> 10
+**Execution Order:** 0 -> 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9 -> 10 -> 11 -> 12
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
@@ -227,38 +264,10 @@ Plans:
 | 8. Crawl Depth & Orphan Detection | 2/2 | Complete   | 2026-04-16 |
 | 9. Scenario Comparison | 0/2 | Not started | - |
 | 10. Outbound Link Warning | 2/2 | Complete    | 2026-04-17 |
+| 11. Topical Cluster Tags | 3/8 | In progress | - |
+| 12. Anchor Text Type on Edge | 0/0 | Not started | - |
 
 ## Backlog
-
-### Phase 999.3: Scenario Diff（Current vs Proposed）(BACKLOG) — P0
-
-**Goal:** 支援 2 份 scenario 並排比對，顯示每個節點的 score delta（+15% / -8%），讓 PM 回答「這次改版比現況好多少」
-**Context:** 這是 pre-deploy simulation 工具的殺手功能，現有 audit 工具做不到。PM 最想回答的問題是改版效果量化。
-**Requirements:** TBD
-**Plans:** 0 plans
-
-Plans:
-- [ ] TBD (promote with /gsd:review-backlog when ready)
-
-### Phase 999.5: Topical Cluster Tags + 同 Cluster Edge 加權 (BACKLOG) — P1
-
-**Goal:** 節點可打 tag/cluster，同 cluster 內的邊有 bonus weight，視覺上同 cluster 上色
-**Context:** Google 非常看重 topical authority，同主題頁面互連的權重遠高於跨主題。目前 PageRank 是 topology-agnostic 的，`/food/ramen` → `/food/sushi` 和 `/food/ramen` → `/hotel/taipei` 在模型裡權重一樣，但 SEO 效果完全不同。
-**Requirements:** TBD
-**Plans:** 3/8 plans executed
-
-Plans:
-- [ ] TBD (promote with /gsd:review-backlog when ready)
-
-### Phase 999.6: Anchor Text Type on Edge (BACKLOG) — P1
-
-**Goal:** Edge 上可標 anchor text type（exact match / partial match / branded / generic），顯示節點的 inbound anchor 多樣性
-**Context:** Anchor text 是內部連結 SEO 的第二大變數。相同 link count，anchor 用「首頁」vs「台北一日遊」傳遞的 topical relevance 天差地遠。
-**Requirements:** TBD
-**Plans:** 0 plans
-
-Plans:
-- [ ] TBD (promote with /gsd:review-backlog when ready)
 
 ### Phase 999.7: 匯入 Screaming Frog CSV / GSC Export (BACKLOG) — P1
 
@@ -280,30 +289,10 @@ Plans:
 Plans:
 - [ ] TBD (promote with /gsd:review-backlog when ready)
 
-### Phase 999.10: 多人協作 / 雲端存檔 (BACKLOG) — P3
-
-**Goal:** 支援多人協作和雲端存檔，讓團隊共用 scenario
-**Context:** 目前 MVP 不需要，但從 PM 工具角度遲早要。
-**Requirements:** TBD
-**Plans:** 0 plans
-
-Plans:
-- [ ] TBD (promote with /gsd:review-backlog when ready)
-
 ### Phase 999.11: URL Prefix 自動推斷 Cluster 預設值 (BACKLOG) — P2
 
 **Goal:** 根據 URL prefix 自動填入 cluster 欄位作為預設值，PM 仍可手動覆寫，大幅降低 999.5 的使用成本
 **Context:** 999.5 要求手動打 cluster tag，節點多時（50+）繁瑣。多數網站 URL 已有主題結構（`/food/*`、`/hotel/*`），應能從 prefix 自動推斷。依賴 999.5。
-**Requirements:** TBD
-**Plans:** 0 plans
-
-Plans:
-- [ ] TBD (promote with /gsd:review-backlog when ready)
-
-### Phase 999.12: 內容 Embedding 相似度（Google Layer 3 模擬）(BACKLOG) — P2
-
-**Goal:** PM 貼 meta description，工具用 LLM/Embedding API 算頁面向量，PageRank 加權時考慮兩端 cosine similarity
-**Context:** 999.5 的 cluster tag 是人工分類，無法捕捉「不同 cluster 但實際語意相關」的頁面。Google 實際上是用 neural embedding 比對語意（Layer 3），這是最接近真實演算法的模擬方式。依賴 999.5、需要 LLM API。
 **Requirements:** TBD
 **Plans:** 0 plans
 
