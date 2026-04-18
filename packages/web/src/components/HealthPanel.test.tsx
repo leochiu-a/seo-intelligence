@@ -2,7 +2,8 @@ import { describe, it, expect } from 'vitest';
 import { render, screen, fireEvent, within } from '@testing-library/react';
 import type { Node } from '@xyflow/react';
 import type { UrlNodeData } from '../lib/graph-utils';
-import { HealthPanel, buildTooltipContent } from './HealthPanel';
+import { buildTooltipContent } from '../lib/graph-utils';
+import { HealthPanel } from './HealthPanel';
 
 function makeNode(
   id: string,

@@ -4,6 +4,7 @@ import type { Node } from '@xyflow/react';
 import {
   getHealthStatus,
   hasAnyWarning,
+  buildTooltipContent,
   type UrlNodeData,
   type HealthStatus,
 } from '../lib/graph-utils';
@@ -23,13 +24,6 @@ interface HealthRow {
   hasWarn: boolean;
 }
 
-function buildTooltipContent(status: HealthStatus): string {
-  const issues: string[] = [];
-  if (status.links === 'warn') issues.push('Outbound links > 150');
-  if (status.depth === 'warn') issues.push('Crawl depth > 3');
-  if (status.tags === 'warn') issues.push('No tags assigned');
-  return issues.join('\n');
-}
 
 export function HealthPanel({ nodes, depthMap, outboundMap }: HealthPanelProps) {
   const [warningsOnly, setWarningsOnly] = useState(true);
@@ -77,6 +71,10 @@ export function HealthPanel({ nodes, depthMap, outboundMap }: HealthPanelProps) 
         <p className="px-3 py-4 text-[11px] text-muted-fg text-center">
           No nodes to check
         </p>
+      ) : visibleRows.length === 0 ? (
+        <p className="px-3 py-4 text-[11px] text-muted-fg text-center">
+          All pages are healthy
+        </p>
       ) : (
         <ul className="divide-y divide-border">
           {visibleRows.map((row) => (
@@ -109,4 +107,3 @@ export function HealthPanel({ nodes, depthMap, outboundMap }: HealthPanelProps) 
   );
 }
 
-export { buildTooltipContent };

@@ -129,6 +129,7 @@ const CLUSTER_BONUS_FACTOR = 1.5;
  * plan 10-02 can reuse the single source of truth instead of duplicating 150.
  */
 export const OUTBOUND_WARNING_THRESHOLD = 150;
+export const DEPTH_WARNING_THRESHOLD = 3;
 
 /**
  * Returns true when source and target tag arrays share at least one tag.
@@ -345,8 +346,8 @@ export interface HealthStatus {
 /**
  * Pure health evaluator for a single node against the Phase 11.1 3 metrics:
  *   - Links: warn when outbound > OUTBOUND_WARNING_THRESHOLD (150)
- *   - Depth: warn when depth > 3 OR depth === Infinity; 'na' when depthMap is
- *     empty (no root set) or node has no entry
+ *   - Depth: warn when depth > DEPTH_WARNING_THRESHOLD OR depth === Infinity;
+ *     'na' when depthMap is empty (no root set); 'warn' when node is unreachable
  *   - Tags:  warn when node.data.tags is missing/empty or all entries are
  *            empty strings after trim
  *
@@ -364,11 +365,13 @@ export function getHealthStatus(
 
   // Depth
   let depth: HealthStatus['depth'];
-  if (depthMap.size === 0 || !depthMap.has(node.id)) {
-    depth = 'na';
+  if (depthMap.size === 0) {
+    depth = 'na'; // no root set, depth is not computable
+  } else if (!depthMap.has(node.id)) {
+    depth = 'warn'; // root is set but node is unreachable
   } else {
     const d = depthMap.get(node.id)!;
-    depth = d === Infinity || d > 3 ? 'warn' : 'ok';
+    depth = d === Infinity || d > DEPTH_WARNING_THRESHOLD ? 'warn' : 'ok';
   }
 
   // Tags — treat whitespace-only entries as empty
@@ -384,6 +387,14 @@ export function getHealthStatus(
  */
 export function hasAnyWarning(status: HealthStatus): boolean {
   return status.links === 'warn' || status.depth === 'warn' || status.tags === 'warn';
+}
+
+export function buildTooltipContent(status: HealthStatus): string {
+  const issues: string[] = [];
+  if (status.links === 'warn') issues.push('Outbound links > 150');
+  if (status.depth === 'warn') issues.push(`Crawl depth > ${DEPTH_WARNING_THRESHOLD}`);
+  if (status.tags === 'warn') issues.push('No tags assigned');
+  return issues.join('\n');
 }
 
 /**

@@ -1503,11 +1503,11 @@ describe('getHealthStatus', () => {
     expect(result.depth).toBe('na');
   });
 
-  it('Depth → na when depthMap is non-empty but has no entry for node.id', () => {
+  it('Depth → warn when depthMap is non-empty but has no entry for node.id (unreachable)', () => {
     const node = makeHealthNode('n1');
     const depthMap = new Map<string, number>([['other', 1]]);
     const result = getHealthStatus(node, depthMap, new Map());
-    expect(result.depth).toBe('na');
+    expect(result.depth).toBe('warn');
   });
 
   it('Depth → ok when depthMap.get(node.id) === 0 (root itself)', () => {
