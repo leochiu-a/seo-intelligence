@@ -1,7 +1,7 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { FilterPanel } from './FilterPanel';
-import type { Node } from 'reactflow';
+import type { Node } from '@xyflow/react';
 import type { UrlNodeData } from '../lib/graph-utils';
 
 const makeNode = (

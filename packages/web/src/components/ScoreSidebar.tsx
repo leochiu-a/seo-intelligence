@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
 import { TriangleAlert, Unplug } from 'lucide-react';
-import { useReactFlow } from 'reactflow';
-import type { Node } from 'reactflow';
+import { useReactFlow } from '@xyflow/react';
+import type { Node } from '@xyflow/react';
 import type { UrlNodeData, UrlTreeNode } from '../lib/graph-utils';
 import { buildUrlTree, OUTBOUND_WARNING_THRESHOLD } from '../lib/graph-utils';
 import { getClusterColor } from '../lib/cluster-colors';

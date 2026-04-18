@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
-import { ReactFlowProvider } from 'reactflow';
-import type { Node } from 'reactflow';
+import { ReactFlowProvider } from '@xyflow/react';
+import type { Node } from '@xyflow/react';
 import { buildUrlTree } from '../lib/graph-utils';
 import type { UrlNodeData } from '../lib/graph-utils';
 import { ScoreSidebar } from './ScoreSidebar';
@@ -167,8 +167,8 @@ describe('buildUrlTree', () => {
 const mockSetNodes = vi.fn();
 const mockFitView = vi.fn();
 
-vi.mock('reactflow', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('reactflow')>();
+vi.mock('@xyflow/react', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@xyflow/react')>();
   return {
     ...actual,
     useReactFlow: () => ({

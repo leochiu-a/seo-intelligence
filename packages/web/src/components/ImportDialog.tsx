@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { X, Upload, FileUp } from 'lucide-react';
 import { parseImportJson } from '../lib/graph-utils';
-import type { Node, Edge } from 'reactflow';
+import type { Node, Edge } from '@xyflow/react';
 import type { UrlNodeData, LinkCountEdgeData } from '../lib/graph-utils';
 
 interface ImportDialogProps {

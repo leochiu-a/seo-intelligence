@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
-import { AlertTriangle } from 'lucide-react';
-import type { Node } from 'reactflow';
+import { TriangleAlert } from 'lucide-react';
+import type { Node } from '@xyflow/react';
 import {
   getHealthStatus,
   hasAnyWarning,
@@ -8,7 +8,7 @@ import {
   type HealthStatus,
 } from '../lib/graph-utils';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Tooltip } from '@/components/ui/tooltip';
+import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
 
 interface HealthPanelProps {
   nodes: Node<UrlNodeData>[];
@@ -89,16 +89,16 @@ export function HealthPanel({ nodes, depthMap, outboundMap }: HealthPanelProps) 
                 {row.urlTemplate}
               </span>
               {row.hasWarn && (
-                <Tooltip
-                  content={
-                    <span className="whitespace-pre-line">
-                      {buildTooltipContent(row.status)}
-                    </span>
-                  }
-                >
-                  <span data-testid="warning-icon" className="text-amber-500 flex-shrink-0">
-                    <AlertTriangle size={14} />
-                  </span>
+                <Tooltip>
+                  <TooltipTrigger
+                    data-testid="warning-icon"
+                    className="text-amber-500 flex-shrink-0 cursor-default inline-flex outline-none"
+                  >
+                    <TriangleAlert size={14} />
+                  </TooltipTrigger>
+                  <TooltipContent className="whitespace-pre-line">
+                    {buildTooltipContent(row.status)}
+                  </TooltipContent>
                 </Tooltip>
               )}
             </li>

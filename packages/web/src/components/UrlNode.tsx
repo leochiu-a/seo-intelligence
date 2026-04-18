@@ -1,5 +1,5 @@
 import { memo, useState, useEffect } from 'react';
-import { Handle, Position, useReactFlow, type NodeProps, type Node } from 'reactflow';
+import { Handle, Position, useReactFlow, type NodeProps, type Node } from '@xyflow/react';
 import { Pencil, TriangleAlert, Globe, Home, Unplug, Layers } from 'lucide-react';
 import { EditPopover } from './EditPopover';
 import { formatPageCount, type UrlNodeData, type ScoreTier, type Placement, HANDLE_IDS, collectPlacementSuggestions, collectClusterSuggestions } from '../lib/graph-utils';

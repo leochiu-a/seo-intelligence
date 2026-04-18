@@ -7,6 +7,12 @@
     "node": ">=22",
     "pnpm": ">=10"
   },
+  "pnpm": {
+    "overrides": {
+      "@types/react": "^19",
+      "@types/react-dom": "^19"
+    }
+  },
   "scripts": {
     "dev": "pnpm --filter @seo-intelligence/web dev",
     "build": "pnpm -r build",
