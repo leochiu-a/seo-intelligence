@@ -19,39 +19,23 @@ const defaultProps = {
 };
 
 describe('EditPopover', () => {
-  it('shows global toggle switch', () => {
+  it('shows only the Root toggle switch (no Global Node toggle)', () => {
     render(<EditPopover {...defaultProps} />);
     const toggles = screen.getAllByRole('switch');
-    // There are two switches: Root and Global Node
-    expect(toggles).toHaveLength(2);
-    const globalToggle = toggles.find((t) => t.getAttribute('aria-checked') === 'false');
-    expect(globalToggle).toBeInTheDocument();
+    // Only one switch: Root (Global Node toggle removed — isGlobal is derived from placements)
+    expect(toggles).toHaveLength(1);
+    expect(toggles[0].getAttribute('aria-checked')).toBe('false');
   });
 
-  it('shows placements section when global is toggled on', () => {
+  it('shows placements section always (unconditionally)', () => {
     render(<EditPopover {...defaultProps} />);
-    // Placements section not visible initially
-    expect(screen.queryByText('Placements')).not.toBeInTheDocument();
-    // Toggle global on — Global Node toggle is the second switch (after Root)
-    const toggles = screen.getAllByRole('switch');
-    const globalToggle = toggles[1];
-    fireEvent.click(globalToggle);
+    // Placements section is always visible regardless of isGlobal prop
     expect(screen.getByText('Placements')).toBeInTheDocument();
     expect(screen.getByText('+ Add Placement')).toBeInTheDocument();
   });
 
-  it('hides placements section when global is toggled off', () => {
-    render(<EditPopover {...defaultProps} isGlobal={true} />);
-    expect(screen.getByText('Placements')).toBeInTheDocument();
-    // Toggle off — Global Node toggle is the second switch (after Root)
-    const toggles = screen.getAllByRole('switch');
-    const globalToggle = toggles[1];
-    fireEvent.click(globalToggle);
-    expect(screen.queryByText('Placements')).not.toBeInTheDocument();
-  });
-
   it('adds a new placement when "+ Add Placement" is clicked', () => {
-    render(<EditPopover {...defaultProps} isGlobal={true} />);
+    render(<EditPopover {...defaultProps} />);
     expect(screen.queryAllByPlaceholderText('e.g. Header Nav')).toHaveLength(0);
     fireEvent.click(screen.getByText('+ Add Placement'));
     expect(screen.getAllByPlaceholderText('e.g. Header Nav')).toHaveLength(1);
@@ -59,7 +43,7 @@ describe('EditPopover', () => {
 
   it('renames a placement via inline text input', () => {
     const existingPlacement: Placement = { id: 'p-1', name: 'Footer', linkCount: 2 };
-    render(<EditPopover {...defaultProps} isGlobal={true} placements={[existingPlacement]} />);
+    render(<EditPopover {...defaultProps} placements={[existingPlacement]} />);
     const nameInput = screen.getByDisplayValue('Footer');
     fireEvent.change(nameInput, { target: { value: 'Header Nav' } });
     expect(screen.getByDisplayValue('Header Nav')).toBeInTheDocument();
@@ -67,20 +51,19 @@ describe('EditPopover', () => {
 
   it('deletes a placement via the X button', () => {
     const existingPlacement: Placement = { id: 'p-1', name: 'Footer', linkCount: 2 };
-    render(<EditPopover {...defaultProps} isGlobal={true} placements={[existingPlacement]} />);
+    render(<EditPopover {...defaultProps} placements={[existingPlacement]} />);
     expect(screen.getByDisplayValue('Footer')).toBeInTheDocument();
     const deleteBtn = screen.getByRole('button', { name: 'Delete placement Footer' });
     fireEvent.click(deleteBtn);
     expect(screen.queryByDisplayValue('Footer')).not.toBeInTheDocument();
   });
 
-  it('onSave receives isGlobal and placements when confirmed', () => {
+  it('onSave derives isGlobal=true when placements exist', () => {
     const onSave = vi.fn();
     const existingPlacement: Placement = { id: 'p-1', name: 'Header Nav', linkCount: 3 };
     render(
       <EditPopover
         {...defaultProps}
-        isGlobal={true}
         placements={[existingPlacement]}
         onSave={onSave}
       />,
@@ -89,12 +72,24 @@ describe('EditPopover', () => {
     expect(onSave).toHaveBeenCalledWith('/page/<id>', 5, true, [existingPlacement], []);
   });
 
+  it('onSave derives isGlobal=false when no placements', () => {
+    const onSave = vi.fn();
+    render(
+      <EditPopover
+        {...defaultProps}
+        placements={[]}
+        onSave={onSave}
+      />,
+    );
+    fireEvent.click(screen.getByText('Confirm'));
+    expect(onSave).toHaveBeenCalledWith('/page/<id>', 5, false, [], []);
+  });
+
   it('shows autocomplete input (combobox role) when placementSuggestions is non-empty', () => {
     const placement: Placement = { id: 'p-1', name: '', linkCount: 1 };
     render(
       <EditPopover
         {...defaultProps}
-        isGlobal={true}
         placements={[placement]}
         placementSuggestions={['Header Nav', 'Footer']}
       />,
@@ -108,7 +103,6 @@ describe('EditPopover', () => {
     render(
       <EditPopover
         {...defaultProps}
-        isGlobal={true}
         placements={[placement]}
         placementSuggestions={[]}
       />,
@@ -122,7 +116,6 @@ describe('EditPopover', () => {
     render(
       <EditPopover
         {...defaultProps}
-        isGlobal={true}
         placements={[placement]}
         placementSuggestions={['Header Nav', 'Footer']}
       />,
@@ -138,7 +131,6 @@ describe('EditPopover', () => {
     render(
       <EditPopover
         {...defaultProps}
-        isGlobal={true}
         placements={[placement]}
         placementSuggestions={['Header Nav', 'Footer']}
         onSave={onSave}
@@ -166,6 +158,19 @@ describe('EditPopover', () => {
   it('renders cluster tags section for global nodes too', () => {
     render(<EditPopover {...defaultProps} isGlobal={true} />);
     expect(screen.getByText('Cluster Tags')).toBeInTheDocument();
+  });
+
+  it('shows the "+ Add Tag" button next to the tag input', () => {
+    render(<EditPopover {...defaultProps} />);
+    expect(screen.getByRole('button', { name: /\+ Add Tag/i })).toBeInTheDocument();
+  });
+
+  it('clicking "+ Add Tag" button adds typed tag as a chip', () => {
+    render(<EditPopover {...defaultProps} />);
+    const input = screen.getByTestId('cluster-tag-input');
+    fireEvent.change(input, { target: { value: 'food' } });
+    fireEvent.click(screen.getByRole('button', { name: /\+ Add Tag/i }));
+    expect(screen.getByText('food')).toBeInTheDocument();
   });
 
   it('typing a tag and pressing Enter adds it to the visible chip list', () => {

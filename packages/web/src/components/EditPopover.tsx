@@ -25,10 +25,9 @@ interface EditPopoverProps {
   onClose: () => void;
 }
 
-export function EditPopover({ nodeId, urlTemplate, pageCount, isGlobal, isRoot, placements, placementSuggestions, tags, clusterSuggestions, onSave, onRootToggle, onClose }: EditPopoverProps) {
+export function EditPopover({ nodeId, urlTemplate, pageCount, isGlobal: _isGlobal, isRoot, placements, placementSuggestions, tags, clusterSuggestions, onSave, onRootToggle, onClose }: EditPopoverProps) {
   const [localTemplate, setLocalTemplate] = useState(urlTemplate);
   const [localCount, setLocalCount] = useState(pageCount);
-  const [localIsGlobal, setLocalIsGlobal] = useState(isGlobal);
   const [localPlacements, setLocalPlacements] = useState<Placement[]>(placements);
   const [localTags, setLocalTags] = useState<string[]>(tags);
   const [tagDraft, setTagDraft] = useState('');
@@ -53,7 +52,7 @@ export function EditPopover({ nodeId, urlTemplate, pageCount, isGlobal, isRoot, 
       return;
     }
     const cleanTags = localTags.map((t) => t.trim()).filter((t) => t.length > 0);
-    onSave(localTemplate.trim(), Math.max(1, localCount), localIsGlobal, localPlacements, cleanTags);
+    onSave(localTemplate.trim(), Math.max(1, localCount), localPlacements.length > 0, localPlacements, cleanTags);
     onClose();
   };
 
@@ -64,7 +63,7 @@ export function EditPopover({ nodeId, urlTemplate, pageCount, isGlobal, isRoot, 
           setError('URL template cannot be empty');
         } else {
           const cleanTags = localTags.map((t) => t.trim()).filter((t) => t.length > 0);
-          onSave(localTemplate.trim(), Math.max(1, localCount), localIsGlobal, localPlacements, cleanTags);
+          onSave(localTemplate.trim(), Math.max(1, localCount), localPlacements.length > 0, localPlacements, cleanTags);
           onClose();
         }
       }
@@ -72,7 +71,7 @@ export function EditPopover({ nodeId, urlTemplate, pageCount, isGlobal, isRoot, 
 
     document.addEventListener('mousedown', handleMouseDown);
     return () => document.removeEventListener('mousedown', handleMouseDown);
-  }, [localTemplate, localCount, localIsGlobal, localPlacements, localTags, onSave, onClose]);
+  }, [localTemplate, localCount, localPlacements, localTags, onSave, onClose]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -84,12 +83,12 @@ export function EditPopover({ nodeId, urlTemplate, pageCount, isGlobal, isRoot, 
 
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [localTemplate, localCount, localIsGlobal, localPlacements, localTags, onClose]);
+  }, [localTemplate, localCount, localPlacements, localTags, onClose]);
 
   return (
     <div
       ref={popoverRef}
-      className={`absolute left-full top-0 ml-2 z-50 ${localIsGlobal ? 'w-[320px]' : 'w-[280px]'} bg-white border border-border rounded-xl shadow-lg overflow-hidden`}
+      className="absolute left-full top-0 ml-2 z-50 w-[320px] bg-white border border-border rounded-xl shadow-lg overflow-hidden"
       onMouseDown={(e) => e.stopPropagation()}
       onClick={(e) => e.stopPropagation()}
     >
@@ -139,118 +138,101 @@ export function EditPopover({ nodeId, urlTemplate, pageCount, isGlobal, isRoot, 
           </button>
         </div>
 
-        <div className="flex items-center justify-between">
-          <label className="block text-[11px] font-semibold uppercase tracking-wide text-muted-fg">
-            Global Node
+        <div>
+          <label className="block text-[11px] font-semibold uppercase tracking-wide text-muted-fg mb-1.5">
+            Placements
           </label>
-          <button
-            type="button"
-            role="switch"
-            aria-checked={localIsGlobal}
-            onClick={() => setLocalIsGlobal((prev) => !prev)}
-            className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${localIsGlobal ? 'bg-blue-600' : 'bg-gray-300'}`}
-          >
-            <span className={`inline-block h-3.5 w-3.5 rounded-full bg-white transition-transform ${localIsGlobal ? 'translate-x-[18px]' : 'translate-x-[3px]'}`} />
-          </button>
-        </div>
-
-        {localIsGlobal && (
-          <div>
-            <label className="block text-[11px] font-semibold uppercase tracking-wide text-muted-fg mb-1.5">
-              Placements
-            </label>
-            <div className="space-y-2">
-              {localPlacements.map((p) => (
-                <div key={p.id} className="flex items-center gap-1.5">
-                  {placementSuggestions.length > 0 ? (
-                    <Autocomplete.Root
-                      value={p.name}
-                      onValueChange={(value) =>
-                        setLocalPlacements((prev) =>
-                          prev.map((pl) => (pl.id === p.id ? { ...pl, name: value } : pl))
-                        )
-                      }
-                      items={placementSuggestions}
-                      openOnInputClick
-                    >
-                      {/* Portal with container=popoverRef keeps dropdown inside popoverRef so click-outside handler works correctly */}
-                      <Autocomplete.Portal container={popoverRef}>
-                        <Autocomplete.Positioner
-                          sideOffset={4}
-                          className="z-[60]"
-                        >
-                          <Autocomplete.Popup className="bg-white border border-border rounded-lg shadow-lg overflow-hidden max-h-40 overflow-y-auto">
-                            {placementSuggestions.map((name) => (
-                              <Autocomplete.Item
-                                key={name}
-                                value={name}
-                                className="px-2 py-1.5 text-sm text-dark cursor-pointer hover:bg-gray-50 data-[highlighted]:bg-gray-100"
-                              >
-                                {name}
-                              </Autocomplete.Item>
-                            ))}
-                            <Autocomplete.Empty className="px-2 py-1.5 text-sm text-muted-fg">
-                              No matches
-                            </Autocomplete.Empty>
-                          </Autocomplete.Popup>
-                        </Autocomplete.Positioner>
-                      </Autocomplete.Portal>
-                      <Autocomplete.Input
-                        className="flex-1 h-7 text-sm text-dark border border-border rounded-lg px-2 focus:outline-none focus:ring-2 focus:ring-tier-neutral/50 focus:border-tier-neutral transition"
-                        placeholder="e.g. Header Nav"
-                      />
-                    </Autocomplete.Root>
-                  ) : (
-                    <input
-                      type="text"
+          <div className="space-y-2">
+            {localPlacements.map((p) => (
+              <div key={p.id} className="flex items-center gap-1.5">
+                {placementSuggestions.length > 0 ? (
+                  <Autocomplete.Root
+                    value={p.name}
+                    onValueChange={(value) =>
+                      setLocalPlacements((prev) =>
+                        prev.map((pl) => (pl.id === p.id ? { ...pl, name: value } : pl))
+                      )
+                    }
+                    items={placementSuggestions}
+                    openOnInputClick
+                  >
+                    {/* Portal with container=popoverRef keeps dropdown inside popoverRef so click-outside handler works correctly */}
+                    <Autocomplete.Portal container={popoverRef}>
+                      <Autocomplete.Positioner
+                        sideOffset={4}
+                        className="z-[60]"
+                      >
+                        <Autocomplete.Popup className="bg-white border border-border rounded-lg shadow-lg overflow-hidden max-h-40 overflow-y-auto">
+                          {placementSuggestions.map((name) => (
+                            <Autocomplete.Item
+                              key={name}
+                              value={name}
+                              className="px-2 py-1.5 text-sm text-dark cursor-pointer hover:bg-gray-50 data-[highlighted]:bg-gray-100"
+                            >
+                              {name}
+                            </Autocomplete.Item>
+                          ))}
+                          <Autocomplete.Empty className="px-2 py-1.5 text-sm text-muted-fg">
+                            No matches
+                          </Autocomplete.Empty>
+                        </Autocomplete.Popup>
+                      </Autocomplete.Positioner>
+                    </Autocomplete.Portal>
+                    <Autocomplete.Input
                       className="flex-1 h-7 text-sm text-dark border border-border rounded-lg px-2 focus:outline-none focus:ring-2 focus:ring-tier-neutral/50 focus:border-tier-neutral transition"
                       placeholder="e.g. Header Nav"
-                      value={p.name}
-                      onChange={(e) =>
-                        setLocalPlacements((prev) =>
-                          prev.map((pl) => (pl.id === p.id ? { ...pl, name: e.target.value } : pl))
-                        )
-                      }
                     />
-                  )}
+                  </Autocomplete.Root>
+                ) : (
                   <input
-                    type="number"
-                    min={1}
-                    className="w-14 h-7 text-sm text-dark border border-border rounded-lg px-2 text-center focus:outline-none focus:ring-2 focus:ring-tier-neutral/50 focus:border-tier-neutral transition"
-                    value={p.linkCount}
+                    type="text"
+                    className="flex-1 h-7 text-sm text-dark border border-border rounded-lg px-2 focus:outline-none focus:ring-2 focus:ring-tier-neutral/50 focus:border-tier-neutral transition"
+                    placeholder="e.g. Header Nav"
+                    value={p.name}
                     onChange={(e) =>
                       setLocalPlacements((prev) =>
-                        prev.map((pl) => (pl.id === p.id ? { ...pl, linkCount: Math.max(1, Number(e.target.value) || 1) } : pl))
+                        prev.map((pl) => (pl.id === p.id ? { ...pl, name: e.target.value } : pl))
                       )
                     }
                   />
-                  <button
-                    type="button"
-                    onClick={() =>
-                      setLocalPlacements((prev) => prev.filter((pl) => pl.id !== p.id))
-                    }
-                    className="p-1 text-muted-fg hover:text-red-500 transition-colors"
-                    aria-label={`Delete placement ${p.name}`}
-                  >
-                    <X size={13} />
-                  </button>
-                </div>
-              ))}
-            </div>
-            <button
-              type="button"
-              onClick={() =>
-                setLocalPlacements((prev) => [
-                  ...prev,
-                  { id: crypto.randomUUID(), name: '', linkCount: 1 },
-                ])
-              }
-              className="mt-2 text-[11px] font-medium text-blue-600 hover:text-blue-800 transition-colors"
-            >
-              + Add Placement
-            </button>
+                )}
+                <input
+                  type="number"
+                  min={1}
+                  className="w-14 h-7 text-sm text-dark border border-border rounded-lg px-2 text-center focus:outline-none focus:ring-2 focus:ring-tier-neutral/50 focus:border-tier-neutral transition"
+                  value={p.linkCount}
+                  onChange={(e) =>
+                    setLocalPlacements((prev) =>
+                      prev.map((pl) => (pl.id === p.id ? { ...pl, linkCount: Math.max(1, Number(e.target.value) || 1) } : pl))
+                    )
+                  }
+                />
+                <button
+                  type="button"
+                  onClick={() =>
+                    setLocalPlacements((prev) => prev.filter((pl) => pl.id !== p.id))
+                  }
+                  className="p-1 text-muted-fg hover:text-red-500 transition-colors"
+                  aria-label={`Delete placement ${p.name}`}
+                >
+                  <X size={13} />
+                </button>
+              </div>
+            ))}
           </div>
-        )}
+          <button
+            type="button"
+            onClick={() =>
+              setLocalPlacements((prev) => [
+                ...prev,
+                { id: crypto.randomUUID(), name: '', linkCount: 1 },
+              ])
+            }
+            className="mt-2 text-[11px] font-medium text-blue-600 hover:text-blue-800 transition-colors"
+          >
+            + Add Placement
+          </button>
+        </div>
 
         <div>
           <label className="block text-[11px] font-semibold uppercase tracking-wide text-muted-fg mb-1.5">
@@ -282,35 +264,54 @@ export function EditPopover({ nodeId, urlTemplate, pageCount, isGlobal, isRoot, 
             </div>
           )}
 
-          {clusterSuggestions.length > 0 ? (
-            <Autocomplete.Root
-              value={tagDraft}
-              onValueChange={(v) => setTagDraft(v)}
-              onItemHighlighted={() => {}}
-              items={clusterSuggestions.filter((s) => !localTags.includes(s))}
-              openOnInputClick
-            >
-              <Autocomplete.Portal container={popoverRef}>
-                <Autocomplete.Positioner sideOffset={4} className="z-[60]">
-                  <Autocomplete.Popup className="bg-white border border-border rounded-lg shadow-lg overflow-hidden max-h-40 overflow-y-auto">
-                    {clusterSuggestions.filter((s) => !localTags.includes(s)).map((tag) => (
-                      <Autocomplete.Item
-                        key={tag}
-                        value={tag}
-                        className="px-2 py-1.5 text-sm text-dark cursor-pointer hover:bg-gray-50 data-[highlighted]:bg-gray-100"
-                      >
-                        {tag}
-                      </Autocomplete.Item>
-                    ))}
-                    <Autocomplete.Empty className="px-2 py-1.5 text-sm text-muted-fg">
-                      Press Enter to add &quot;{tagDraft}&quot;
-                    </Autocomplete.Empty>
-                  </Autocomplete.Popup>
-                </Autocomplete.Positioner>
-              </Autocomplete.Portal>
-              <Autocomplete.Input
-                className="w-full h-7 text-sm text-dark border border-border rounded-lg px-2 focus:outline-none focus:ring-2 focus:ring-tier-neutral/50 focus:border-tier-neutral transition"
+          {/* Input row: text input + Add Tag button */}
+          <div className="flex items-center gap-1.5">
+            {clusterSuggestions.length > 0 ? (
+              <Autocomplete.Root
+                value={tagDraft}
+                onValueChange={(v) => setTagDraft(v)}
+                onItemHighlighted={() => {}}
+                items={clusterSuggestions.filter((s) => !localTags.includes(s))}
+                openOnInputClick
+              >
+                <Autocomplete.Portal container={popoverRef}>
+                  <Autocomplete.Positioner sideOffset={4} className="z-[60]">
+                    <Autocomplete.Popup className="bg-white border border-border rounded-lg shadow-lg overflow-hidden max-h-40 overflow-y-auto">
+                      {clusterSuggestions.filter((s) => !localTags.includes(s)).map((tag) => (
+                        <Autocomplete.Item
+                          key={tag}
+                          value={tag}
+                          className="px-2 py-1.5 text-sm text-dark cursor-pointer hover:bg-gray-50 data-[highlighted]:bg-gray-100"
+                        >
+                          {tag}
+                        </Autocomplete.Item>
+                      ))}
+                      <Autocomplete.Empty className="px-2 py-1.5 text-sm text-muted-fg">
+                        No matches
+                      </Autocomplete.Empty>
+                    </Autocomplete.Popup>
+                  </Autocomplete.Positioner>
+                </Autocomplete.Portal>
+                <Autocomplete.Input
+                  className="flex-1 h-7 text-sm text-dark border border-border rounded-lg px-2 focus:outline-none focus:ring-2 focus:ring-tier-neutral/50 focus:border-tier-neutral transition"
+                  placeholder="e.g. food, taipei"
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      addTag();
+                    }
+                  }}
+                />
+              </Autocomplete.Root>
+            ) : (
+              <input
+                type="text"
+                data-testid="cluster-tag-input"
+                className="flex-1 h-7 text-sm text-dark border border-border rounded-lg px-2 focus:outline-none focus:ring-2 focus:ring-tier-neutral/50 focus:border-tier-neutral transition"
                 placeholder="e.g. food, taipei"
+                value={tagDraft}
+                onChange={(e) => setTagDraft(e.target.value)}
                 onKeyDown={(e) => {
                   if (e.key === 'Enter') {
                     e.preventDefault();
@@ -319,24 +320,15 @@ export function EditPopover({ nodeId, urlTemplate, pageCount, isGlobal, isRoot, 
                   }
                 }}
               />
-            </Autocomplete.Root>
-          ) : (
-            <input
-              type="text"
-              data-testid="cluster-tag-input"
-              className="w-full h-7 text-sm text-dark border border-border rounded-lg px-2 focus:outline-none focus:ring-2 focus:ring-tier-neutral/50 focus:border-tier-neutral transition"
-              placeholder="e.g. food, taipei"
-              value={tagDraft}
-              onChange={(e) => setTagDraft(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  addTag();
-                }
-              }}
-            />
-          )}
+            )}
+            <button
+              type="button"
+              onClick={addTag}
+              className="text-[11px] font-medium text-blue-600 hover:text-blue-800 transition-colors whitespace-nowrap"
+            >
+              + Add Tag
+            </button>
+          </div>
         </div>
       </div>
 
