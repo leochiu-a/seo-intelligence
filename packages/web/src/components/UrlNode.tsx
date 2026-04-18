@@ -106,21 +106,7 @@ function UrlNodeComponent({ id, data, selected }: NodeProps<UrlNodeExtendedData>
         style={{ background: '#ffffff', border: '2px solid var(--color-placeholder)', width: 12, height: 12 }}
       />
 
-      {/* Cluster stripe - sibling of content wrapper, stays vivid when dimmed */}
-      {visibleBandTags.length > 0 && (
-        <div
-          data-testid="cluster-stripe"
-          className="absolute left-0 top-0 bottom-0 w-1 flex flex-col overflow-hidden rounded-l-xl pointer-events-none"
-          aria-hidden
-        >
-          {visibleBandTags.map((tag) => {
-            const color = getClusterColor(tag);
-            return <div key={tag} className={`flex-1 ${color.stripe}`} data-cluster-tag={tag} />;
-          })}
-        </div>
-      )}
-
-      {/* Content wrapper - receives dim opacity; stripe above is sibling and stays vivid */}
+      {/* Content wrapper - receives dim opacity */}
       <div
         data-testid="card-content"
         data-dimmed={data.isDimmed ?? false}

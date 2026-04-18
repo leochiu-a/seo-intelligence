@@ -14,21 +14,19 @@
  */
 
 export interface ClusterColor {
-  /** Tailwind class for left-edge stripe bands and other solid backgrounds */
-  stripe: string;
   /** Tailwind class for sidebar dots and inline tag chip color dot */
   dot: string;
 }
 
 export const CLUSTER_PALETTE: readonly ClusterColor[] = Object.freeze([
-  { stripe: 'bg-teal-400',    dot: 'bg-teal-400'    },
-  { stripe: 'bg-cyan-400',    dot: 'bg-cyan-400'    },
-  { stripe: 'bg-sky-400',     dot: 'bg-sky-400'     },
-  { stripe: 'bg-pink-400',    dot: 'bg-pink-400'    },
-  { stripe: 'bg-rose-400',    dot: 'bg-rose-400'    },
-  { stripe: 'bg-orange-400',  dot: 'bg-orange-400'  },
-  { stripe: 'bg-lime-400',    dot: 'bg-lime-400'    },
-  { stripe: 'bg-fuchsia-400', dot: 'bg-fuchsia-400' },
+  { dot: 'bg-teal-400'    },
+  { dot: 'bg-cyan-400'    },
+  { dot: 'bg-sky-400'     },
+  { dot: 'bg-pink-400'    },
+  { dot: 'bg-rose-400'    },
+  { dot: 'bg-orange-400'  },
+  { dot: 'bg-lime-400'    },
+  { dot: 'bg-fuchsia-400' },
 ]);
 
 /**

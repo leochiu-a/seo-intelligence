@@ -9,7 +9,6 @@ describe('CLUSTER_PALETTE', () => {
   it('avoids colors used by existing UI (green/amber/red/indigo/blue/violet)', () => {
     const reservedPatterns = /\b(red|amber|indigo|blue|violet|green)-\d/;
     for (const color of CLUSTER_PALETTE) {
-      expect(color.stripe).not.toMatch(reservedPatterns);
       expect(color.dot).not.toMatch(reservedPatterns);
     }
   });
@@ -36,13 +35,11 @@ describe('getClusterColor', () => {
 
   it('handles empty string gracefully (returns a palette entry)', () => {
     const c = getClusterColor('');
-    expect(c.stripe).toBeDefined();
     expect(c.dot).toBeDefined();
   });
 
-  it('returns 2-property shape (stripe, dot)', () => {
+  it('returns dot property', () => {
     const c = getClusterColor('food');
-    expect(c).toHaveProperty('stripe');
     expect(c).toHaveProperty('dot');
   });
 });

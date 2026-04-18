@@ -169,61 +169,7 @@ describe('UrlNode', () => {
     expect(content).toHaveStyle({ opacity: '1' });
   });
 
-  it('stripe and card-content are siblings (neither contains the other)', () => {
-    renderNode({
-      urlTemplate: '/page/<id>',
-      pageCount: 1,
-      tags: ['food'],
-      onUpdate: vi.fn(),
-    });
-    const stripe = screen.getByTestId('cluster-stripe');
-    const content = screen.getByTestId('card-content');
-    expect(stripe.contains(content)).toBe(false);
-    expect(content.contains(stripe)).toBe(false);
-    expect(stripe.parentElement).toBe(content.parentElement);
-  });
-
-  describe('cluster stripe + chips', () => {
-    it('renders no stripe DIV when data.tags is undefined', () => {
-      renderNode({ urlTemplate: '/page', pageCount: 1, onUpdate: vi.fn() });
-      expect(document.querySelector('[data-testid="cluster-stripe"]')).toBeNull();
-    });
-
-    it('renders no stripe DIV when data.tags is empty', () => {
-      renderNode({ urlTemplate: '/page', pageCount: 1, onUpdate: vi.fn(), tags: [] });
-      expect(document.querySelector('[data-testid="cluster-stripe"]')).toBeNull();
-    });
-
-    it('renders 1 stripe band for single tag', () => {
-      renderNode({ urlTemplate: '/page', pageCount: 1, onUpdate: vi.fn(), tags: ['food'] });
-      const stripe = document.querySelector('[data-testid="cluster-stripe"]')!;
-      expect(stripe).not.toBeNull();
-      const bands = stripe.querySelectorAll('[data-cluster-tag]');
-      expect(bands).toHaveLength(1);
-    });
-
-    it('renders 2 equal bands for two tags', () => {
-      renderNode({ urlTemplate: '/page', pageCount: 1, onUpdate: vi.fn(), tags: ['food', 'taipei'] });
-      const stripe = document.querySelector('[data-testid="cluster-stripe"]')!;
-      const bands = stripe.querySelectorAll('[data-cluster-tag]');
-      expect(bands).toHaveLength(2);
-    });
-
-    it('renders 3 equal bands for three tags', () => {
-      renderNode({ urlTemplate: '/page', pageCount: 1, onUpdate: vi.fn(), tags: ['food', 'taipei', 'hotel'] });
-      const stripe = document.querySelector('[data-testid="cluster-stripe"]')!;
-      const bands = stripe.querySelectorAll('[data-cluster-tag]');
-      expect(bands).toHaveLength(3);
-    });
-
-    it('caps at 3 bands for 4+ tags and shows +N indicator in subtitle', () => {
-      renderNode({ urlTemplate: '/page', pageCount: 1, onUpdate: vi.fn(), tags: ['a', 'b', 'c', 'd', 'e'] });
-      const stripe = document.querySelector('[data-testid="cluster-stripe"]')!;
-      const bands = stripe.querySelectorAll('[data-cluster-tag]');
-      expect(bands).toHaveLength(3);
-      expect(screen.getByTestId('cluster-overflow')).toHaveTextContent('+2');
-    });
-
+  describe('cluster chips', () => {
     it('renders tag chips in subtitle row', () => {
       renderNode({ urlTemplate: '/page', pageCount: 1, onUpdate: vi.fn(), tags: ['food', 'taipei'] });
       const chips = screen.getAllByTestId('cluster-chip');
