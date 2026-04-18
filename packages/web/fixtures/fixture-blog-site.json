@@ -1,6 +1,6 @@
 {
   "nodes": [
-    { "id": "node-1",  "urlTemplate": "/",                        "pageCount": 1,  "x": 600, "y": 60  },
+    { "id": "node-1",  "urlTemplate": "/",                        "pageCount": 1,  "x": 600, "y": 60,  "isRoot": true },
     { "id": "node-2",  "urlTemplate": "/blog",                    "pageCount": 1,  "x": 220, "y": 220, "tags": ["blog"] },
     { "id": "node-3",  "urlTemplate": "/products",                "pageCount": 1,  "x": 820, "y": 220, "tags": ["products"] },
     { "id": "node-4",  "urlTemplate": "/blog/seo",                "pageCount": 8,  "x": 0,   "y": 420, "tags": ["blog", "seo"] },
@@ -9,7 +9,28 @@
     { "id": "node-7",  "urlTemplate": "/blog/tutorial/<slug>",    "pageCount": 1,  "x": 400, "y": 660, "tags": ["blog", "tutorial"] },
     { "id": "node-8",  "urlTemplate": "/products/<category>",     "pageCount": 5,  "x": 760, "y": 420, "tags": ["products"] },
     { "id": "node-9",  "urlTemplate": "/products/<category>/<id>","pageCount": 1,  "x": 760, "y": 660, "tags": ["products"] },
-    { "id": "node-10", "urlTemplate": "/about",                   "pageCount": 1,  "x": 1060, "y": 220 }
+    { "id": "node-10", "urlTemplate": "/about",                   "pageCount": 1,  "x": 1060, "y": 220 },
+    {
+      "id": "global-header",
+      "urlTemplate": "Global Header",
+      "pageCount": 1,
+      "x": 600, "y": -160,
+      "isGlobal": true,
+      "placements": [
+        { "id": "ph-1", "name": "Header Nav", "linkCount": 3 }
+      ]
+    },
+    {
+      "id": "global-footer",
+      "urlTemplate": "Global Footer",
+      "pageCount": 1,
+      "x": 600, "y": -40,
+      "isGlobal": true,
+      "placements": [
+        { "id": "pf-1", "name": "Footer Links", "linkCount": 2 },
+        { "id": "pf-2", "name": "Footer Blog",  "linkCount": 1 }
+      ]
+    }
   ],
   "edges": [
     { "id": "e1-2",  "source": "node-1",  "target": "node-2",  "linkCount": 3 },
