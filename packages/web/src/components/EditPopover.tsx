@@ -51,7 +51,7 @@ export function EditPopover({ nodeId, urlTemplate, pageCount, isGlobal: _isGloba
       return;
     }
     const allTags = tagDraft.trim() ? [...localTags, tagDraft.trim()] : localTags;
-    const cleanTags = [...new Set(allTags.map((t) => t.trim()).filter((t) => t.length > 0))];
+    const cleanTags = [...new Set(allTags.filter((t) => t.length > 0))];
     onSave(localTemplate.trim(), Math.max(1, localCount), localPlacements.length > 0, localPlacements, cleanTags);
     onClose();
   };
@@ -63,7 +63,7 @@ export function EditPopover({ nodeId, urlTemplate, pageCount, isGlobal: _isGloba
           setError('URL template cannot be empty');
         } else {
           const allTags = tagDraft.trim() ? [...localTags, tagDraft.trim()] : localTags;
-          const cleanTags = [...new Set(allTags.map((t) => t.trim()).filter((t) => t.length > 0))];
+          const cleanTags = [...new Set(allTags.filter((t) => t.length > 0))];
           onSave(localTemplate.trim(), Math.max(1, localCount), localPlacements.length > 0, localPlacements, cleanTags);
           onClose();
         }
