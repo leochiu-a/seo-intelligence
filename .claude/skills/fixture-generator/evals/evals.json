@@ -1,0 +1,20 @@
+{
+  "skill_name": "fixture-generator",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "我想要幫我們的部落格網站建一個 fixture。網站有首頁、文章列表頁（/blog）、還有個別文章頁（/blog/<slug>）。文章大概有 50 篇。首頁和文章列表都在 Header Nav 裡面。",
+      "expected_output": "JSON fixture with at least 3 nodes (homepage, /blog, /blog/<slug>), edges connecting them, isGlobal+placements on homepage and /blog, saved to fixture-*.json"
+    },
+    {
+      "id": 2,
+      "prompt": "幫我建一個電商網站的 fixture。有首頁、產品列表 /products、分類頁 /products/<category>、和產品詳細頁 /products/<category>/<id>。分類大概有 8 個，Header 有首頁和產品列表的連結。我也想把產品相關頁面打上 products 這個 tag。",
+      "expected_output": "JSON fixture with 4+ nodes for e-commerce, products tag on product nodes, placements on isGlobal nodes, edges showing product hierarchy"
+    },
+    {
+      "id": 3,
+      "prompt": "I need to create a site fixture for our company website. We have: a homepage, an about page (/about), a services section (/services) with individual service pages (/services/<slug>), and a contact page (/contact). Header links to homepage, about, services, and contact. Footer only has about and contact.",
+      "expected_output": "JSON fixture with 5 nodes, both Header and Footer placements on relevant global nodes, services tag or similar grouping, edges reflecting navigation"
+    }
+  ]
+}
