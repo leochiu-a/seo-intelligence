@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import type { Node, Edge } from 'reactflow';
+import type { Node, Edge } from '@xyflow/react';
 import {
   createDefaultNode,
   updateNodeData,
@@ -23,8 +23,10 @@ import {
   hasSameCluster,
   collectClusterSuggestions,
   collectClusterGroups,
+  getHealthStatus,
+  hasAnyWarning,
 } from './graph-utils';
-import type { UrlNodeData, LinkCountEdgeData, Placement, ClusterGroup } from './graph-utils';
+import type { UrlNodeData, LinkCountEdgeData, Placement, ClusterGroup, HealthStatus } from './graph-utils';
 
 describe('createDefaultNode', () => {
   beforeEach(() => {
@@ -1445,5 +1447,180 @@ describe('collectClusterGroups', () => {
       { id: 'a', type: 'urlNode', position: { x: 0, y: 0 }, data: { urlTemplate: '/a', pageCount: 1, tags: ['zebra', 'apple', 'mango'] } },
     ];
     expect(collectClusterGroups(nodes).map((g) => g.tagName)).toEqual(['apple', 'mango', 'zebra']);
+  });
+});
+
+// =============================================================================
+// Phase 11.1: PM Health Check — getHealthStatus and hasAnyWarning
+// =============================================================================
+
+describe('getHealthStatus', () => {
+  // Helper to create a minimal node for health status tests
+  function makeHealthNode(
+    id: string,
+    opts?: { tags?: string[] },
+  ): Node<UrlNodeData> {
+    return {
+      id,
+      type: 'urlNode',
+      position: { x: 0, y: 0 },
+      data: { urlTemplate: '/blog', pageCount: 1, ...opts },
+    };
+  }
+
+  // --- Links metric ---
+  it('Links → warn when outboundMap.get(node.id) is 151 (boundary: > 150)', () => {
+    const node = makeHealthNode('n1');
+    const outboundMap = new Map<string, number>([['n1', 151]]);
+    const result = getHealthStatus(node, new Map(), outboundMap);
+    expect(result.links).toBe('warn');
+  });
+
+  it('Links → ok when outboundMap.get(node.id) is 150 (boundary: not > 150)', () => {
+    const node = makeHealthNode('n1');
+    const outboundMap = new Map<string, number>([['n1', 150]]);
+    const result = getHealthStatus(node, new Map(), outboundMap);
+    expect(result.links).toBe('ok');
+  });
+
+  it('Links → ok when outboundMap.get(node.id) is 0', () => {
+    const node = makeHealthNode('n1');
+    const outboundMap = new Map<string, number>([['n1', 0]]);
+    const result = getHealthStatus(node, new Map(), outboundMap);
+    expect(result.links).toBe('ok');
+  });
+
+  it('Links → ok when outboundMap has no entry for node.id (undefined treated as 0)', () => {
+    const node = makeHealthNode('n1');
+    const result = getHealthStatus(node, new Map(), new Map());
+    expect(result.links).toBe('ok');
+  });
+
+  // --- Depth metric ---
+  it('Depth → na when depthMap.size === 0 (no root set)', () => {
+    const node = makeHealthNode('n1');
+    const result = getHealthStatus(node, new Map(), new Map());
+    expect(result.depth).toBe('na');
+  });
+
+  it('Depth → warn when depthMap is non-empty but has no entry for node.id (unreachable)', () => {
+    const node = makeHealthNode('n1');
+    const depthMap = new Map<string, number>([['other', 1]]);
+    const result = getHealthStatus(node, depthMap, new Map());
+    expect(result.depth).toBe('warn');
+  });
+
+  it('Depth → ok when depthMap.get(node.id) === 0 (root itself)', () => {
+    const node = makeHealthNode('n1');
+    const depthMap = new Map<string, number>([['n1', 0]]);
+    const result = getHealthStatus(node, depthMap, new Map());
+    expect(result.depth).toBe('ok');
+  });
+
+  it('Depth → ok when depthMap.get(node.id) === 3 (boundary: not > 3)', () => {
+    const node = makeHealthNode('n1');
+    const depthMap = new Map<string, number>([['n1', 3]]);
+    const result = getHealthStatus(node, depthMap, new Map());
+    expect(result.depth).toBe('ok');
+  });
+
+  it('Depth → warn when depthMap.get(node.id) === 4 (boundary: > 3)', () => {
+    const node = makeHealthNode('n1');
+    const depthMap = new Map<string, number>([['n1', 4]]);
+    const result = getHealthStatus(node, depthMap, new Map());
+    expect(result.depth).toBe('warn');
+  });
+
+  it('Depth → warn when depthMap.get(node.id) === Infinity (unreachable)', () => {
+    const node = makeHealthNode('n1');
+    const depthMap = new Map<string, number>([['n1', Infinity]]);
+    const result = getHealthStatus(node, depthMap, new Map());
+    expect(result.depth).toBe('warn');
+  });
+
+  // --- Tags metric ---
+  it('Tags → warn when node.data.tags is undefined', () => {
+    const node = makeHealthNode('n1');
+    const result = getHealthStatus(node, new Map(), new Map());
+    expect(result.tags).toBe('warn');
+  });
+
+  it('Tags → warn when node.data.tags is []', () => {
+    const node = makeHealthNode('n1', { tags: [] });
+    const result = getHealthStatus(node, new Map(), new Map());
+    expect(result.tags).toBe('warn');
+  });
+
+  it("Tags → warn when node.data.tags is [''] (all whitespace)", () => {
+    const node = makeHealthNode('n1', { tags: [''] });
+    const result = getHealthStatus(node, new Map(), new Map());
+    expect(result.tags).toBe('warn');
+  });
+
+  it("Tags → warn when node.data.tags is ['  '] (all whitespace)", () => {
+    const node = makeHealthNode('n1', { tags: ['  '] });
+    const result = getHealthStatus(node, new Map(), new Map());
+    expect(result.tags).toBe('warn');
+  });
+
+  it("Tags → ok when node.data.tags is ['food']", () => {
+    const node = makeHealthNode('n1', { tags: ['food'] });
+    const result = getHealthStatus(node, new Map(), new Map());
+    expect(result.tags).toBe('ok');
+  });
+
+  it("Tags → ok when node.data.tags is ['food', 'hotel']", () => {
+    const node = makeHealthNode('n1', { tags: ['food', 'hotel'] });
+    const result = getHealthStatus(node, new Map(), new Map());
+    expect(result.tags).toBe('ok');
+  });
+
+  // --- Combined cases ---
+  it('Combined: untagged + deep + over-linked node returns { links: warn, depth: warn, tags: warn }', () => {
+    const node = makeHealthNode('n1');
+    const depthMap = new Map<string, number>([['n1', 5]]);
+    const outboundMap = new Map<string, number>([['n1', 200]]);
+    const result = getHealthStatus(node, depthMap, outboundMap);
+    expect(result).toEqual({ links: 'warn', depth: 'warn', tags: 'warn' });
+  });
+
+  it('Combined: tagged + shallow + under-linked returns { links: ok, depth: ok, tags: ok }', () => {
+    const node = makeHealthNode('n1', { tags: ['food'] });
+    const depthMap = new Map<string, number>([['n1', 2]]);
+    const outboundMap = new Map<string, number>([['n1', 50]]);
+    const result = getHealthStatus(node, depthMap, outboundMap);
+    expect(result).toEqual({ links: 'ok', depth: 'ok', tags: 'ok' });
+  });
+});
+
+describe('hasAnyWarning', () => {
+  it('Returns true for { links: warn, depth: ok, tags: ok }', () => {
+    const status: HealthStatus = { links: 'warn', depth: 'ok', tags: 'ok' };
+    expect(hasAnyWarning(status)).toBe(true);
+  });
+
+  it('Returns true for { links: ok, depth: warn, tags: ok }', () => {
+    const status: HealthStatus = { links: 'ok', depth: 'warn', tags: 'ok' };
+    expect(hasAnyWarning(status)).toBe(true);
+  });
+
+  it('Returns true for { links: ok, depth: ok, tags: warn }', () => {
+    const status: HealthStatus = { links: 'ok', depth: 'ok', tags: 'warn' };
+    expect(hasAnyWarning(status)).toBe(true);
+  });
+
+  it('Returns false for { links: ok, depth: ok, tags: ok }', () => {
+    const status: HealthStatus = { links: 'ok', depth: 'ok', tags: 'ok' };
+    expect(hasAnyWarning(status)).toBe(false);
+  });
+
+  it('Returns false for { links: ok, depth: na, tags: ok } — na is not a warning', () => {
+    const status: HealthStatus = { links: 'ok', depth: 'na', tags: 'ok' };
+    expect(hasAnyWarning(status)).toBe(false);
+  });
+
+  it('Returns true for { links: warn, depth: na, tags: warn }', () => {
+    const status: HealthStatus = { links: 'warn', depth: 'na', tags: 'warn' };
+    expect(hasAnyWarning(status)).toBe(true);
   });
 });

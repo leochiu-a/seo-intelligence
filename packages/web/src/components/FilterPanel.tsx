@@ -1,6 +1,7 @@
-import type { Node } from 'reactflow';
+import type { Node } from '@xyflow/react';
 import { collectPlacementGroups, collectClusterGroups } from '../lib/graph-utils';
 import type { UrlNodeData, PlacementGroup, ClusterGroup } from '../lib/graph-utils';
+import { Checkbox } from '@/components/ui/checkbox';
 
 interface FilterPanelProps {
   nodes: Node<UrlNodeData>[];
@@ -36,20 +37,18 @@ export function FilterPanel({ nodes, activeFilters, onToggle, onClear }: FilterP
               <li key={group.placementName} className="py-2 px-3">
                 {/* Top-level placement name checkbox */}
                 <div className="flex items-center gap-2">
-                  <input
-                    type="checkbox"
-                    id={`filter-pname-${group.placementName}`}
+                  <Checkbox
+                    aria-label={group.placementName}
                     checked={activeFilters.has(filterKey)}
-                    onChange={() => onToggle(filterKey)}
-                    className="rounded border-border accent-blue-600"
+                    onCheckedChange={() => onToggle(filterKey)}
                   />
-                  <label
-                    htmlFor={`filter-pname-${group.placementName}`}
+                  <span
                     className="text-xs text-dark truncate cursor-pointer select-none font-medium"
                     title={group.placementName}
+                    onClick={() => onToggle(filterKey)}
                   >
                     {group.placementName}
-                  </label>
+                  </span>
                 </div>
 
                 {/* Sub-items: read-only node URL templates */}
@@ -83,20 +82,18 @@ export function FilterPanel({ nodes, activeFilters, onToggle, onClear }: FilterP
               return (
                 <li key={group.tagName} className="py-2 px-3">
                   <div className="flex items-center gap-2">
-                    <input
-                      type="checkbox"
-                      id={`filter-cluster-${group.tagName}`}
+                    <Checkbox
+                      aria-label={group.tagName}
                       checked={activeFilters.has(filterKey)}
-                      onChange={() => onToggle(filterKey)}
-                      className="rounded border-border accent-blue-600"
+                      onCheckedChange={() => onToggle(filterKey)}
                     />
-                    <label
-                      htmlFor={`filter-cluster-${group.tagName}`}
+                    <span
                       className="text-xs text-dark truncate cursor-pointer select-none font-medium"
                       title={group.tagName}
+                      onClick={() => onToggle(filterKey)}
                     >
                       {group.tagName}
-                    </label>
+                    </span>
                   </div>
 
                   {/* Sub-items: node URL templates in this cluster */}

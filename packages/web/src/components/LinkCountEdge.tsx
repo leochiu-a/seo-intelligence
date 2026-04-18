@@ -4,7 +4,7 @@ import {
   EdgeLabelRenderer,
   getSmoothStepPath,
   type EdgeProps,
-} from 'reactflow';
+} from '@xyflow/react';
 
 export interface LinkCountEdgeData {
   linkCount: number;

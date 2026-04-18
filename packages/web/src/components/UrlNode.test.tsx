@@ -1,8 +1,8 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { ReactFlowProvider } from 'reactflow';
-import type { NodeProps } from 'reactflow';
+import { ReactFlowProvider } from '@xyflow/react';
+import type { NodeProps } from '@xyflow/react';
 import { UrlNode } from './UrlNode';
 import type { UrlNodeData } from '../lib/graph-utils';
 import { getClusterColor } from '../lib/cluster-colors';

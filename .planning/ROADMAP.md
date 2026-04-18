@@ -16,10 +16,10 @@ Four phases deliver a browser-based visual tool for modeling internal link struc
 - [x] **Phase 0: Project Setup** - Scaffold Vite + React + TypeScript project with Tailwind CSS and React Flow (completed 2026-04-13)
 - [x] **Phase 1: Canvas Editor** - Interactive canvas with URL template nodes, directed edges, and inline configuration (completed 2026-04-13)
 - [x] **Phase 2: Scoring & Analysis** - PageRank engine with visual node scoring and ranked sidebar (completed 2026-04-13)
-- [ ] **Phase 3: Scenarios & Export** - localStorage graph persistence plus CSV/JSON export (scenarios dropped per D-01)
-- [ ] **Phase 4: Global Nodes** - Global node designation with named placements and PageRank injection
-- [ ] **Phase 5: Global Filter Panel** - Filter panel with placement checkboxes and canvas dimming
-- [ ] **Phase 6: Placement Autocomplete** - Typing a placement name in the edit popover shows suggestions from existing placement names across all other global nodes
+- [x] **Phase 3: Scenarios & Export** - localStorage graph persistence plus CSV/JSON export (completed 2026-04-13)
+- [x] **Phase 4: Global Nodes** - Global node designation with named placements and PageRank injection
+- [x] **Phase 5: Global Filter Panel** - Filter panel with placement checkboxes and canvas dimming
+- [x] **Phase 6: Placement Autocomplete** - Typing a placement name in the edit popover shows suggestions from existing placement names across all other global nodes
 - [x] **Phase 7: Placement-Centric Filter** - Filter panel redesigned to group by unique placement name so checking "Header" highlights every global node that carries a Header placement (completed 2026-04-15)
 
 ---
@@ -27,7 +27,7 @@ Four phases deliver a browser-based visual tool for modeling internal link struc
 ## v2.0 SEO Analysis Depth — Phases 8-10
 
 - [x] **Phase 8: Crawl Depth & Orphan Detection** - BFS-based crawl depth from root node with depth warnings, plus dedicated orphan node alerts distinct from weak-node indicators (completed 2026-04-16)
-- [ ] **Phase 9: Scenario Comparison** - Multi-scenario management with independent graph state, localStorage persistence, and side-by-side score delta diff
+- [x] **Phase 9: Scenario Comparison** - Multi-scenario management with independent graph state, localStorage persistence (completed 2026-04-16)
 - [x] **Phase 10: Outbound Link Warning** - Per-node total outbound link calculation with threshold warning at >150 links on canvas and sidebar (completed 2026-04-17)
 - [ ] **Phase 11: Topical Cluster Tags** - Tag nodes by topic cluster, bonus weight for same-cluster edges, visual cluster color coding
 - [ ] **Phase 12: Anchor Text Type on Edge** - Label edges with anchor text type (exact/partial/branded/generic) and display inbound anchor diversity per node
@@ -80,22 +80,6 @@ Plans:
 Plans:
 - [x] 02-01: Implement iterative PageRank algorithm (dampening factor, page count and link count weighting) that recalculates on every graph state change
 - [x] 02-02: Implement score-driven node size/color scaling and ranked sidebar with weak-page flags and click-to-highlight
-
-**UI hint**: yes
-
-### Phase 3: Scenarios & Export
-**Goal**: Graph data persists across browser refresh and users can export data as JSON or CSV for external use
-**Depends on**: Phase 2
-**Requirements**: EXPORT-01, EXPORT-02
-**Success Criteria** (what must be TRUE):
-  1. Graph (nodes + edges) persists across browser refresh via localStorage
-  2. User can export the current graph as a JSON file containing nodes, edges, and scores
-  3. User can export the current score ranking as a CSV file with columns: url_template, page_count, score
-**Plans**: 2 plans
-
-Plans:
-- [x] 03-01-PLAN.md — localStorage graph persistence (save on change, restore on mount)
-- [x] 03-02-PLAN.md — JSON and CSV export buttons in toolbar with file download
 
 **UI hint**: yes
 
@@ -181,22 +165,6 @@ Plans:
 - [x] 08-02-PLAN.md — Root toggle in EditPopover, depth/orphan indicators in UrlNode, sidebar sections, App.tsx wiring + localStorage
 **UI hint**: yes
 
-### Phase 9: Scenario Comparison
-**Goal**: Users can create, switch, and manage multiple named graph scenarios with independent state and localStorage persistence (SCENE-01, SCENE-02, SCENE-03). Side-by-side score delta comparison (SCENE-04, SCENE-05) deferred per D-06.
-**Depends on**: Phase 8
-**Requirements**: SCENE-01, SCENE-02, SCENE-03, SCENE-04, SCENE-05
-**Success Criteria** (what must be TRUE):
-  1. User can create a new named scenario (e.g. "Current", "Proposal A") and switch between them; each scenario has its own fully independent graph state
-  2. Scenarios persist in localStorage so switching tabs or refreshing does not lose work
-  3. User can open a side-by-side comparison view showing two scenarios simultaneously with each node's score delta (e.g. +15%, -8%) displayed — DEFERRED
-  4. Score delta display uses green for improvements and red for regressions, making the impact immediately readable — DEFERRED
-**Plans**: 2 plans
-
-Plans:
-- [x] 09-01-PLAN.md — TDD: useScenarios hook with scenario types, CRUD, switch, localStorage persistence, auto-migration
-- [x] 09-02-PLAN.md — ScenarioTabBar component + App.tsx wiring (replace single-graph with multi-scenario)
-**UI hint**: yes
-
 ### Phase 10: Outbound Link Warning
 **Goal**: Users are warned when any node carries more outbound links than the recommended SEO threshold, so over-linked pages can be identified and corrected before deployment
 **Depends on**: Phase 9
@@ -234,6 +202,17 @@ Plans:
 - [ ] 999.5-08-PLAN.md — (carried from backlog, not yet executed)
 **UI hint**: yes
 
+### Phase 11.1: PM 指標健診面板 — 在單一頁面檢查 Internal Link Deep Placement Text 是否達標並 filter warning 危險頁面 (INSERTED)
+
+**Goal**: Add a PM Health Check view inside the existing right sidebar via a [Score | Health] tab toggle. The Health view lists every node with 3 icon badges (Links >150, Depth >3/unreachable, Tags empty), warnings-first sort, and a "Show warnings only" filter toggle. Read-only diagnostic surface — no click-through to canvas.
+**Requirements**: HEALTH-01, HEALTH-02, HEALTH-03, HEALTH-04, HEALTH-05, HEALTH-06, HEALTH-07, HEALTH-08, HEALTH-09, HEALTH-10
+**Depends on:** Phase 11
+**Plans:** 2/2 plans complete
+
+Plans:
+- [x] 11.1-01-PLAN.md — TDD: getHealthStatus + hasAnyWarning pure helpers in graph-utils.ts
+- [x] 11.1-02-PLAN.md — HealthPanel component + [Score|Health] tab wiring in ScoreSidebar
+
 ### Phase 12: Anchor Text Type on Edge
 **Goal**: Users can label each edge with an anchor text type (exact match / partial match / branded / generic) and see inbound anchor diversity per node, surfacing topical relevance gaps
 **Depends on**: Phase 11
@@ -256,38 +235,18 @@ Plans:
 | 0. Project Setup | 1/1 | Complete   | 2026-04-13 |
 | 1. Canvas Editor | 3/3 | Complete   | 2026-04-13 |
 | 2. Scoring & Analysis | 2/2 | Complete   | 2026-04-13 |
-| 3. Scenarios & Export | 0/2 | Not started | - |
-| 4. Global Nodes | 0/2 | Complete    | 2026-04-14 |
+| 3. Scenarios & Export | 2/2 | Complete   | 2026-04-13 |
+| 4. Global Nodes | 2/2 | Complete    | 2026-04-14 |
 | 5. Global Filter Panel | 1/1 | Complete   | 2026-04-14 |
-| 6. Placement Autocomplete | 0/1 | Not started | - |
+| 6. Placement Autocomplete | 1/1 | Complete   | 2026-04-14 |
 | 7. Placement-Centric Filter | 1/1 | Complete   | 2026-04-15 |
 | 8. Crawl Depth & Orphan Detection | 2/2 | Complete   | 2026-04-16 |
-| 9. Scenario Comparison | 0/2 | Not started | - |
+| 9. Scenario Comparison | 2/2 | Complete   | 2026-04-16 |
 | 10. Outbound Link Warning | 2/2 | Complete    | 2026-04-17 |
 | 11. Topical Cluster Tags | 3/8 | In progress | - |
 | 12. Anchor Text Type on Edge | 0/0 | Not started | - |
 
 ## Backlog
-
-### Phase 999.7: 匯入 Screaming Frog CSV / GSC Export (BACKLOG) — P1
-
-**Goal:** 支援匯入 Screaming Frog / Sitebulb crawl data 作為 baseline，對比 GSC impressions/clicks，證明模型和真實流量相關
-**Context:** 這是 pre-deploy tool 最根本的信任問題 — PM 看到某頁分數 0.47，那又怎樣？需要和真實數據橋接才敢拿去向老闆提案。
-**Requirements:** TBD
-**Plans:** 0 plans
-
-Plans:
-- [ ] TBD (promote with /gsd:review-backlog when ready)
-
-### Phase 999.9: 匯出改版建議清單 (BACKLOG) — P2
-
-**Goal:** 匯出可執行的改版建議（e.g.「`/category/*` 應增加 inbound 3 條」），讓 PM 直接丟給工程 ticket
-**Context:** 目前只能匯出原始數據，缺乏 actionable insights 的格式化輸出。
-**Requirements:** TBD
-**Plans:** 0 plans
-
-Plans:
-- [ ] TBD (promote with /gsd:review-backlog when ready)
 
 ### Phase 999.11: URL Prefix 自動推斷 Cluster 預設值 (BACKLOG) — P2
 
@@ -299,12 +258,3 @@ Plans:
 Plans:
 - [ ] TBD (promote with /gsd:review-backlog when ready)
 
-### Phase 999.13: Tag 輸入體驗 + Edge Color UX 改善 (BACKLOG) — P2
-
-**Goal:** 改善 cluster tag 相關的兩個 UX 問題：(1) tag 新增應支援 Tab 鍵（目前只有 Enter），降低輸入摩擦；(2) 重新評估 same-cluster edge 以 tag 顏色顯示的設計，判斷是否過於視覺干擾或語意不清
-**Context:** 從 999.5 使用回饋收集：Enter 以外的 Tab 鍵是表單 tag input 的常見習慣；edge 顏色目前與 node stripe 使用同一 palette，但 edge 顏色的語意（same cluster）對 PM 不夠直觀，可能需要 tooltip 或完全移除。
-**Requirements:** TBD
-**Plans:** 0 plans
-
-Plans:
-- [ ] TBD (promote with /gsd:review-backlog when ready)

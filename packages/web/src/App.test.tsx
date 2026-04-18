@@ -1,6 +1,6 @@
 import { render, act, waitFor } from '@testing-library/react';
 import { useState, StrictMode } from 'react';
-import type { Node, Edge, NodeChange, EdgeChange } from 'reactflow';
+import type { Node, Edge, NodeChange, EdgeChange } from '@xyflow/react';
 import App from './App';
 
 // ---- Reactflow mock ----

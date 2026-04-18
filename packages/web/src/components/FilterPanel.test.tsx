@@ -1,7 +1,7 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { FilterPanel } from './FilterPanel';
-import type { Node } from 'reactflow';
+import type { Node } from '@xyflow/react';
 import type { UrlNodeData } from '../lib/graph-utils';
 
 const makeNode = (
@@ -50,8 +50,8 @@ describe('FilterPanel (placement-centric)', () => {
       ]),
     ];
     render(<FilterPanel {...defaultProps} nodes={nodes} />);
-    expect(screen.getByLabelText('Header Nav')).toBeInTheDocument();
-    expect(screen.getByLabelText('Footer')).toBeInTheDocument();
+    expect(screen.getByRole('checkbox', { name: 'Header Nav' })).toBeInTheDocument();
+    expect(screen.getByRole('checkbox', { name: 'Footer' })).toBeInTheDocument();
   });
 
   it('Test 4: each placement name checkbox shows the placement name as its label', () => {
@@ -61,7 +61,7 @@ describe('FilterPanel (placement-centric)', () => {
       ]),
     ];
     render(<FilterPanel {...defaultProps} nodes={nodes} />);
-    expect(screen.getByLabelText('Sidebar')).toBeInTheDocument();
+    expect(screen.getByRole('checkbox', { name: 'Sidebar' })).toBeInTheDocument();
   });
 
   it('Test 5: checking a placement name checkbox calls onToggle with key "placement-name:{name}"', () => {
@@ -72,7 +72,7 @@ describe('FilterPanel (placement-centric)', () => {
       ]),
     ];
     render(<FilterPanel {...defaultProps} nodes={nodes} onToggle={onToggle} />);
-    fireEvent.click(screen.getByLabelText('Header Nav'));
+    fireEvent.click(screen.getByRole('checkbox', { name: 'Header Nav' }));
     expect(onToggle).toHaveBeenCalledWith('placement-name:Header Nav');
   });
 
@@ -95,8 +95,8 @@ describe('FilterPanel (placement-centric)', () => {
       ]),
     ];
     render(<FilterPanel {...defaultProps} nodes={nodes} activeFilters={activeFilters} />);
-    expect(screen.getByLabelText('Header Nav')).toBeChecked();
-    expect(screen.getByLabelText('Footer')).not.toBeChecked();
+    expect(screen.getByRole('checkbox', { name: 'Header Nav' })).toBeChecked();
+    expect(screen.getByRole('checkbox', { name: 'Footer' })).not.toBeChecked();
   });
 
   it('Test 8: "Clear all" button appears when activeFilters is non-empty and calls onClear when clicked', () => {
@@ -134,7 +134,7 @@ describe('FilterPanel (placement-centric)', () => {
       ]),
     ];
     render(<FilterPanel {...defaultProps} nodes={nodes} />);
-    const checkboxes = screen.getAllByLabelText('Header');
+    const checkboxes = screen.getAllByRole('checkbox', { name: 'Header' });
     expect(checkboxes).toHaveLength(1);
     expect(screen.getByText('/global-1')).toBeInTheDocument();
     expect(screen.getByText('/global-2')).toBeInTheDocument();
@@ -164,7 +164,7 @@ describe('FilterPanel (cluster section)', () => {
     const onToggle = vi.fn();
     const nodes = [makeNode('n1', '/food/ramen', false, undefined, ['food'])];
     render(<FilterPanel {...defaultProps} nodes={nodes} onToggle={onToggle} />);
-    fireEvent.click(screen.getByLabelText('food'));
+    fireEvent.click(screen.getByRole('checkbox', { name: 'food' }));
     expect(onToggle).toHaveBeenCalledWith('cluster:food');
   });
 });

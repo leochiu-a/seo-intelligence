@@ -1,5 +1,5 @@
 import { useState, useCallback, useRef, useMemo, useEffect } from 'react';
-import ReactFlow, {
+import { ReactFlow,
   Background,
   BackgroundVariant,
   Controls,
@@ -14,8 +14,8 @@ import ReactFlow, {
   type Edge,
   type Connection,
   type ReactFlowInstance,
-} from 'reactflow';
-import 'reactflow/dist/style.css';
+} from '@xyflow/react';
+import '@xyflow/react/dist/style.css';
 import { UrlNode } from './components/UrlNode';
 import { LinkCountEdge } from './components/LinkCountEdge';
 import { Toolbar } from './components/Toolbar';
@@ -23,6 +23,7 @@ import { ScenarioTabBar } from './components/ScenarioTabBar';
 import { ScoreSidebar } from './components/ScoreSidebar';
 import { FilterPanel } from './components/FilterPanel';
 import { ImportDialog } from './components/ImportDialog';
+import { TooltipProvider } from './components/ui/tooltip';
 import { useFilterState } from './hooks/useFilterState';
 import { useScenarios } from './hooks/useScenarios';
 import {
@@ -663,8 +664,10 @@ function AppInner() {
 
 export default function App() {
   return (
-    <ReactFlowProvider>
-      <AppInner />
-    </ReactFlowProvider>
+    <TooltipProvider>
+      <ReactFlowProvider>
+        <AppInner />
+      </ReactFlowProvider>
+    </TooltipProvider>
   );
 }

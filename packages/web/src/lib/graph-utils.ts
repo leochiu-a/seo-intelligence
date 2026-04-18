@@ -1,4 +1,4 @@
-import type { Node, Edge } from 'reactflow';
+import type { Node, Edge } from '@xyflow/react';
 
 export interface Placement {
   id: string;
@@ -129,6 +129,7 @@ const CLUSTER_BONUS_FACTOR = 1.5;
  * plan 10-02 can reuse the single source of truth instead of duplicating 150.
  */
 export const OUTBOUND_WARNING_THRESHOLD = 150;
+export const DEPTH_WARNING_THRESHOLD = 3;
 
 /**
  * Returns true when source and target tag arrays share at least one tag.
@@ -330,6 +331,70 @@ export function calculateOutboundLinks(
   }
 
   return result;
+}
+
+// ---------------------------------------------------------------------------
+// Phase 11.1: PM Health Check — 3-metric status helper
+// ---------------------------------------------------------------------------
+
+export interface HealthStatus {
+  links: 'ok' | 'warn';
+  depth: 'ok' | 'warn' | 'na';
+  tags: 'ok' | 'warn';
+}
+
+/**
+ * Pure health evaluator for a single node against the Phase 11.1 3 metrics:
+ *   - Links: warn when outbound > OUTBOUND_WARNING_THRESHOLD (150)
+ *   - Depth: warn when depth > DEPTH_WARNING_THRESHOLD OR depth === Infinity;
+ *     'na' when depthMap is empty (no root set); 'warn' when node is unreachable
+ *   - Tags:  warn when node.data.tags is missing/empty or all entries are
+ *            empty strings after trim
+ *
+ * Pure function — no React, no side effects. Suitable for sort predicates and
+ * memoized renders.
+ */
+export function getHealthStatus(
+  node: Node<UrlNodeData>,
+  depthMap: Map<string, number>,
+  outboundMap: Map<string, number>,
+): HealthStatus {
+  // Links
+  const outbound = outboundMap.get(node.id) ?? 0;
+  const links: HealthStatus['links'] = outbound > OUTBOUND_WARNING_THRESHOLD ? 'warn' : 'ok';
+
+  // Depth
+  let depth: HealthStatus['depth'];
+  if (depthMap.size === 0) {
+    depth = 'na'; // no root set, depth is not computable
+  } else if (!depthMap.has(node.id)) {
+    depth = 'warn'; // root is set but node is unreachable
+  } else {
+    const d = depthMap.get(node.id)!;
+    depth = d === Infinity || d > DEPTH_WARNING_THRESHOLD ? 'warn' : 'ok';
+  }
+
+  // Tags — treat whitespace-only entries as empty
+  const trimmed = (node.data.tags ?? []).filter((t) => t.trim() !== '');
+  const tags: HealthStatus['tags'] = trimmed.length === 0 ? 'warn' : 'ok';
+
+  return { links, depth, tags };
+}
+
+/**
+ * Warnings-first sort helper. Returns true when any metric is 'warn'.
+ * 'na' depth is NOT a warning (no root set → no actionable signal).
+ */
+export function hasAnyWarning(status: HealthStatus): boolean {
+  return status.links === 'warn' || status.depth === 'warn' || status.tags === 'warn';
+}
+
+export function buildTooltipContent(status: HealthStatus): string {
+  const issues: string[] = [];
+  if (status.links === 'warn') issues.push('Outbound links > 150');
+  if (status.depth === 'warn') issues.push(`Crawl depth > ${DEPTH_WARNING_THRESHOLD}`);
+  if (status.tags === 'warn') issues.push('No tags assigned');
+  return issues.join('\n');
 }
 
 /**
