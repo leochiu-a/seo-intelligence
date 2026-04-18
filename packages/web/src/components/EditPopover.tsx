@@ -2,7 +2,6 @@ import { useState, useEffect, useRef } from 'react';
 import { X } from 'lucide-react';
 import { Autocomplete } from '@base-ui/react/autocomplete';
 import { type Placement } from '../lib/graph-utils';
-import { getClusterColor } from '../lib/cluster-colors';
 
 interface EditPopoverProps {
   nodeId: string;
@@ -239,25 +238,28 @@ export function EditPopover({ nodeId, urlTemplate, pageCount, isGlobal: _isGloba
             Cluster Tags
           </label>
           <div className="space-y-2">
-            {localTags.map((tag) => {
-              const color = getClusterColor(tag);
-              return (
-                <div key={tag} className="flex items-center gap-1.5">
-                  <div className="flex-1 flex items-center gap-1.5 h-7 text-sm text-dark border border-border rounded-lg px-2">
-                    <span className={`inline-block w-1.5 h-1.5 rounded-full flex-shrink-0 ${color.dot}`} aria-hidden />
-                    <span className="flex-1 truncate">{tag}</span>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => removeTag(tag)}
-                    className="p-1 text-muted-fg hover:text-red-500 transition-colors"
-                    aria-label={`Remove tag ${tag}`}
-                  >
-                    <X size={13} />
-                  </button>
-                </div>
-              );
-            })}
+            {localTags.map((tag, i) => (
+              <div key={i} className="flex items-center gap-1.5">
+                <input
+                  type="text"
+                  className="flex-1 h-7 text-sm text-dark border border-border rounded-lg px-2 focus:outline-none focus:ring-2 focus:ring-tier-neutral/50 focus:border-tier-neutral transition"
+                  value={tag}
+                  onChange={(e) =>
+                    setLocalTags((prev) =>
+                      prev.map((t, j) => (j === i ? e.target.value : t))
+                    )
+                  }
+                />
+                <button
+                  type="button"
+                  onClick={() => removeTag(tag)}
+                  className="p-1 text-muted-fg hover:text-red-500 transition-colors"
+                  aria-label={`Remove tag ${tag}`}
+                >
+                  <X size={13} />
+                </button>
+              </div>
+            ))}
           </div>
           {clusterSuggestions.length > 0 ? (
             <Autocomplete.Root
