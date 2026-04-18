@@ -332,6 +332,60 @@ export function calculateOutboundLinks(
   return result;
 }
 
+// ---------------------------------------------------------------------------
+// Phase 11.1: PM Health Check — 3-metric status helper
+// ---------------------------------------------------------------------------
+
+export interface HealthStatus {
+  links: 'ok' | 'warn';
+  depth: 'ok' | 'warn' | 'na';
+  tags: 'ok' | 'warn';
+}
+
+/**
+ * Pure health evaluator for a single node against the Phase 11.1 3 metrics:
+ *   - Links: warn when outbound > OUTBOUND_WARNING_THRESHOLD (150)
+ *   - Depth: warn when depth > 3 OR depth === Infinity; 'na' when depthMap is
+ *     empty (no root set) or node has no entry
+ *   - Tags:  warn when node.data.tags is missing/empty or all entries are
+ *            empty strings after trim
+ *
+ * Pure function — no React, no side effects. Suitable for sort predicates and
+ * memoized renders.
+ */
+export function getHealthStatus(
+  node: Node<UrlNodeData>,
+  depthMap: Map<string, number>,
+  outboundMap: Map<string, number>,
+): HealthStatus {
+  // Links
+  const outbound = outboundMap.get(node.id) ?? 0;
+  const links: HealthStatus['links'] = outbound > OUTBOUND_WARNING_THRESHOLD ? 'warn' : 'ok';
+
+  // Depth
+  let depth: HealthStatus['depth'];
+  if (depthMap.size === 0 || !depthMap.has(node.id)) {
+    depth = 'na';
+  } else {
+    const d = depthMap.get(node.id)!;
+    depth = d === Infinity || d > 3 ? 'warn' : 'ok';
+  }
+
+  // Tags — treat whitespace-only entries as empty
+  const trimmed = (node.data.tags ?? []).filter((t) => t.trim() !== '');
+  const tags: HealthStatus['tags'] = trimmed.length === 0 ? 'warn' : 'ok';
+
+  return { links, depth, tags };
+}
+
+/**
+ * Warnings-first sort helper. Returns true when any metric is 'warn'.
+ * 'na' depth is NOT a warning (no root set → no actionable signal).
+ */
+export function hasAnyWarning(status: HealthStatus): boolean {
+  return status.links === 'warn' || status.depth === 'warn' || status.tags === 'warn';
+}
+
 /**
  * Classifies a score into a tier based on relative thirds of the score range.
  * If only one unique score exists, returns 'neutral'.
