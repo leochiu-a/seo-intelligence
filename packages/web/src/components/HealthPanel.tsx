@@ -96,7 +96,7 @@ export function HealthPanel({ nodes, depthMap, outboundMap }: HealthPanelProps) 
                   >
                     <TriangleAlert size={14} />
                   </TooltipTrigger>
-                  <TooltipContent className="whitespace-pre-line">
+                  <TooltipContent>
                     {buildTooltipContent(row.status)}
                   </TooltipContent>
                 </Tooltip>

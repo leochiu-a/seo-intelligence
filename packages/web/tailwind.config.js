@@ -7,6 +7,7 @@ export default {
   theme: {
     extend: {
       colors: {
+        // project tokens
         pink: 'var(--color-pink)',
         dark: 'var(--color-dark)',
         ink: 'var(--color-ink)',
@@ -21,6 +22,22 @@ export default {
         'tier-mid': 'var(--color-tier-mid)',
         'tier-low': 'var(--color-tier-low)',
         'tier-neutral': 'var(--color-tier-neutral)',
+        // shadcn semantic tokens
+        background: 'var(--background)',
+        foreground: 'var(--foreground)',
+        card: { DEFAULT: 'var(--card)', foreground: 'var(--card-foreground)' },
+        popover: { DEFAULT: 'var(--popover)', foreground: 'var(--popover-foreground)' },
+        primary: { DEFAULT: 'var(--primary)', foreground: 'var(--primary-foreground)' },
+        muted: { DEFAULT: 'var(--muted)', foreground: 'var(--muted-foreground)' },
+        accent: { DEFAULT: 'var(--accent)', foreground: 'var(--accent-foreground)' },
+        destructive: 'var(--destructive)',
+        input: 'var(--input)',
+        ring: 'var(--ring)',
+      },
+      borderRadius: {
+        lg: 'var(--radius)',
+        md: 'calc(var(--radius) - 2px)',
+        sm: 'calc(var(--radius) - 4px)',
       },
     },
   },
