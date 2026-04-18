@@ -38,14 +38,11 @@ describe('getClusterColor', () => {
     const c = getClusterColor('');
     expect(c.stripe).toBeDefined();
     expect(c.dot).toBeDefined();
-    expect(c.edge).toMatch(/^#[0-9a-fA-F]{6}$/);
   });
 
-  it('returns 3-string shape (stripe, dot, edge hex)', () => {
+  it('returns 2-property shape (stripe, dot)', () => {
     const c = getClusterColor('food');
     expect(c).toHaveProperty('stripe');
     expect(c).toHaveProperty('dot');
-    expect(c).toHaveProperty('edge');
-    expect(c.edge).toMatch(/^#[0-9a-fA-F]{6}$/);
   });
 });
