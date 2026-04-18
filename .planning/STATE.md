@@ -28,7 +28,7 @@ See: .planning/PROJECT.md (updated 2026-04-16)
 Phase: 12
 Plan: Not started
 Status: Ready to execute
-Last activity: 2026-04-18
+Last activity: 2026-04-18 - Completed quick task 260418-uhb: Add tooltip to warning icon in score ranking panel
 
 Progress: [░░░░░░░░░░] 0%
 
