@@ -234,4 +234,22 @@ describe('EditPopover', () => {
     const foodChips = screen.getAllByText('food');
     expect(foodChips).toHaveLength(1);
   });
+
+  it('saves tag draft on Confirm without requiring Enter first', () => {
+    const onSave = vi.fn();
+    render(<EditPopover {...defaultProps} onSave={onSave} />);
+    const input = screen.getByTestId('cluster-tag-input');
+    fireEvent.change(input, { target: { value: 'home' } });
+    fireEvent.click(screen.getByText('Confirm'));
+    expect(onSave).toHaveBeenCalledWith('/page/<id>', 5, false, [], ['home']);
+  });
+
+  it('deduplicates draft tag already present as chip on Confirm', () => {
+    const onSave = vi.fn();
+    render(<EditPopover {...defaultProps} tags={['home']} onSave={onSave} />);
+    const input = screen.getByTestId('cluster-tag-input');
+    fireEvent.change(input, { target: { value: 'home' } });
+    fireEvent.click(screen.getByText('Confirm'));
+    expect(onSave).toHaveBeenCalledWith('/page/<id>', 5, false, [], ['home']);
+  });
 });

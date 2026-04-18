@@ -50,7 +50,8 @@ export function EditPopover({ nodeId, urlTemplate, pageCount, isGlobal: _isGloba
       setError('URL template cannot be empty');
       return;
     }
-    const cleanTags = localTags.map((t) => t.trim()).filter((t) => t.length > 0);
+    const allTags = tagDraft.trim() ? [...localTags, tagDraft.trim()] : localTags;
+    const cleanTags = [...new Set(allTags.filter((t) => t.length > 0))];
     onSave(localTemplate.trim(), Math.max(1, localCount), localPlacements.length > 0, localPlacements, cleanTags);
     onClose();
   };
@@ -61,7 +62,8 @@ export function EditPopover({ nodeId, urlTemplate, pageCount, isGlobal: _isGloba
         if (localTemplate.trim() === '') {
           setError('URL template cannot be empty');
         } else {
-          const cleanTags = localTags.map((t) => t.trim()).filter((t) => t.length > 0);
+          const allTags = tagDraft.trim() ? [...localTags, tagDraft.trim()] : localTags;
+          const cleanTags = [...new Set(allTags.filter((t) => t.length > 0))];
           onSave(localTemplate.trim(), Math.max(1, localCount), localPlacements.length > 0, localPlacements, cleanTags);
           onClose();
         }
@@ -70,7 +72,7 @@ export function EditPopover({ nodeId, urlTemplate, pageCount, isGlobal: _isGloba
 
     document.addEventListener('mousedown', handleMouseDown);
     return () => document.removeEventListener('mousedown', handleMouseDown);
-  }, [localTemplate, localCount, localPlacements, localTags, onSave, onClose]);
+  }, [localTemplate, localCount, localPlacements, localTags, tagDraft, onSave, onClose]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
