@@ -238,80 +238,56 @@ export function EditPopover({ nodeId, urlTemplate, pageCount, isGlobal: _isGloba
           <label className="block text-[11px] font-semibold uppercase tracking-wide text-muted-fg mb-1.5">
             Cluster Tags
           </label>
-
-          {localTags.length > 0 && (
-            <div className="flex flex-wrap gap-1 mb-2">
-              {localTags.map((tag) => {
-                const color = getClusterColor(tag);
-                return (
-                  <span
-                    key={tag}
-                    className="inline-flex items-center gap-1 rounded-full bg-gray-50 border border-border px-2 py-0.5 text-[11px] text-dark"
+          <div className="space-y-2">
+            {localTags.map((tag) => {
+              const color = getClusterColor(tag);
+              return (
+                <div key={tag} className="flex items-center gap-1.5">
+                  <div className="flex-1 flex items-center gap-1.5 h-7 text-sm text-dark border border-border rounded-lg px-2">
+                    <span className={`inline-block w-1.5 h-1.5 rounded-full flex-shrink-0 ${color.dot}`} aria-hidden />
+                    <span className="flex-1 truncate">{tag}</span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => removeTag(tag)}
+                    className="p-1 text-muted-fg hover:text-red-500 transition-colors"
+                    aria-label={`Remove tag ${tag}`}
                   >
-                    <span className={`inline-block w-1.5 h-1.5 rounded-full ${color.dot}`} aria-hidden />
-                    {tag}
-                    <button
-                      type="button"
-                      onClick={() => removeTag(tag)}
-                      aria-label={`Remove tag ${tag}`}
-                      className="text-muted-fg hover:text-red-500 transition-colors"
-                    >
-                      <X size={10} />
-                    </button>
-                  </span>
-                );
-              })}
-            </div>
-          )}
-
-          {/* Input row: text input + Add Tag button */}
-          <div className="flex items-center gap-1.5">
-            {clusterSuggestions.length > 0 ? (
-              <Autocomplete.Root
-                value={tagDraft}
-                onValueChange={(v) => setTagDraft(v)}
-                onItemHighlighted={() => {}}
-                items={clusterSuggestions.filter((s) => !localTags.includes(s))}
-                openOnInputClick
-              >
-                <Autocomplete.Portal container={popoverRef}>
-                  <Autocomplete.Positioner sideOffset={4} className="z-[60]">
-                    <Autocomplete.Popup className="bg-white border border-border rounded-lg shadow-lg overflow-hidden max-h-40 overflow-y-auto">
-                      {clusterSuggestions.filter((s) => !localTags.includes(s)).map((tag) => (
-                        <Autocomplete.Item
-                          key={tag}
-                          value={tag}
-                          className="px-2 py-1.5 text-sm text-dark cursor-pointer hover:bg-gray-50 data-[highlighted]:bg-gray-100"
-                        >
-                          {tag}
-                        </Autocomplete.Item>
-                      ))}
-                      <Autocomplete.Empty className="px-2 py-1.5 text-sm text-muted-fg">
-                        No matches
-                      </Autocomplete.Empty>
-                    </Autocomplete.Popup>
-                  </Autocomplete.Positioner>
-                </Autocomplete.Portal>
-                <Autocomplete.Input
-                  className="flex-1 h-7 text-sm text-dark border border-border rounded-lg px-2 focus:outline-none focus:ring-2 focus:ring-tier-neutral/50 focus:border-tier-neutral transition"
-                  placeholder="e.g. food, taipei"
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      addTag();
-                    }
-                  }}
-                />
-              </Autocomplete.Root>
-            ) : (
-              <input
-                type="text"
-                data-testid="cluster-tag-input"
-                className="flex-1 h-7 text-sm text-dark border border-border rounded-lg px-2 focus:outline-none focus:ring-2 focus:ring-tier-neutral/50 focus:border-tier-neutral transition"
+                    <X size={13} />
+                  </button>
+                </div>
+              );
+            })}
+          </div>
+          {clusterSuggestions.length > 0 ? (
+            <Autocomplete.Root
+              value={tagDraft}
+              onValueChange={(v) => setTagDraft(v)}
+              onItemHighlighted={() => {}}
+              items={clusterSuggestions.filter((s) => !localTags.includes(s))}
+              openOnInputClick
+            >
+              <Autocomplete.Portal container={popoverRef}>
+                <Autocomplete.Positioner sideOffset={4} className="z-[60]">
+                  <Autocomplete.Popup className="bg-white border border-border rounded-lg shadow-lg overflow-hidden max-h-40 overflow-y-auto">
+                    {clusterSuggestions.filter((s) => !localTags.includes(s)).map((tag) => (
+                      <Autocomplete.Item
+                        key={tag}
+                        value={tag}
+                        className="px-2 py-1.5 text-sm text-dark cursor-pointer hover:bg-gray-50 data-[highlighted]:bg-gray-100"
+                      >
+                        {tag}
+                      </Autocomplete.Item>
+                    ))}
+                    <Autocomplete.Empty className="px-2 py-1.5 text-sm text-muted-fg">
+                      No matches
+                    </Autocomplete.Empty>
+                  </Autocomplete.Popup>
+                </Autocomplete.Positioner>
+              </Autocomplete.Portal>
+              <Autocomplete.Input
+                className="mt-2 w-full h-7 text-sm text-dark border border-border rounded-lg px-2 focus:outline-none focus:ring-2 focus:ring-tier-neutral/50 focus:border-tier-neutral transition"
                 placeholder="e.g. food, taipei"
-                value={tagDraft}
-                onChange={(e) => setTagDraft(e.target.value)}
                 onKeyDown={(e) => {
                   if (e.key === 'Enter') {
                     e.preventDefault();
@@ -320,15 +296,31 @@ export function EditPopover({ nodeId, urlTemplate, pageCount, isGlobal: _isGloba
                   }
                 }}
               />
-            )}
-            <button
-              type="button"
-              onClick={addTag}
-              className="text-[11px] font-medium text-blue-600 hover:text-blue-800 transition-colors whitespace-nowrap"
-            >
-              + Add Tag
-            </button>
-          </div>
+            </Autocomplete.Root>
+          ) : (
+            <input
+              type="text"
+              data-testid="cluster-tag-input"
+              className="mt-2 w-full h-7 text-sm text-dark border border-border rounded-lg px-2 focus:outline-none focus:ring-2 focus:ring-tier-neutral/50 focus:border-tier-neutral transition"
+              placeholder="e.g. food, taipei"
+              value={tagDraft}
+              onChange={(e) => setTagDraft(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  addTag();
+                }
+              }}
+            />
+          )}
+          <button
+            type="button"
+            onClick={addTag}
+            className="mt-2 text-[11px] font-medium text-blue-600 hover:text-blue-800 transition-colors"
+          >
+            + Add Tag
+          </button>
         </div>
       </div>
 
