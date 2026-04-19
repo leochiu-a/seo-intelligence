@@ -584,7 +584,7 @@ function AppInner() {
       />
       <div className="flex-1 min-h-0 overflow-hidden">
       <ResizablePanelGroup direction="horizontal" className="h-full">
-        <ResizablePanel defaultSize={17} minSize={10} maxSize={35}>
+        <ResizablePanel defaultSize="17%" minSize="10%" maxSize="35%">
           <FilterPanel
             nodes={nodes}
             activeFilters={activeFilters}
@@ -595,7 +595,7 @@ function AppInner() {
 
         <ResizableHandle />
 
-        <ResizablePanel defaultSize={63} minSize={30}>
+        <ResizablePanel defaultSize="63%" minSize="30%">
           <div className="h-full" ref={reactFlowWrapper}>
             <ReactFlow
               nodes={styledNodes}
@@ -654,7 +654,7 @@ function AppInner() {
 
         <ResizableHandle />
 
-        <ResizablePanel defaultSize={20} minSize={10} maxSize={40}>
+        <ResizablePanel defaultSize="20%" minSize="10%" maxSize="40%">
           <ScoreSidebar
             nodes={nodes}
             scores={scores}
