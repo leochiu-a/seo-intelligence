@@ -46,8 +46,17 @@ export function LegendDialog({ open, onClose }: LegendDialogProps) {
             </h3>
             <p className="text-sm text-gray-500">
               Each node's score reflects how well it is connected internally — pages that receive
-              more links from well-connected pages score higher. Nodes are split into thirds (High /
-              Mid / Low) relative to the rest of the graph.
+              more links from well-connected pages score higher.
+            </p>
+            <p className="text-sm text-gray-500">
+              The <strong className="text-gray-700">High / Mid / Low</strong> label is a{" "}
+              <strong className="text-gray-700">relative ranking</strong>: nodes are ordered by
+              score and split into roughly equal thirds. A page tagged{" "}
+              <strong className="text-gray-700">Low</strong> only means it is in the bottom third
+              of <em>this</em> graph — it does <strong className="text-gray-700">not</strong> mean
+              the page is bad in absolute terms. If you add one extreme-outlier node (e.g. a global
+              page with hundreds of thousands of pages), every other node's label is measured
+              relative to the new outlier-inclusive ranking.
             </p>
             <p className="text-sm text-gray-500">
               A node's score also affects what it gives away: a{" "}
@@ -58,17 +67,17 @@ export function LegendDialog({ open, onClose }: LegendDialogProps) {
             <LegendRow
               indicator={<span className={`${BADGE} bg-green-100 text-green-700`}>High</span>}
               label="High"
-              description="Top third of internal link strength — well-connected."
+              description="Top ~1/3 of nodes by score — best-connected pages in this graph."
             />
             <LegendRow
               indicator={<span className={`${BADGE} bg-amber-100 text-amber-700`}>Mid</span>}
               label="Mid"
-              description="Middle third — add links from high-scoring pages to push it higher."
+              description="Middle ~1/3 by score — solid but not dominant within this graph."
             />
             <LegendRow
               indicator={<span className={`${BADGE} bg-red-100 text-red-700`}>Low</span>}
               label="Low"
-              description="Bottom third — needs more internal links from well-connected pages."
+              description="Bottom ~1/3 by score within this graph. Relative, not absolute — still may be a valuable page."
             />
             <LegendRow
               indicator={<span className={`${BADGE} bg-indigo-100 text-indigo-700`}>Neutral</span>}
