@@ -9,6 +9,7 @@ import {
 export interface LinkCountEdgeData {
   linkCount: number;
   onLinkCountChange?: (edgeId: string, linkCount: number) => void;
+
 }
 
 export function LinkCountEdge({

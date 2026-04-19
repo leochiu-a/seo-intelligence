@@ -17,6 +17,7 @@ interface ScoreSidebarProps {
   depthMap: Map<string, number>;
   outboundMap: Map<string, number>;
   rootId: string | null;
+  onNodeHighlight?: (id: string | null) => void;
 }
 
 /** Renders up to 3 small colored dots for a node's cluster tags. Returns null if no tags. */
@@ -49,7 +50,7 @@ function flattenTree(treeNodes: UrlTreeNode[]): UrlTreeNode[] {
   return result;
 }
 
-export function ScoreSidebar({ nodes, scores, weakNodes, orphanNodes, unreachableNodes, depthMap, outboundMap, rootId }: ScoreSidebarProps) {
+export function ScoreSidebar({ nodes, scores, weakNodes, orphanNodes, unreachableNodes, depthMap, outboundMap, rootId, onNodeHighlight }: ScoreSidebarProps) {
   const { fitView, setNodes } = useReactFlow();
   const [activeTab, setActiveTab] = useState<'score' | 'health'>('score');
 
@@ -76,6 +77,7 @@ export function ScoreSidebar({ nodes, scores, weakNodes, orphanNodes, unreachabl
     setTimeout(() => {
       fitView({ nodes: [{ id: nodeId }], duration: 300, padding: 0.5 });
     }, 50);
+    onNodeHighlight?.(nodeId);
   };
 
   return (

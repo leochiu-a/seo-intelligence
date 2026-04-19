@@ -39,6 +39,7 @@ import {
   calculateCrawlDepth,
   identifyOrphanNodes,
   calculateOutboundLinks,
+  getConnectedElements,
   OUTBOUND_WARNING_THRESHOLD,
   type UrlNodeData,
   type LinkCountEdgeData,
@@ -125,6 +126,18 @@ function AppInner() {
   const activeScenario = store.scenarios.find((s) => s.id === store.activeScenarioId) ?? store.scenarios[0];
 
   const { activeFilters, toggle: toggleFilter, clear: clearFilters } = useFilterState();
+
+  // Route-highlight state: ID of the focal node whose neighbourhood is highlighted.
+  // null = no route highlight active.
+  const [highlightedRouteNodeId, setHighlightedRouteNodeId] = useState<string | null>(null);
+
+  const handleNodeHighlight = useCallback((id: string | null) => {
+    setHighlightedRouteNodeId((prev) => (prev === id ? null : id));
+  }, []);
+
+  const clearRouteHighlight = useCallback(() => {
+    setHighlightedRouteNodeId(null);
+  }, []);
 
   // Use a ref to hold the stable update callback so nodes don't need to be re-mapped
   const onNodeDataUpdate = useCallback(
@@ -469,36 +482,40 @@ function AppInner() {
   const highlightedNodeIds = useMemo(() => {
     const placementKeys = [...activeFilters].filter((k) => k.startsWith('placement-name:'));
     const clusterKeys = [...activeFilters].filter((k) => k.startsWith('cluster:'));
-    if (placementKeys.length === 0 && clusterKeys.length === 0) return null;
 
-    const placementMatches = new Set<string>();
-    for (const key of placementKeys) {
-      const name = key.slice('placement-name:'.length);
-      for (const node of nodes) {
-        if (node.data.isGlobal && node.data.placements?.some((p) => p.name === name)) {
-          placementMatches.add(node.id);
+    let filterIds: Set<string> | null = null;
+    if (placementKeys.length > 0 || clusterKeys.length > 0) {
+      const placementMatches = new Set<string>();
+      for (const key of placementKeys) {
+        const name = key.slice('placement-name:'.length);
+        for (const node of nodes) {
+          if (node.data.isGlobal && node.data.placements?.some((p) => p.name === name)) {
+            placementMatches.add(node.id);
+          }
         }
+      }
+      const clusterMatches = new Set<string>();
+      for (const key of clusterKeys) {
+        const tag = key.slice('cluster:'.length);
+        for (const node of nodes) {
+          if (node.data.tags?.includes(tag)) clusterMatches.add(node.id);
+        }
+      }
+      if (placementKeys.length > 0 && clusterKeys.length > 0) {
+        filterIds = new Set([...placementMatches].filter((id) => clusterMatches.has(id)));
+      } else {
+        filterIds = placementKeys.length > 0 ? placementMatches : clusterMatches;
       }
     }
 
-    const clusterMatches = new Set<string>();
-    for (const key of clusterKeys) {
-      const tag = key.slice('cluster:'.length);
-      for (const node of nodes) {
-        if (node.data.tags?.includes(tag)) {
-          clusterMatches.add(node.id);
-        }
-      }
-    }
+    const routeIds = highlightedRouteNodeId
+      ? getConnectedElements(highlightedRouteNodeId, edges)
+      : null;
 
-    if (placementKeys.length > 0 && clusterKeys.length > 0) {
-      return new Set([...placementMatches].filter((id) => clusterMatches.has(id)));
-    }
-    if (placementKeys.length > 0) return placementMatches;
-    return clusterMatches;
-  }, [activeFilters, nodes]);
+    if (routeIds !== null) return routeIds;
+    return filterIds;
+  }, [activeFilters, nodes, highlightedRouteNodeId, edges]);
 
-  // Apply dim flag based on active filters (stripe persists via sibling DOM structure in UrlNode)
   const styledNodes = useMemo(() => {
     if (highlightedNodeIds === null) {
       return enrichedNodes.map((node) =>
@@ -603,6 +620,8 @@ function AppInner() {
               onNodesChange={onNodesChange}
               onEdgesChange={onEdgesChange}
               onConnect={onConnect}
+              onNodeClick={(_e, node) => handleNodeHighlight(node.id)}
+              onPaneClick={clearRouteHighlight}
               connectionMode={ConnectionMode.Loose}
               onInit={setReactFlowInstance}
               onDrop={onDrop}
@@ -664,6 +683,7 @@ function AppInner() {
             depthMap={depthMap}
             outboundMap={outboundMap}
             rootId={rootId}
+            onNodeHighlight={handleNodeHighlight}
           />
         </ResizablePanel>
       </ResizablePanelGroup>

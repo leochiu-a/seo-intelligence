@@ -641,6 +641,18 @@ export function collectClusterSuggestions(
   return [...new Set(tags)];
 }
 
+/** Returns IDs of the focal node and every node directly connected to it (either direction). */
+export function getConnectedElements(nodeId: string, edges: Edge[]): Set<string> {
+  const ids = new Set<string>();
+  if (!nodeId) return ids;
+  ids.add(nodeId);
+  for (const edge of edges) {
+    if (edge.source === nodeId) ids.add(edge.target);
+    else if (edge.target === nodeId) ids.add(edge.source);
+  }
+  return ids;
+}
+
 // ---------------------------------------------------------------------------
 // URL tree hierarchy
 // ---------------------------------------------------------------------------
