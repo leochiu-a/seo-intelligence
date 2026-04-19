@@ -28,7 +28,7 @@ See: .planning/PROJECT.md (updated 2026-04-16)
 Phase: 12
 Plan: Not started
 Status: Executing Phase 11.2
-Last activity: 2026-04-19 - Completed quick task 260419-kr4: Implement Export Dropdown with Copy for AI in Toolbar
+Last activity: 2026-04-19 - Completed quick task 260419-m0t: Refactor App.tsx — extract useGraphAnalytics, useHighlightedNodes, useDialogState hooks
 
 Progress: [░░░░░░░░░░] 0%
 
@@ -168,6 +168,7 @@ None yet.
 | 260419-dr5 | 製作 Resizer component 並修復 Score Panel 的 Resizer | 2026-04-19 | 72a5d15 | [260419-dr5-resizer-component-score-panel-resizer](./quick/260419-dr5-resizer-component-score-panel-resizer/) |
 | 260419-etx | 點擊 node 時 highlight 其相連路線 (canvas click + sidebar) | 2026-04-19 | 3275e26 | [260419-etx-node-highlight-route-feature](./quick/260419-etx-node-highlight-route-feature/) |
 | 260419-kr4 | Implement Export Dropdown with Copy for AI in Toolbar | 2026-04-19 | 44677ed | [260419-kr4-implement-export-dropdown-with-copy-for-](./quick/260419-kr4-implement-export-dropdown-with-copy-for-/) |
+| 260419-m0t | Refactor App.tsx: extract useGraphAnalytics, useHighlightedNodes, useDialogState hooks | 2026-04-19 | 3aa7dfb | [260419-m0t-refactor-app-tsx-extract-hooks-and-compo](./quick/260419-m0t-refactor-app-tsx-extract-hooks-and-compo/) |
 
 ## Session Continuity
 
