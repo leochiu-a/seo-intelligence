@@ -14,31 +14,26 @@ interface ToolbarProps {
   onClearCanvas: () => void;
   isEmpty: boolean;
   onLegendOpen?: () => void;
-  exportFeedback?: "copied" | null;
 }
 
 function ExportMenu({
   onExportJson,
   onCopyForAI,
   isEmpty,
-  exportFeedback,
 }: {
   onExportJson: () => void;
   onCopyForAI: () => void | Promise<void>;
   isEmpty: boolean;
-  exportFeedback?: "copied" | null;
 }) {
-  const isCopied = exportFeedback === "copied";
-
   return (
     <DropdownMenu>
       <DropdownMenuTrigger
         disabled={isEmpty}
-        className={`flex items-center gap-1.5 rounded-md border border-border bg-white px-3 py-1.5 text-sm font-medium hover:bg-surface disabled:cursor-not-allowed disabled:opacity-50 transition-colors ${isCopied ? "text-green-600" : "text-ink"}`}
+        className="flex items-center gap-1.5 rounded-md border border-border bg-white px-3 py-1.5 text-sm font-medium text-ink hover:bg-surface disabled:cursor-not-allowed disabled:opacity-50 transition-colors"
       >
         <Download size={14} />
-        {isCopied ? "Copied!" : "Export"}
-        {!isCopied && <ChevronDown size={12} />}
+        Export
+        <ChevronDown size={12} />
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" side="bottom">
         <DropdownMenuItem onClick={onExportJson}>
@@ -62,7 +57,6 @@ export function Toolbar({
   onClearCanvas,
   isEmpty,
   onLegendOpen,
-  exportFeedback,
 }: ToolbarProps) {
   return (
     <header className="flex h-12 shrink-0 items-center border-b border-border bg-white px-4 shadow-sm">
@@ -83,12 +77,7 @@ export function Toolbar({
           <Upload size={14} />
           Import JSON
         </button>
-        <ExportMenu
-          onExportJson={onExportJson}
-          onCopyForAI={onCopyForAI}
-          isEmpty={isEmpty}
-          exportFeedback={exportFeedback}
-        />
+        <ExportMenu onExportJson={onExportJson} onCopyForAI={onCopyForAI} isEmpty={isEmpty} />
         <button
           onClick={onClearCanvas}
           disabled={isEmpty}

@@ -23,6 +23,7 @@ import { LinkCountEdge } from "./components/LinkCountEdge";
 import { Toolbar } from "./components/Toolbar";
 import { ScenarioTabBar } from "./components/ScenarioTabBar";
 import { SidePanel } from "./components/SidePanel";
+import { CopyForAIDialog } from "./components/CopyForAIDialog";
 import { ImportDialog } from "./components/ImportDialog";
 import { LegendDialog } from "./components/LegendDialog";
 import { TooltipProvider } from "./components/ui/tooltip";
@@ -662,9 +663,10 @@ function AppInner() {
     URL.revokeObjectURL(url);
   }, [nodes, edges, scores, depthMap, outboundMap]);
 
-  const [copyFeedback, setCopyFeedback] = useState<"copied" | null>(null);
+  const [showCopyForAIDialog, setShowCopyForAIDialog] = useState(false);
+  const [copyForAIText, setCopyForAIText] = useState("");
 
-  const onCopyForAI = useCallback(async () => {
+  const onCopyForAI = useCallback(() => {
     const text = buildCopyForAIText({
       nodes: nodes.map((n) => ({ id: n.id, data: n.data })),
       edges: edges.map((e) => ({
@@ -677,13 +679,8 @@ function AppInner() {
       depthMap,
       outboundMap,
     });
-    try {
-      await navigator.clipboard.writeText(text);
-      setCopyFeedback("copied");
-      window.setTimeout(() => setCopyFeedback(null), 1500);
-    } catch {
-      // Clipboard blocked (non-secure context or permission denied) — swallow silently for v1
-    }
+    setCopyForAIText(text);
+    setShowCopyForAIDialog(true);
   }, [nodes, edges, scores, allScoreValues, depthMap, outboundMap]);
 
   const handleClearCanvas = useCallback(() => {
@@ -723,7 +720,6 @@ function AppInner() {
         onClearCanvas={handleClearCanvas}
         isEmpty={nodes.length === 0}
         onLegendOpen={() => setShowLegendDialog(true)}
-        exportFeedback={copyFeedback}
       />
       <ScenarioTabBar
         scenarios={store.scenarios}
@@ -823,6 +819,11 @@ function AppInner() {
         onImport={handleImportFromDialog}
       />
       <LegendDialog open={showLegendDialog} onClose={() => setShowLegendDialog(false)} />
+      <CopyForAIDialog
+        open={showCopyForAIDialog}
+        onClose={() => setShowCopyForAIDialog(false)}
+        text={copyForAIText}
+      />
     </div>
   );
 }

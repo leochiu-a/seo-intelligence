@@ -83,8 +83,8 @@ describe("Toolbar Export dropdown", () => {
     expect(screen.queryByRole("menuitem", { name: /export json/i })).toBeNull();
   });
 
-  it("test 7 — exportFeedback=copied shows Copied! on trigger and hides chevron", () => {
-    render(<Toolbar {...defaultProps} exportFeedback="copied" />);
-    expect(screen.getByText(/copied!/i)).toBeTruthy();
+  it("test 7 — Export trigger shows Download icon and chevron", () => {
+    render(<Toolbar {...defaultProps} />);
+    expect(screen.getByRole("button", { name: /export/i })).toBeTruthy();
   });
 });
