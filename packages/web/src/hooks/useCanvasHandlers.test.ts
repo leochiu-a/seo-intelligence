@@ -123,16 +123,10 @@ describe("useCanvasHandlers", () => {
   });
 
   it("Test 2 (onDrop JSON file): parses and wires nodes/edges from dropped JSON file", async () => {
+    // parseImportJson expects flat structure: urlTemplate/pageCount at top level of each node
     const jsonContent = JSON.stringify({
-      nodes: [
-        {
-          id: "n1",
-          type: "urlNode",
-          position: { x: 0, y: 0 },
-          data: { urlTemplate: "/a", pageCount: 1 },
-        },
-      ],
-      edges: [{ id: "e1", source: "n1", target: "n2", data: { linkCount: 2 } }],
+      nodes: [{ id: "n1", urlTemplate: "/a", pageCount: 1, x: 0, y: 0 }],
+      edges: [{ id: "e1", source: "n1", target: "n2", linkCount: 2 }],
     });
 
     const mockFile = { name: "graph.json" } as File;

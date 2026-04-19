@@ -9,13 +9,9 @@ import {
   ReactFlowProvider,
   useNodesState,
   useEdgesState,
-  addEdge,
-  MarkerType,
   type Node,
   type Edge,
-  type Connection,
   type ReactFlowInstance,
-  type EdgeMarkerType,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import { UrlNode } from "./components/UrlNode";
@@ -35,9 +31,8 @@ import { useHighlightedNodes } from "./hooks/useHighlightedNodes";
 import { useDialogState } from "./hooks/useDialogState";
 import { useNodeCallbacks } from "./hooks/useNodeCallbacks";
 import { useScenarioHandlers } from "./hooks/useScenarioHandlers";
+import { useCanvasHandlers } from "./hooks/useCanvasHandlers";
 import {
-  parseImportJson,
-  getClosestHandleIds,
   buildCopyForAIText,
   type UrlNodeData,
   type LinkCountEdgeData,
@@ -149,109 +144,17 @@ function AppInner() {
     isSwitchingRef,
   });
 
-  const onDragOver = useCallback((event: React.DragEvent) => {
-    event.preventDefault();
-    event.dataTransfer.dropEffect = "move";
-  }, []);
-
-  const onDrop = useCallback(
-    (event: React.DragEvent) => {
-      event.preventDefault();
-
-      // Handle JSON file import via drag-and-drop
-      const file = Array.from(event.dataTransfer.files).find((f) => f.name.endsWith(".json"));
-      if (file) {
-        const reader = new FileReader();
-        reader.onload = (e) => {
-          try {
-            const { nodes: importedNodes, edges: importedEdges } = parseImportJson(
-              e.target?.result as string,
-            );
-            // Wire runtime callbacks into edges before setting state
-            const wiredEdges: Edge<LinkCountEdgeData>[] = importedEdges.map((edge) => ({
-              ...edge,
-              markerEnd: { type: MarkerType.ArrowClosed, color: "#9CA3AF" },
-              data: {
-                linkCount: edge.data?.linkCount ?? 1,
-                onLinkCountChange: onEdgeLinkCountChange,
-              },
-            }));
-            setNodes(
-              importedNodes.map((n) => ({
-                ...n,
-                data: {
-                  ...n.data,
-                  onUpdate: onNodeDataUpdate,
-                  onRootToggle,
-                  onZIndexChange: onNodeZIndexChange,
-                },
-              })),
-            );
-            setEdges(wiredEdges);
-          } catch {
-            // Invalid JSON — silently ignore (file was dropped by mistake)
-          }
-        };
-        reader.readAsText(file);
-        return;
-      }
-
-      // Handle sidebar node drag onto canvas
-      const type = event.dataTransfer.getData("application/reactflow");
-      if (type !== "urlNode" || !reactFlowInstance) return;
-      const position = reactFlowInstance.screenToFlowPosition({
-        x: event.clientX,
-        y: event.clientY,
-      });
-      addNode(position);
-    },
-    [
-      reactFlowInstance,
-      addNode,
-      setNodes,
-      setEdges,
-      onNodeDataUpdate,
-      onRootToggle,
-      onNodeZIndexChange,
-      onEdgeLinkCountChange,
-    ],
-  );
-
-  const onAddNode = useCallback(() => {
-    const position = reactFlowInstance
-      ? reactFlowInstance.screenToFlowPosition({
-          x: window.innerWidth / 2,
-          y: window.innerHeight / 2,
-        })
-      : { x: 250, y: 250 };
-    addNode(position);
-  }, [reactFlowInstance, addNode]);
-
-  const onConnect = useCallback(
-    (connection: Connection) => {
-      let conn = connection;
-      if (!conn.sourceHandle) {
-        const sourceNode = nodes.find((n) => n.id === conn.source);
-        const targetNode = nodes.find((n) => n.id === conn.target);
-        if (sourceNode && targetNode) {
-          const handles = getClosestHandleIds(sourceNode.position, targetNode.position);
-          conn = { ...conn, ...handles };
-        }
-      }
-      setEdges((eds) =>
-        addEdge(
-          {
-            ...conn,
-            type: "linkCountEdge",
-            markerEnd: { type: MarkerType.ArrowClosed, color: "#9CA3AF" },
-            data: { linkCount: 1, onLinkCountChange: onEdgeLinkCountChange },
-          },
-          eds,
-        ),
-      );
-    },
-    [nodes, setEdges, onEdgeLinkCountChange],
-  );
+  const { onDragOver, onDrop, onAddNode, onConnect } = useCanvasHandlers({
+    reactFlowInstance,
+    addNode,
+    nodes,
+    setNodes,
+    setEdges,
+    onNodeDataUpdate,
+    onRootToggle,
+    onNodeZIndexChange,
+    onEdgeLinkCountChange,
+  });
 
   const {
     scores,
