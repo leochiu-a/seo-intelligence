@@ -28,7 +28,7 @@ See: .planning/PROJECT.md (updated 2026-04-16)
 Phase: 12
 Plan: Not started
 Status: Ready to execute
-Last activity: 2026-04-19 - Completed quick task 260419-do7: increase filter panel text sizes
+Last activity: 2026-04-19 - Completed quick task 260419-dr5: 製作 Resizer component 並修復 Score Panel 的 Resizer
 
 Progress: [░░░░░░░░░░] 0%
 
@@ -164,6 +164,7 @@ None yet.
 | 260418-gy5 | Unify Placement and Cluster UX: derive Global Node from placements length and replace Cluster text input with add-button pattern | 2026-04-18 | 1a3f8f2 | [260418-gy5-unify-placement-and-cluster-ux-derive-gl](./quick/260418-gy5-unify-placement-and-cluster-ux-derive-gl/) |
 | 260418-uhb | Add tooltip to warning icon in Score Ranking panel explaining weak-page criterion | 2026-04-18 | 21901e0 | [260418-uhb-add-tooltip-to-warning-icon-in-score-ran](./quick/260418-uhb-add-tooltip-to-warning-icon-in-score-ran/) |
 | 260419-do7 | increase filter panel text sizes | 2026-04-19 | 376ec99 | [260419-do7-increase-filter-panel-text-sizes](./quick/260419-do7-increase-filter-panel-text-sizes/) |
+| 260419-dr5 | 製作 Resizer component 並修復 Score Panel 的 Resizer | 2026-04-19 | 72a5d15 | [260419-dr5-resizer-component-score-panel-resizer](./quick/260419-dr5-resizer-component-score-panel-resizer/) |
 
 ## Session Continuity
 
