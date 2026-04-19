@@ -12,6 +12,7 @@ import {
 } from "../lib/graph-utils";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
+import { ScoreTierBadge } from "./ScoreTierBadge";
 
 interface HealthPanelProps {
   nodes: Node<UrlNodeData>[];
@@ -146,13 +147,7 @@ export function HealthPanel({
                 className="px-3 py-2.5 flex items-center gap-2"
               >
                 <span className="flex-1 min-w-0 text-sm text-dark truncate">{row.urlTemplate}</span>
-                <span
-                  className={`inline-flex items-center rounded-full px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide flex-shrink-0 ${
-                    row.tier === "low" ? "bg-red-100 text-red-700" : "bg-amber-100 text-amber-700"
-                  }`}
-                >
-                  {row.tier === "low" ? "Low" : "Mid"}
-                </span>
+                <ScoreTierBadge tier={row.tier} className="flex-shrink-0" />
               </li>
             ))}
           </ul>
