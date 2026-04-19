@@ -20,13 +20,13 @@ export function FilterPanel({ nodes, activeFilters, onToggle, onClear }: FilterP
       data-testid="filter-panel"
     >
       <div className="px-3 py-2.5 border-b border-border">
-        <h2 className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-fg">
+        <h2 className="text-sm font-semibold uppercase tracking-[0.14em] text-muted-fg">
           By placement
         </h2>
       </div>
 
       {placementGroups.length === 0 ? (
-        <p className="px-3 py-4 text-xs text-muted-fg text-center" data-testid="filter-empty">
+        <p className="px-3 py-4 text-sm text-muted-fg text-center" data-testid="filter-empty">
           No placement filters
         </p>
       ) : (
@@ -56,7 +56,7 @@ export function FilterPanel({ nodes, activeFilters, onToggle, onClear }: FilterP
                   {group.nodeLabels.map((label, idx) => (
                     <li
                       key={group.nodeIds[idx]}
-                      className="text-xs text-muted-fg truncate"
+                      className="text-sm text-muted-fg truncate"
                       title={label}
                     >
                       {label}
@@ -72,7 +72,7 @@ export function FilterPanel({ nodes, activeFilters, onToggle, onClear }: FilterP
       {clusterGroups.length > 0 && (
         <>
           <div className="px-3 py-2.5 border-b border-t border-border">
-            <h2 className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-fg">
+            <h2 className="text-sm font-semibold uppercase tracking-[0.14em] text-muted-fg">
               By cluster
             </h2>
           </div>
@@ -101,7 +101,7 @@ export function FilterPanel({ nodes, activeFilters, onToggle, onClear }: FilterP
                     {group.nodeLabels.map((label, idx) => (
                       <li
                         key={group.nodeIds[idx]}
-                        className="text-xs text-muted-fg truncate"
+                        className="text-sm text-muted-fg truncate"
                         title={label}
                       >
                         {label}
@@ -119,7 +119,7 @@ export function FilterPanel({ nodes, activeFilters, onToggle, onClear }: FilterP
         <div className="px-3 py-2 border-t border-border">
           <button
             onClick={onClear}
-            className="w-full text-xs text-blue-600 hover:text-blue-700 font-medium transition-colors"
+            className="w-full text-sm text-blue-600 hover:text-blue-700 font-medium transition-colors"
           >
             Clear all
           </button>
