@@ -33,17 +33,14 @@ import { useScenarios } from "./hooks/useScenarios";
 import { useGraphAnalytics } from "./hooks/useGraphAnalytics";
 import { useHighlightedNodes } from "./hooks/useHighlightedNodes";
 import { useDialogState } from "./hooks/useDialogState";
+import { useNodeCallbacks } from "./hooks/useNodeCallbacks";
 import {
-  createDefaultNode,
-  updateNodeData,
-  updateEdgeLinkCount,
   parseImportJson,
   getClosestHandleIds,
   buildCopyForAIText,
   type UrlNodeData,
   type LinkCountEdgeData,
   type ScoreTier,
-  type Placement,
 } from "./lib/graph-utils";
 import { serializeGraph } from "./lib/serialize-graph";
 
@@ -119,135 +116,14 @@ function AppInner() {
     setHighlightedRouteNodeId(null);
   }, []);
 
-  // Use a ref to hold the stable update callback so nodes don't need to be re-mapped
-  const onNodeDataUpdate = useCallback(
-    (nodeId: string, newData: Partial<UrlNodeData>) => {
-      // updateNodeData from graph-utils handles the immutable update
-      setNodes(
-        (nds) => updateNodeData(nds as Node<UrlNodeData>[], nodeId, newData) as Node<AppNodeData>[],
-      );
-    },
-    [setNodes],
-  );
-
-  // Route node.zIndex updates through the same setNodes used for data updates.
-  // This prevents a race where UrlNode's zIndex effect (previously using
-  // useReactFlow().setNodes) read a stale nodes snapshot and clobbered freshly
-  // saved data from EditPopover's Confirm handler.
-  const onNodeZIndexChange = useCallback(
-    (nodeId: string, zIndex: number) => {
-      setNodes((nds) =>
-        nds.map((n) => (n.id === nodeId && n.zIndex !== zIndex ? { ...n, zIndex } : n)),
-      );
-    },
-    [setNodes],
-  );
-
-  // onRootToggle ensures only one node is root at a time (exclusive root designation)
-  const onRootToggle = useCallback(
-    (nodeId: string) => {
-      setNodes((nds) =>
-        nds.map((n) => {
-          if (n.id === nodeId) {
-            // Toggle this node's root status
-            const newIsRoot = !n.data.isRoot;
-            return { ...n, data: { ...n.data, isRoot: newIsRoot } };
-          }
-          // Clear root from all other nodes
-          if (n.data.isRoot) {
-            return { ...n, data: { ...n.data, isRoot: false } };
-          }
-          return n;
-        }),
-      );
-    },
-    [setNodes],
-  );
-
-  const addNode = useCallback(
-    (position: { x: number; y: number }) => {
-      const newNode = createDefaultNode(position);
-      setNodes((nds) =>
-        nds.concat({
-          ...newNode,
-          data: {
-            ...newNode.data,
-            onUpdate: onNodeDataUpdate,
-            onRootToggle,
-            onZIndexChange: onNodeZIndexChange,
-          },
-        }),
-      );
-    },
-    [onNodeDataUpdate, onRootToggle, onNodeZIndexChange, setNodes],
-  );
-
-  const onEdgeLinkCountChange = useCallback(
-    (edgeId: string, linkCount: number) => {
-      setEdges((eds) => updateEdgeLinkCount(eds, edgeId, linkCount));
-    },
-    [setEdges],
-  );
-
-  // Helper: re-attach runtime callbacks onto serialized nodes/edges from a scenario record
-  const wireCallbacks = useCallback(
-    (
-      serializedNodes: Array<{
-        id: string;
-        type?: string;
-        position: { x: number; y: number };
-        data: {
-          urlTemplate: string;
-          pageCount: number;
-          isGlobal?: boolean;
-          placements?: Placement[];
-          isRoot?: boolean;
-          tags?: string[];
-        };
-      }>,
-      serializedEdges: Array<{
-        id: string;
-        source: string;
-        target: string;
-        sourceHandle?: string | null;
-        targetHandle?: string | null;
-        type?: string;
-        markerEnd?: unknown;
-        data: { linkCount: number };
-      }>,
-    ): { wiredNodes: Node<AppNodeData>[]; wiredEdges: Edge<LinkCountEdgeData>[] } => {
-      const wiredNodes: Node<AppNodeData>[] = serializedNodes.map((n) => ({
-        ...n,
-        type: n.type ?? "urlNode",
-        data: {
-          urlTemplate: n.data.urlTemplate,
-          pageCount: n.data.pageCount,
-          ...(n.data.isGlobal != null && { isGlobal: n.data.isGlobal }),
-          ...(n.data.placements != null && { placements: n.data.placements }),
-          ...(n.data.isRoot != null && { isRoot: n.data.isRoot }),
-          ...(n.data.tags?.length && { tags: n.data.tags }),
-          onUpdate: onNodeDataUpdate,
-          onRootToggle,
-          onZIndexChange: onNodeZIndexChange,
-        },
-      }));
-      const wiredEdges: Edge<LinkCountEdgeData>[] = serializedEdges.map((e) => ({
-        id: e.id,
-        source: e.source,
-        target: e.target,
-        ...(e.sourceHandle != null ? { sourceHandle: e.sourceHandle } : {}),
-        ...(e.targetHandle != null ? { targetHandle: e.targetHandle } : {}),
-        type: e.type ?? "linkCountEdge",
-        markerEnd: (e.markerEnd as EdgeMarkerType | undefined) ?? {
-          type: MarkerType.ArrowClosed,
-          color: "#9CA3AF",
-        },
-        data: { linkCount: e.data?.linkCount ?? 1, onLinkCountChange: onEdgeLinkCountChange },
-      }));
-      return { wiredNodes, wiredEdges };
-    },
-    [onNodeDataUpdate, onRootToggle, onNodeZIndexChange, onEdgeLinkCountChange],
-  );
+  const {
+    onNodeDataUpdate,
+    onNodeZIndexChange,
+    onRootToggle,
+    addNode,
+    onEdgeLinkCountChange,
+    wireCallbacks,
+  } = useNodeCallbacks({ setNodes, setEdges });
 
   // Scenario switch handler
   const handleSwitchScenario = useCallback(
