@@ -3,9 +3,9 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: MVP
 status: executing
-stopped_at: Completed 11.1-02-PLAN.md
-last_updated: "2026-04-18T07:55:28.849Z"
-last_activity: 2026-04-18
+stopped_at: Completed 11.2-01-PLAN.md
+last_updated: "2026-04-19T05:52:49.346Z"
+last_activity: "2026-04-19 - Completed quick task 260419-etx: 點擊 node 時 highlight 其相連路線"
 progress:
   total_phases: 13
   completed_phases: 9
@@ -75,6 +75,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 999.5-topical-cluster-tags P06 | 2 | 1 tasks | 2 files |
 | Phase 999.5-topical-cluster-tags P07 | 15 | 3 tasks | 7 files |
 | Phase 11.1-pm-internal-link-deep-placement-text-filter-warning P02 | 4 | 2 tasks | 4 files |
+| Phase 11.2-add-score-badge-tooltip-and-improvement-guidance-for-low-mid-nodes P01 | 3 | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -141,6 +142,7 @@ Recent decisions affecting current work:
 - [Phase 999.5-topical-cluster-tags]: AND-combine: placementKeys and clusterKeys split by prefix; per-dimension Sets intersected when both dimensions active
 - [Phase 11.1-pm-internal-link-deep-placement-text-filter-warning]: data-testid on span wrapper around lucide icons (not SVG) — SVGAnimatedString className breaks .toMatch() in tests
 - [Phase 11.1-pm-internal-link-deep-placement-text-filter-warning]: Tab underline style (border-b-2 border-blue-500) chosen over pill tabs to match sidebar header aesthetic
+- [Phase 11.2-add-score-badge-tooltip-and-improvement-guidance-for-low-mid-nodes]: Tier badge tooltip: render={<span />} on TooltipTrigger preserves badge layout; TONE_MAP extended with tooltip field to co-locate all tier display data
 
 ### Pending Todos
 
@@ -169,6 +171,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-19T00:00:00.000Z
-Stopped at: Completed quick task 260419-etx (paused at Task 3 human-verify checkpoint)
+Last session: 2026-04-19T05:52:49.344Z
+Stopped at: Completed 11.2-01-PLAN.md
 Resume file: None
