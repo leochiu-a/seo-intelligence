@@ -28,7 +28,7 @@ See: .planning/PROJECT.md (updated 2026-04-16)
 Phase: 12
 Plan: Not started
 Status: Ready to execute
-Last activity: 2026-04-19 - Completed quick task 260419-dr5: 製作 Resizer component 並修復 Score Panel 的 Resizer
+Last activity: 2026-04-19 - Completed quick task 260419-etx: 點擊 node 時 highlight 其相連路線
 
 Progress: [░░░░░░░░░░] 0%
 
@@ -165,7 +165,7 @@ None yet.
 | 260418-uhb | Add tooltip to warning icon in Score Ranking panel explaining weak-page criterion | 2026-04-18 | 21901e0 | [260418-uhb-add-tooltip-to-warning-icon-in-score-ran](./quick/260418-uhb-add-tooltip-to-warning-icon-in-score-ran/) |
 | 260419-do7 | increase filter panel text sizes | 2026-04-19 | 376ec99 | [260419-do7-increase-filter-panel-text-sizes](./quick/260419-do7-increase-filter-panel-text-sizes/) |
 | 260419-dr5 | 製作 Resizer component 並修復 Score Panel 的 Resizer | 2026-04-19 | 72a5d15 | [260419-dr5-resizer-component-score-panel-resizer](./quick/260419-dr5-resizer-component-score-panel-resizer/) |
-| 260419-etx | Node highlight route feature: click sidebar row to highlight connected route on canvas | 2026-04-19 | ae1295e | [260419-etx-node-highlight-route-feature](./quick/260419-etx-node-highlight-route-feature/) |
+| 260419-etx | 點擊 node 時 highlight 其相連路線 (canvas click + sidebar) | 2026-04-19 | 3275e26 | [260419-etx-node-highlight-route-feature](./quick/260419-etx-node-highlight-route-feature/) |
 
 ## Session Continuity
 
