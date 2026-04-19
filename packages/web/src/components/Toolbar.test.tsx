@@ -40,10 +40,7 @@ describe("Toolbar", () => {
 describe("Toolbar Export dropdown", () => {
   it("test 1 — renders an Export trigger button with chevron (no standalone Export JSON button)", () => {
     render(<Toolbar {...defaultProps} />);
-    // Should have an Export button (trigger)
     expect(screen.getByRole("button", { name: /export/i })).toBeTruthy();
-    // No standalone top-level "Export JSON" button (only appears inside menu)
-    // After rendering, menu should be closed so menu items are not visible
     expect(screen.queryByRole("menuitem", { name: /export json/i })).toBeNull();
   });
 

@@ -1,5 +1,10 @@
-import { useEffect, useRef, useState } from "react";
 import { ChevronDown, Download, HelpCircle, Plus, Sparkles, Trash2, Upload } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 interface ToolbarProps {
   onAddNode: () => void;
@@ -23,72 +28,29 @@ function ExportMenu({
   isEmpty: boolean;
   exportFeedback?: "copied" | null;
 }) {
-  const [open, setOpen] = useState(false);
-  const wrapperRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (!open) return;
-
-    function handleMouseDown(event: MouseEvent) {
-      if (!wrapperRef.current?.contains(event.target as Node)) {
-        setOpen(false);
-      }
-    }
-
-    document.addEventListener("mousedown", handleMouseDown);
-    return () => {
-      document.removeEventListener("mousedown", handleMouseDown);
-    };
-  }, [open]);
-
   const isCopied = exportFeedback === "copied";
 
   return (
-    <div ref={wrapperRef} className="relative">
-      <button
-        onClick={() => setOpen((prev) => !prev)}
+    <DropdownMenu>
+      <DropdownMenuTrigger
         disabled={isEmpty}
-        aria-haspopup="menu"
-        aria-expanded={open}
         className={`flex items-center gap-1.5 rounded-md border border-border bg-white px-3 py-1.5 text-sm font-medium hover:bg-surface disabled:cursor-not-allowed disabled:opacity-50 transition-colors ${isCopied ? "text-green-600" : "text-ink"}`}
       >
         <Download size={14} />
         {isCopied ? "Copied!" : "Export"}
         {!isCopied && <ChevronDown size={12} />}
-      </button>
-
-      {open && (
-        <div
-          role="menu"
-          className="absolute right-0 top-full mt-1 min-w-40 rounded-md border border-border bg-white shadow-md z-20 py-1"
-        >
-          <button
-            type="button"
-            role="menuitem"
-            onClick={() => {
-              onExportJson();
-              setOpen(false);
-            }}
-            className="flex w-full items-center gap-2 px-3 py-1.5 text-left text-sm text-ink hover:bg-surface"
-          >
-            <Download size={14} />
-            Export JSON
-          </button>
-          <button
-            type="button"
-            role="menuitem"
-            onClick={() => {
-              void onCopyForAI();
-              setOpen(false);
-            }}
-            className="flex w-full items-center gap-2 px-3 py-1.5 text-left text-sm text-ink hover:bg-surface"
-          >
-            <Sparkles size={14} />
-            Copy for AI
-          </button>
-        </div>
-      )}
-    </div>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" side="bottom">
+        <DropdownMenuItem onClick={onExportJson}>
+          <Download size={14} />
+          Export JSON
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => void onCopyForAI()}>
+          <Sparkles size={14} />
+          Copy for AI
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 }
 
