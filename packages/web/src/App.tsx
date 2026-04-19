@@ -42,6 +42,7 @@ import {
   identifyOrphanNodes,
   calculateOutboundLinks,
   getConnectedElements,
+  buildCopyForAIText,
   OUTBOUND_WARNING_THRESHOLD,
   type UrlNodeData,
   type LinkCountEdgeData,
@@ -661,6 +662,30 @@ function AppInner() {
     URL.revokeObjectURL(url);
   }, [nodes, edges, scores, depthMap, outboundMap]);
 
+  const [copyFeedback, setCopyFeedback] = useState<"copied" | null>(null);
+
+  const onCopyForAI = useCallback(async () => {
+    const text = buildCopyForAIText({
+      nodes: nodes.map((n) => ({ id: n.id, data: n.data })),
+      edges: edges.map((e) => ({
+        source: e.source,
+        target: e.target,
+        data: { linkCount: (e.data as LinkCountEdgeData | undefined)?.linkCount ?? 1 },
+      })),
+      scores,
+      allScoreValues,
+      depthMap,
+      outboundMap,
+    });
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopyFeedback("copied");
+      window.setTimeout(() => setCopyFeedback(null), 1500);
+    } catch {
+      // Clipboard blocked (non-secure context or permission denied) — swallow silently for v1
+    }
+  }, [nodes, edges, scores, allScoreValues, depthMap, outboundMap]);
+
   const handleClearCanvas = useCallback(() => {
     setNodes([]);
     setEdges([]);
@@ -694,9 +719,11 @@ function AppInner() {
         onAddNode={onAddNode}
         onImportJson={() => setShowImportDialog(true)}
         onExportJson={onExportJson}
+        onCopyForAI={onCopyForAI}
         onClearCanvas={handleClearCanvas}
         isEmpty={nodes.length === 0}
         onLegendOpen={() => setShowLegendDialog(true)}
+        exportFeedback={copyFeedback}
       />
       <ScenarioTabBar
         scenarios={store.scenarios}
