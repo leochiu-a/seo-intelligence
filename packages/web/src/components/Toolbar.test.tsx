@@ -21,7 +21,7 @@ describe("Toolbar", () => {
     const onClearCanvas = vi.fn();
     render(<Toolbar {...defaultProps} onClearCanvas={onClearCanvas} />);
     fireEvent.click(screen.getByRole("button", { name: /clear canvas/i }));
-    fireEvent.click(screen.getByRole("button", { name: /continue/i }));
+    fireEvent.click(screen.getByRole("button", { name: /delete/i }));
     expect(onClearCanvas).toHaveBeenCalledTimes(1);
   });
 
@@ -58,7 +58,7 @@ describe("Toolbar", () => {
     const onClearCanvas = vi.fn();
     render(<Toolbar {...defaultProps} onClearCanvas={onClearCanvas} />);
     fireEvent.click(screen.getByRole("button", { name: /clear canvas/i }));
-    fireEvent.click(screen.getByRole("button", { name: /continue/i }));
+    fireEvent.click(screen.getByRole("button", { name: /delete/i }));
     expect(onClearCanvas).toHaveBeenCalledTimes(1);
   });
 });

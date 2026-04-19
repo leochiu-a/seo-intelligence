@@ -115,7 +115,9 @@ export function Toolbar({
             </AlertDialogHeader>
             <AlertDialogFooter>
               <AlertDialogCancel>Cancel</AlertDialogCancel>
-              <AlertDialogAction onClick={handleConfirmClear}>Continue</AlertDialogAction>
+              <AlertDialogAction variant="destructive" onClick={handleConfirmClear}>
+                Delete
+              </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
