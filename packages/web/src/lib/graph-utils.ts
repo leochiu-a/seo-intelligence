@@ -859,3 +859,86 @@ export function parseImportJson(raw: string): {
 
   return { nodes, edges };
 }
+
+// ---------------------------------------------------------------------------
+// buildCopyForAIText — pure serializer for AI-assisted review
+// ---------------------------------------------------------------------------
+
+export interface CopyForAIInput {
+  nodes: Array<{
+    id: string;
+    data: UrlNodeData & { isRoot?: boolean; isGlobal?: boolean };
+  }>;
+  edges: Array<{ source: string; target: string; data?: { linkCount?: number } }>;
+  scores: Map<string, number>;
+  allScoreValues: number[];
+  depthMap: Map<string, number>;
+  outboundMap: Map<string, number>;
+}
+
+function formatNodeLine(
+  node: CopyForAIInput["nodes"][number],
+  scores: Map<string, number>,
+  allScoreValues: number[],
+  depthMap: Map<string, number>,
+  outboundMap: Map<string, number>,
+): string {
+  const { id, data } = node;
+  const tier = classifyScoreTier(scores.get(id) ?? 0, allScoreValues);
+
+  let depthStr: string;
+  if (!depthMap.has(id)) {
+    depthStr = "-";
+  } else {
+    const d = depthMap.get(id)!;
+    depthStr = d === Infinity ? "unreachable" : String(d);
+  }
+
+  const outbound = outboundMap.get(id) ?? 0;
+
+  let line = `- ${data.urlTemplate}  pages: ${data.pageCount}  score: ${tier}  depth: ${depthStr}  outbound: ${outbound}`;
+  if (data.isRoot) line += " [root]";
+  if (data.isGlobal) line += " [global]";
+  return line;
+}
+
+function formatEdgeLine(
+  edge: CopyForAIInput["edges"][number],
+  templateById: Map<string, string>,
+): string | null {
+  const sourceTpl = templateById.get(edge.source);
+  const targetTpl = templateById.get(edge.target);
+  if (!sourceTpl || !targetTpl) return null;
+  const linkCount = edge.data?.linkCount ?? 1;
+  return `- ${sourceTpl} → ${targetTpl}  (${linkCount} links)`;
+}
+
+/**
+ * Serializes the current graph into a compact plain-text format optimized for
+ * paste-into-LLM usage. Pure function — no side effects, no DOM/clipboard access.
+ */
+export function buildCopyForAIText(input: CopyForAIInput): string {
+  const { nodes, edges, scores, allScoreValues, depthMap, outboundMap } = input;
+
+  const templateById = new Map<string, string>(nodes.map((n) => [n.id, n.data.urlTemplate]));
+
+  const lines: string[] = [];
+
+  lines.push("# SEO Internal Link Structure");
+  lines.push("");
+  lines.push(`## Nodes (${nodes.length} total)`);
+
+  for (const node of nodes) {
+    lines.push(formatNodeLine(node, scores, allScoreValues, depthMap, outboundMap));
+  }
+
+  lines.push("");
+  lines.push("## Links");
+
+  for (const edge of edges) {
+    const edgeLine = formatEdgeLine(edge, templateById);
+    if (edgeLine) lines.push(edgeLine);
+  }
+
+  return lines.join("\n") + "\n";
+}

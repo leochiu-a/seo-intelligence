@@ -26,6 +26,7 @@ import {
   getHealthStatus,
   hasAnyWarning,
   getConnectedElements,
+  buildCopyForAIText,
 } from "./graph-utils";
 import type { UrlNodeData, LinkCountEdgeData, Placement, HealthStatus } from "./graph-utils";
 
@@ -1874,5 +1875,236 @@ describe("getConnectedElements", () => {
   it("excludes disconnected component (A→B, C→D, focus A)", () => {
     const edges = [edge("e1", "a", "b"), edge("e2", "c", "d")];
     expect(getConnectedElements("a", edges)).toEqual(new Set(["a", "b"]));
+  });
+});
+
+// ---------------------------------------------------------------------------
+// buildCopyForAIText
+// ---------------------------------------------------------------------------
+describe("buildCopyForAIText", () => {
+  function makeNode(
+    id: string,
+    urlTemplate: string,
+    pageCount: number,
+    extra: Partial<UrlNodeData> = {},
+  ) {
+    return { id, data: { urlTemplate, pageCount, ...extra } };
+  }
+
+  function makeEdge(source: string, target: string, linkCount?: number) {
+    return { source, target, data: linkCount !== undefined ? { linkCount } : undefined };
+  }
+
+  const baseNodes = [makeNode("n1", "/blog/<id>", 10), makeNode("n2", "/product/<id>", 5)];
+  const baseEdges = [makeEdge("n1", "n2", 3)];
+  const baseScores = new Map([
+    ["n1", 0.8],
+    ["n2", 0.3],
+  ]);
+  const baseAllScores = [0.8, 0.3];
+  const baseDepthMap = new Map([
+    ["n1", 0],
+    ["n2", 1],
+  ]);
+  const baseOutboundMap = new Map([
+    ["n1", 3],
+    ["n2", 0],
+  ]);
+
+  function buildBase() {
+    return buildCopyForAIText({
+      nodes: baseNodes,
+      edges: baseEdges,
+      scores: baseScores,
+      allScoreValues: baseAllScores,
+      depthMap: baseDepthMap,
+      outboundMap: baseOutboundMap,
+    });
+  }
+
+  it("test 1 — starts with header line and blank line", () => {
+    const result = buildBase();
+    expect(result.startsWith("# SEO Internal Link Structure\n\n")).toBe(true);
+  });
+
+  it("test 2 — Nodes section count matches input node count", () => {
+    const result = buildBase();
+    expect(result).toContain("## Nodes (2 total)");
+  });
+
+  it("test 3 — each node line has required fields", () => {
+    const result = buildBase();
+    expect(result).toContain("- /blog/<id>  pages: 10  score:");
+    expect(result).toContain("depth:");
+    expect(result).toContain("outbound:");
+  });
+
+  it("test 4a — depth renders as number when finite", () => {
+    const result = buildBase();
+    expect(result).toContain("depth: 0");
+    expect(result).toContain("depth: 1");
+  });
+
+  it("test 4b — depth renders as 'unreachable' when Infinity", () => {
+    const nodes = [makeNode("n1", "/blog/<id>", 10)];
+    const result = buildCopyForAIText({
+      nodes,
+      edges: [],
+      scores: new Map(),
+      allScoreValues: [],
+      depthMap: new Map([["n1", Infinity]]),
+      outboundMap: new Map(),
+    });
+    expect(result).toContain("depth: unreachable");
+  });
+
+  it("test 4c — depth renders as '-' when node missing from depthMap", () => {
+    const nodes = [makeNode("n1", "/blog/<id>", 10, { isGlobal: true })];
+    const result = buildCopyForAIText({
+      nodes,
+      edges: [],
+      scores: new Map(),
+      allScoreValues: [],
+      depthMap: new Map(), // n1 absent
+      outboundMap: new Map(),
+    });
+    expect(result).toContain("depth: -");
+  });
+
+  it("test 5 — score tier uses classifyScoreTier; missing score falls back to neutral via ?? 0", () => {
+    const nodes = [makeNode("n1", "/blog/<id>", 10)];
+    const result = buildCopyForAIText({
+      nodes,
+      edges: [],
+      scores: new Map(), // n1 missing → fallback 0
+      allScoreValues: [0.8, 0.3],
+      depthMap: new Map([["n1", 0]]),
+      outboundMap: new Map(),
+    });
+    // classifyScoreTier(0, [0.8, 0.3]) should be "low" or "neutral"
+    expect(result).toMatch(/score: (low|neutral)/);
+  });
+
+  it("test 6 — outbound uses outboundMap; missing defaults to 0", () => {
+    const nodes = [makeNode("n1", "/blog/<id>", 10)];
+    const result = buildCopyForAIText({
+      nodes,
+      edges: [],
+      scores: new Map([["n1", 0.5]]),
+      allScoreValues: [0.5],
+      depthMap: new Map([["n1", 0]]),
+      outboundMap: new Map(), // missing → 0
+    });
+    expect(result).toContain("outbound: 0");
+  });
+
+  it("test 7 — [root] suffix appears iff isRoot === true", () => {
+    const nodes = [makeNode("n1", "/home", 1, { isRoot: true })];
+    const result = buildCopyForAIText({
+      nodes,
+      edges: [],
+      scores: new Map([["n1", 0.9]]),
+      allScoreValues: [0.9],
+      depthMap: new Map([["n1", 0]]),
+      outboundMap: new Map(),
+    });
+    expect(result).toContain("[root]");
+  });
+
+  it("test 8 — [global] suffix appears iff isGlobal === true; both flags produce [root] [global]", () => {
+    const nodes = [makeNode("n1", "/nav", 1, { isRoot: true, isGlobal: true })];
+    const result = buildCopyForAIText({
+      nodes,
+      edges: [],
+      scores: new Map([["n1", 0.9]]),
+      allScoreValues: [0.9],
+      depthMap: new Map(),
+      outboundMap: new Map(),
+    });
+    expect(result).toContain("[root] [global]");
+  });
+
+  it("test 9 — Links section lists edges; missing linkCount defaults to 1", () => {
+    const nodes = [makeNode("n1", "/a", 1), makeNode("n2", "/b", 1)];
+    const edges = [
+      makeEdge("n1", "n2", 5),
+      makeEdge("n2", "n1"), // no linkCount → defaults to 1
+    ];
+    const result = buildCopyForAIText({
+      nodes,
+      edges,
+      scores: new Map(),
+      allScoreValues: [],
+      depthMap: new Map(),
+      outboundMap: new Map(),
+    });
+    expect(result).toContain("- /a → /b  (5 links)");
+    expect(result).toContain("- /b → /a  (1 links)");
+  });
+
+  it("test 10 — edges whose source or target id is not in nodes are skipped", () => {
+    const nodes = [makeNode("n1", "/a", 1)];
+    const edges = [makeEdge("n1", "ghost-id", 2)];
+    const result = buildCopyForAIText({
+      nodes,
+      edges,
+      scores: new Map(),
+      allScoreValues: [],
+      depthMap: new Map(),
+      outboundMap: new Map(),
+    });
+    // should not crash, and ghost edge should be absent
+    expect(result).not.toContain("ghost-id");
+    expect(result).toContain("## Links");
+  });
+
+  it("test 11 — empty edges: Links section still emitted but with no list items", () => {
+    const result = buildCopyForAIText({
+      nodes: baseNodes,
+      edges: [],
+      scores: baseScores,
+      allScoreValues: baseAllScores,
+      depthMap: baseDepthMap,
+      outboundMap: baseOutboundMap,
+    });
+    expect(result).toContain("## Links");
+    // There should be no "- /blog" under Links (no edge lines)
+    const linksIdx = result.indexOf("## Links");
+    const afterLinks = result.slice(linksIdx + "## Links".length).trim();
+    expect(afterLinks).toBe("");
+  });
+
+  it("test 12 — snapshot over small fixture (2 non-global + 1 global + 2 edges)", () => {
+    const nodes = [
+      makeNode("a", "/home", 1, { isRoot: true }),
+      makeNode("b", "/blog/<id>", 20),
+      makeNode("g", "/nav", 1, { isGlobal: true }),
+    ];
+    const edges = [makeEdge("a", "b", 4), makeEdge("g", "b", 2)];
+    const scores = new Map([
+      ["a", 0.9],
+      ["b", 0.5],
+      ["g", 0.1],
+    ]);
+    const allScoreValues = [0.9, 0.5, 0.1];
+    const depthMap = new Map([
+      ["a", 0],
+      ["b", 1],
+    ]);
+    const outboundMap = new Map([
+      ["a", 4],
+      ["b", 0],
+      ["g", 2],
+    ]);
+
+    const result = buildCopyForAIText({
+      nodes,
+      edges,
+      scores,
+      allScoreValues,
+      depthMap,
+      outboundMap,
+    });
+    expect(result).toMatchSnapshot();
   });
 });

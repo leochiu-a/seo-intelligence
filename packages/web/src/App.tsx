@@ -23,6 +23,7 @@ import { LinkCountEdge } from "./components/LinkCountEdge";
 import { Toolbar } from "./components/Toolbar";
 import { ScenarioTabBar } from "./components/ScenarioTabBar";
 import { SidePanel } from "./components/SidePanel";
+import { CopyForAIDialog } from "./components/CopyForAIDialog";
 import { ImportDialog } from "./components/ImportDialog";
 import { LegendDialog } from "./components/LegendDialog";
 import { TooltipProvider } from "./components/ui/tooltip";
@@ -42,6 +43,7 @@ import {
   identifyOrphanNodes,
   calculateOutboundLinks,
   getConnectedElements,
+  buildCopyForAIText,
   OUTBOUND_WARNING_THRESHOLD,
   type UrlNodeData,
   type LinkCountEdgeData,
@@ -661,6 +663,26 @@ function AppInner() {
     URL.revokeObjectURL(url);
   }, [nodes, edges, scores, depthMap, outboundMap]);
 
+  const [showCopyForAIDialog, setShowCopyForAIDialog] = useState(false);
+  const [copyForAIText, setCopyForAIText] = useState("");
+
+  const onCopyForAI = useCallback(() => {
+    const text = buildCopyForAIText({
+      nodes: nodes.map((n) => ({ id: n.id, data: n.data })),
+      edges: edges.map((e) => ({
+        source: e.source,
+        target: e.target,
+        data: { linkCount: (e.data as LinkCountEdgeData | undefined)?.linkCount ?? 1 },
+      })),
+      scores,
+      allScoreValues,
+      depthMap,
+      outboundMap,
+    });
+    setCopyForAIText(text);
+    setShowCopyForAIDialog(true);
+  }, [nodes, edges, scores, allScoreValues, depthMap, outboundMap]);
+
   const handleClearCanvas = useCallback(() => {
     setNodes([]);
     setEdges([]);
@@ -694,6 +716,7 @@ function AppInner() {
         onAddNode={onAddNode}
         onImportJson={() => setShowImportDialog(true)}
         onExportJson={onExportJson}
+        onCopyForAI={onCopyForAI}
         onClearCanvas={handleClearCanvas}
         isEmpty={nodes.length === 0}
         onLegendOpen={() => setShowLegendDialog(true)}
@@ -796,6 +819,11 @@ function AppInner() {
         onImport={handleImportFromDialog}
       />
       <LegendDialog open={showLegendDialog} onClose={() => setShowLegendDialog(false)} />
+      <CopyForAIDialog
+        open={showCopyForAIDialog}
+        onClose={() => setShowCopyForAIDialog(false)}
+        text={copyForAIText}
+      />
     </div>
   );
 }

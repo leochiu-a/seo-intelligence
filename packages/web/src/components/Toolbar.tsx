@@ -1,18 +1,59 @@
-import { Plus, Download, Upload, Trash2, HelpCircle } from "lucide-react";
+import { ChevronDown, Download, HelpCircle, Plus, Sparkles, Trash2, Upload } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 interface ToolbarProps {
   onAddNode: () => void;
   onImportJson: () => void;
   onExportJson: () => void;
+  onCopyForAI: () => void | Promise<void>;
   onClearCanvas: () => void;
   isEmpty: boolean;
   onLegendOpen?: () => void;
+}
+
+function ExportMenu({
+  onExportJson,
+  onCopyForAI,
+  isEmpty,
+}: {
+  onExportJson: () => void;
+  onCopyForAI: () => void | Promise<void>;
+  isEmpty: boolean;
+}) {
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger
+        disabled={isEmpty}
+        className="flex items-center gap-1.5 rounded-md border border-border bg-white px-3 py-1.5 text-sm font-medium text-ink hover:bg-surface disabled:cursor-not-allowed disabled:opacity-50 transition-colors"
+      >
+        <Download size={14} />
+        Export
+        <ChevronDown size={12} />
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" side="bottom">
+        <DropdownMenuItem onClick={onExportJson}>
+          <Download size={14} />
+          Export JSON
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => void onCopyForAI()}>
+          <Sparkles size={14} />
+          Copy for AI
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
 }
 
 export function Toolbar({
   onAddNode,
   onImportJson,
   onExportJson,
+  onCopyForAI,
   onClearCanvas,
   isEmpty,
   onLegendOpen,
@@ -36,14 +77,7 @@ export function Toolbar({
           <Upload size={14} />
           Import JSON
         </button>
-        <button
-          onClick={onExportJson}
-          disabled={isEmpty}
-          className="flex items-center gap-1.5 rounded-md border border-border bg-white px-3 py-1.5 text-sm font-medium text-ink hover:bg-surface disabled:cursor-not-allowed disabled:opacity-50 transition-colors"
-        >
-          <Download size={14} />
-          Export JSON
-        </button>
+        <ExportMenu onExportJson={onExportJson} onCopyForAI={onCopyForAI} isEmpty={isEmpty} />
         <button
           onClick={onClearCanvas}
           disabled={isEmpty}
