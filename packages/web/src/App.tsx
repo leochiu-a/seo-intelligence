@@ -582,8 +582,9 @@ function AppInner() {
         onRename={(id, name) => { renameScenario(id, name); persist(); }}
         onDelete={handleDeleteScenario}
       />
-      <ResizablePanelGroup direction="horizontal" className="flex-1 overflow-hidden">
-        <ResizablePanel defaultSize={17} minSize={10} maxSize={35}>
+      <div className="flex-1 min-h-0 overflow-hidden">
+      <ResizablePanelGroup direction="horizontal" className="h-full">
+        <ResizablePanel defaultSize="17%" minSize="10%" maxSize="35%">
           <FilterPanel
             nodes={nodes}
             activeFilters={activeFilters}
@@ -594,7 +595,7 @@ function AppInner() {
 
         <ResizableHandle />
 
-        <ResizablePanel defaultSize={63} minSize={30}>
+        <ResizablePanel defaultSize="63%" minSize="30%">
           <div className="h-full" ref={reactFlowWrapper}>
             <ReactFlow
               nodes={styledNodes}
@@ -653,7 +654,7 @@ function AppInner() {
 
         <ResizableHandle />
 
-        <ResizablePanel defaultSize={20} minSize={10} maxSize={40}>
+        <ResizablePanel defaultSize="20%" minSize="10%" maxSize="40%">
           <ScoreSidebar
             nodes={nodes}
             scores={scores}
@@ -666,6 +667,7 @@ function AppInner() {
           />
         </ResizablePanel>
       </ResizablePanelGroup>
+      </div>
       <ImportDialog
         open={showImportDialog}
         onClose={() => setShowImportDialog(false)}
