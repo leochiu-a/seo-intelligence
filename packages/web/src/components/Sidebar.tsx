@@ -8,8 +8,8 @@ export function Sidebar() {
         className="cursor-grab rounded-xl border-2 border-border bg-white p-3.5 shadow-sm hover:shadow-md hover:border-tier-neutral/60 transition"
         draggable
         onDragStart={(e) => {
-          e.dataTransfer.setData('application/reactflow', 'urlNode');
-          e.dataTransfer.effectAllowed = 'move';
+          e.dataTransfer.setData("application/reactflow", "urlNode");
+          e.dataTransfer.effectAllowed = "move";
         }}
       >
         <div className="text-sm font-semibold text-dark">URL Node</div>

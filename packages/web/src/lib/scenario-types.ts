@@ -1,5 +1,5 @@
-export const SCENARIOS_KEY = 'seo-planner-scenarios';
-export const OLD_STORAGE_KEY = 'seo-planner-graph';
+export const SCENARIOS_KEY = "seo-planner-scenarios";
+export const OLD_STORAGE_KEY = "seo-planner-graph";
 
 export interface SerializedNode {
   id: string;

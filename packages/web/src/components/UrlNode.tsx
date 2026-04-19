@@ -1,11 +1,19 @@
-import { memo, useState, useEffect } from 'react';
-import { Handle, Position, useReactFlow, type NodeProps, type Node } from '@xyflow/react';
-import { Pencil, TriangleAlert, Globe, Home, Unplug, Layers } from 'lucide-react';
-import { EditPopover } from './EditPopover';
-import { formatPageCount, type UrlNodeData, type ScoreTier, type Placement, HANDLE_IDS, collectPlacementSuggestions, collectClusterSuggestions } from '../lib/graph-utils';
-import { getClusterColor } from '../lib/cluster-colors';
+import { memo, useState, useEffect } from "react";
+import { Handle, Position, useReactFlow, type NodeProps, type Node } from "@xyflow/react";
+import { Pencil, TriangleAlert, Globe, Home, Unplug, Layers } from "lucide-react";
+import { EditPopover } from "./EditPopover";
+import {
+  formatPageCount,
+  type UrlNodeData,
+  type ScoreTier,
+  type Placement,
+  HANDLE_IDS,
+  collectPlacementSuggestions,
+  collectClusterSuggestions,
+} from "../lib/graph-utils";
+import { getClusterColor } from "../lib/cluster-colors";
 
-export type { UrlNodeData } from '../lib/graph-utils';
+export type { UrlNodeData } from "../lib/graph-utils";
 
 interface UrlNodeExtendedData extends UrlNodeData {
   onUpdate?: (id: string, data: Partial<UrlNodeData>) => void;
@@ -22,30 +30,37 @@ interface UrlNodeExtendedData extends UrlNodeData {
   isDimmed?: boolean;
 }
 
-const TONE_MAP: Record<ScoreTier, { card: string; focus: string; badge: string; badgeLabel: string }> = {
+const TONE_MAP: Record<
+  ScoreTier,
+  { card: string; focus: string; badge: string; badgeLabel: string }
+> = {
   high: {
-    card: 'bg-white border-tier-high/40',
-    focus: 'border-tier-high shadow-[0_0_0_1px_var(--color-tier-high-glow),0_0_24px_var(--color-tier-high-ambient)]',
-    badge: 'bg-green-100 text-green-700',
-    badgeLabel: 'High',
+    card: "bg-white border-tier-high/40",
+    focus:
+      "border-tier-high shadow-[0_0_0_1px_var(--color-tier-high-glow),0_0_24px_var(--color-tier-high-ambient)]",
+    badge: "bg-green-100 text-green-700",
+    badgeLabel: "High",
   },
   mid: {
-    card: 'bg-white border-tier-mid/40',
-    focus: 'border-tier-mid shadow-[0_0_0_1px_var(--color-tier-mid-glow),0_0_24px_var(--color-tier-mid-ambient)]',
-    badge: 'bg-amber-100 text-amber-700',
-    badgeLabel: 'Mid',
+    card: "bg-white border-tier-mid/40",
+    focus:
+      "border-tier-mid shadow-[0_0_0_1px_var(--color-tier-mid-glow),0_0_24px_var(--color-tier-mid-ambient)]",
+    badge: "bg-amber-100 text-amber-700",
+    badgeLabel: "Mid",
   },
   low: {
-    card: 'bg-white border-tier-low/40',
-    focus: 'border-tier-low shadow-[0_0_0_1px_var(--color-tier-low-glow),0_0_24px_var(--color-tier-low-ambient)]',
-    badge: 'bg-red-100 text-red-700',
-    badgeLabel: 'Low',
+    card: "bg-white border-tier-low/40",
+    focus:
+      "border-tier-low shadow-[0_0_0_1px_var(--color-tier-low-glow),0_0_24px_var(--color-tier-low-ambient)]",
+    badge: "bg-red-100 text-red-700",
+    badgeLabel: "Low",
   },
   neutral: {
-    card: 'bg-white border-tier-neutral/40',
-    focus: 'border-tier-neutral shadow-[0_0_0_1px_var(--color-tier-neutral-glow),0_0_24px_var(--color-tier-neutral-ambient)]',
-    badge: 'bg-indigo-100 text-indigo-700',
-    badgeLabel: 'Neutral',
+    card: "bg-white border-tier-neutral/40",
+    focus:
+      "border-tier-neutral shadow-[0_0_0_1px_var(--color-tier-neutral-glow),0_0_24px_var(--color-tier-neutral-ambient)]",
+    badge: "bg-indigo-100 text-indigo-700",
+    badgeLabel: "Neutral",
   },
 };
 
@@ -70,7 +85,7 @@ function UrlNodeComponent({ id, data, selected }: NodeProps<UrlNodeExtendedData>
   const placementSuggestions = collectPlacementSuggestions(allNodes, id);
   const clusterSuggestions = collectClusterSuggestions(allNodes, id);
 
-  const tier = data.scoreTier ?? 'neutral';
+  const tier = data.scoreTier ?? "neutral";
   const tone = TONE_MAP[tier];
 
   const tags = data.tags ?? [];
@@ -91,26 +106,36 @@ function UrlNodeComponent({ id, data, selected }: NodeProps<UrlNodeExtendedData>
 
   return (
     <div
-      className={`relative w-[200px] rounded-xl border-2 p-2.5 shadow-md shadow-black/8 transition ${tone.card} ${selected ? tone.focus : ''}`}
+      className={`relative w-[200px] rounded-xl border-2 p-2.5 shadow-md shadow-black/8 transition ${tone.card} ${selected ? tone.focus : ""}`}
     >
       <Handle
         type="source"
         id={HANDLE_IDS.top}
         position={Position.Top}
-        style={{ background: '#ffffff', border: '2px solid var(--color-placeholder)', width: 12, height: 12 }}
+        style={{
+          background: "#ffffff",
+          border: "2px solid var(--color-placeholder)",
+          width: 12,
+          height: 12,
+        }}
       />
       <Handle
         type="source"
         id={HANDLE_IDS.left}
         position={Position.Left}
-        style={{ background: '#ffffff', border: '2px solid var(--color-placeholder)', width: 12, height: 12 }}
+        style={{
+          background: "#ffffff",
+          border: "2px solid var(--color-placeholder)",
+          width: 12,
+          height: 12,
+        }}
       />
 
       {/* Content wrapper - receives dim opacity */}
       <div
         data-testid="card-content"
         data-dimmed={data.isDimmed ?? false}
-        style={{ opacity: data.isDimmed ? 0.2 : 1, transition: 'opacity 0.2s' }}
+        style={{ opacity: data.isDimmed ? 0.2 : 1, transition: "opacity 0.2s" }}
       >
         {/* Edit button — always absolute top-right */}
         <button
@@ -125,10 +150,12 @@ function UrlNodeComponent({ id, data, selected }: NodeProps<UrlNodeExtendedData>
         </button>
 
         {/* Badges — tier, global, and/or root */}
-        {(tier !== 'neutral' || data.isGlobal || data.isRoot) && (
+        {(tier !== "neutral" || data.isGlobal || data.isRoot) && (
           <div className="mb-2 flex flex-wrap items-center gap-1">
-            {tier !== 'neutral' && (
-              <span className={`inline-flex items-center rounded-full px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${tone.badge}`}>
+            {tier !== "neutral" && (
+              <span
+                className={`inline-flex items-center rounded-full px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${tone.badge}`}
+              >
                 {tone.badgeLabel}
               </span>
             )}
@@ -176,14 +203,18 @@ function UrlNodeComponent({ id, data, selected }: NodeProps<UrlNodeExtendedData>
               <span className="text-red-500">Unreachable</span>
             </>
           )}
-          {typeof data.crawlDepth === 'number' && data.crawlDepth !== Infinity && data.crawlDepth > 3 && !data.isOrphan && !data.isUnreachable && (
-            <>
-              <span>·</span>
-              <Layers size={11} className="text-amber-500" aria-label="Deep page" />
-              <span className="text-amber-500">Depth {data.crawlDepth}</span>
-            </>
-          )}
-          {data.isOverLinked && typeof data.outboundCount === 'number' && (
+          {typeof data.crawlDepth === "number" &&
+            data.crawlDepth !== Infinity &&
+            data.crawlDepth > 3 &&
+            !data.isOrphan &&
+            !data.isUnreachable && (
+              <>
+                <span>·</span>
+                <Layers size={11} className="text-amber-500" aria-label="Deep page" />
+                <span className="text-amber-500">Depth {data.crawlDepth}</span>
+              </>
+            )}
+          {data.isOverLinked && typeof data.outboundCount === "number" && (
             <>
               <span>·</span>
               <TriangleAlert size={11} className="text-red-500" aria-label="Over-linked page" />
@@ -196,14 +227,23 @@ function UrlNodeComponent({ id, data, selected }: NodeProps<UrlNodeExtendedData>
               {visibleBandTags.map((tag) => {
                 const color = getClusterColor(tag);
                 return (
-                  <span key={tag} className="inline-flex items-center gap-0.5" data-testid="cluster-chip">
-                    <span className={`inline-block w-1.5 h-1.5 rounded-full ${color.dot}`} aria-hidden />
+                  <span
+                    key={tag}
+                    className="inline-flex items-center gap-0.5"
+                    data-testid="cluster-chip"
+                  >
+                    <span
+                      className={`inline-block w-1.5 h-1.5 rounded-full ${color.dot}`}
+                      aria-hidden
+                    />
                     <span>{tag}</span>
                   </span>
                 );
               })}
               {overflowCount > 0 && (
-                <span className="text-muted-fg" data-testid="cluster-overflow">+{overflowCount}</span>
+                <span className="text-muted-fg" data-testid="cluster-overflow">
+                  +{overflowCount}
+                </span>
               )}
             </>
           )}
@@ -214,13 +254,23 @@ function UrlNodeComponent({ id, data, selected }: NodeProps<UrlNodeExtendedData>
         type="source"
         id={HANDLE_IDS.right}
         position={Position.Right}
-        style={{ background: '#ffffff', border: '2px solid var(--color-placeholder)', width: 12, height: 12 }}
+        style={{
+          background: "#ffffff",
+          border: "2px solid var(--color-placeholder)",
+          width: 12,
+          height: 12,
+        }}
       />
       <Handle
         type="source"
         id={HANDLE_IDS.bottom}
         position={Position.Bottom}
-        style={{ background: '#ffffff', border: '2px solid var(--color-placeholder)', width: 12, height: 12 }}
+        style={{
+          background: "#ffffff",
+          border: "2px solid var(--color-placeholder)",
+          width: 12,
+          height: 12,
+        }}
       />
 
       {showPopover && (

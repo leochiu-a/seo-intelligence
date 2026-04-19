@@ -1,15 +1,9 @@
-import { useState, useCallback, useRef, useEffect } from 'react';
-import {
-  BaseEdge,
-  EdgeLabelRenderer,
-  getSmoothStepPath,
-  type EdgeProps,
-} from '@xyflow/react';
+import { useState, useCallback, useRef, useEffect } from "react";
+import { BaseEdge, EdgeLabelRenderer, getSmoothStepPath, type EdgeProps } from "@xyflow/react";
 
 export interface LinkCountEdgeData {
   linkCount: number;
   onLinkCountChange?: (edgeId: string, linkCount: number) => void;
-
 }
 
 export function LinkCountEdge({
@@ -64,7 +58,7 @@ export function LinkCountEdge({
         markerEnd={markerEnd}
         style={{
           ...style,
-          stroke: selected ? '#6366F1' : '#9CA3AF',
+          stroke: selected ? "#6366F1" : "#9CA3AF",
           strokeWidth: 2,
         }}
       />
@@ -72,9 +66,9 @@ export function LinkCountEdge({
         <div
           className="nodrag nopan"
           style={{
-            position: 'absolute',
+            position: "absolute",
             transform: `translate(-50%, -50%) translate(${labelX}px,${labelY}px)`,
-            pointerEvents: 'all',
+            pointerEvents: "all",
           }}
         >
           {editing ? (
@@ -86,7 +80,7 @@ export function LinkCountEdge({
               onChange={(e) => setLocalCount(Math.max(1, parseInt(e.target.value) || 1))}
               onBlur={handleSave}
               onKeyDown={(e) => {
-                if (e.key === 'Enter') handleSave();
+                if (e.key === "Enter") handleSave();
               }}
               className="w-12 text-center text-xs font-semibold text-gray-700 bg-white border-2 border-indigo-500 rounded-full px-2 py-1 outline-none ring-2 ring-indigo-500"
             />
@@ -94,7 +88,7 @@ export function LinkCountEdge({
             <button
               onClick={() => setEditing(true)}
               className={`text-xs font-semibold text-gray-700 bg-white rounded-full px-2 py-1 border cursor-pointer hover:border-gray-300 ${
-                selected ? 'border-indigo-200' : 'border-gray-200'
+                selected ? "border-indigo-200" : "border-gray-200"
               }`}
             >
               {data?.linkCount ?? 1}

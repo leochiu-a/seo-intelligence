@@ -19,6 +19,19 @@
     "test": "pnpm -r test",
     "lint": "pnpm -r lint",
     "preview": "pnpm --filter @seo-intelligence/web preview",
-    "type-check": "pnpm -r type-check"
+    "type-check": "pnpm -r type-check",
+    "prepare": "husky"
+  },
+  "lint-staged": {
+    "*.{js,jsx,ts,tsx}": [
+      "oxlint --fix",
+      "oxfmt --write"
+    ]
+  },
+  "devDependencies": {
+    "husky": "^9.1.7",
+    "lint-staged": "^16.4.0",
+    "oxfmt": "^0.45.0",
+    "oxlint": "^1.60.0"
   }
 }

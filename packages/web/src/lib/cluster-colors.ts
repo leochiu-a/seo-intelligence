@@ -19,14 +19,14 @@ export interface ClusterColor {
 }
 
 export const CLUSTER_PALETTE: readonly ClusterColor[] = Object.freeze([
-  { dot: 'bg-teal-400'    },
-  { dot: 'bg-cyan-400'    },
-  { dot: 'bg-sky-400'     },
-  { dot: 'bg-pink-400'    },
-  { dot: 'bg-rose-400'    },
-  { dot: 'bg-orange-400'  },
-  { dot: 'bg-lime-400'    },
-  { dot: 'bg-fuchsia-400' },
+  { dot: "bg-teal-400" },
+  { dot: "bg-cyan-400" },
+  { dot: "bg-sky-400" },
+  { dot: "bg-pink-400" },
+  { dot: "bg-rose-400" },
+  { dot: "bg-orange-400" },
+  { dot: "bg-lime-400" },
+  { dot: "bg-fuchsia-400" },
 ]);
 
 /**
@@ -36,7 +36,7 @@ export const CLUSTER_PALETTE: readonly ClusterColor[] = Object.freeze([
 function djb2(str: string): number {
   let hash = 5381;
   for (let i = 0; i < str.length; i++) {
-    hash = ((hash << 5) + hash) + str.charCodeAt(i); // hash * 33 + c
+    hash = (hash << 5) + hash + str.charCodeAt(i); // hash * 33 + c
   }
   return hash >>> 0; // unsigned 32-bit
 }

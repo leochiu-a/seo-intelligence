@@ -1,8 +1,8 @@
-import { useState, useRef, useEffect, useCallback } from 'react';
-import { X, Upload, FileUp } from 'lucide-react';
-import { parseImportJson } from '../lib/graph-utils';
-import type { Node, Edge } from '@xyflow/react';
-import type { UrlNodeData, LinkCountEdgeData } from '../lib/graph-utils';
+import { useState, useRef, useEffect, useCallback } from "react";
+import { X, Upload, FileUp } from "lucide-react";
+import { parseImportJson } from "../lib/graph-utils";
+import type { Node, Edge } from "@xyflow/react";
+import type { UrlNodeData, LinkCountEdgeData } from "../lib/graph-utils";
 
 interface ImportDialogProps {
   open: boolean;
@@ -25,7 +25,7 @@ export function ImportDialog({ open, onClose, onImport }: ImportDialogProps) {
           onImport(nodes, edges);
           onClose();
         } catch {
-          setError('Invalid JSON file — please check the file format.');
+          setError("Invalid JSON file — please check the file format.");
         }
       };
       reader.readAsText(file);
@@ -47,9 +47,7 @@ export function ImportDialog({ open, onClose, onImport }: ImportDialogProps) {
       e.preventDefault();
       setIsDragOver(false);
       setError(null);
-      const file = Array.from(e.dataTransfer.files).find((f) =>
-        f.name.endsWith('.json'),
-      );
+      const file = Array.from(e.dataTransfer.files).find((f) => f.name.endsWith(".json"));
       if (file) {
         handleFile(file);
       }
@@ -75,10 +73,10 @@ export function ImportDialog({ open, onClose, onImport }: ImportDialogProps) {
   useEffect(() => {
     if (!open) return;
     const handler = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
+      if (e.key === "Escape") onClose();
     };
-    document.addEventListener('keydown', handler);
-    return () => document.removeEventListener('keydown', handler);
+    document.addEventListener("keydown", handler);
+    return () => document.removeEventListener("keydown", handler);
   }, [open, onClose]);
 
   if (!open) return null;
@@ -120,33 +118,20 @@ export function ImportDialog({ open, onClose, onImport }: ImportDialogProps) {
             onDragLeave={onDragLeave}
             onDrop={onDrop}
             className={[
-              'rounded-lg border-2 border-dashed p-8 text-center transition-colors cursor-default',
-              isDragOver
-                ? 'border-pink-400 bg-pink-50'
-                : 'border-gray-300 bg-gray-50',
-            ].join(' ')}
+              "rounded-lg border-2 border-dashed p-8 text-center transition-colors cursor-default",
+              isDragOver ? "border-pink-400 bg-pink-50" : "border-gray-300 bg-gray-50",
+            ].join(" ")}
           >
             <Upload
               size={32}
-              className={[
-                'mx-auto mb-3',
-                isDragOver ? 'text-pink-400' : 'text-gray-400',
-              ].join(' ')}
+              className={["mx-auto mb-3", isDragOver ? "text-pink-400" : "text-gray-400"].join(" ")}
             />
-            <p className="text-sm font-medium text-gray-700">
-              Drag &amp; drop a .json file here
-            </p>
-            <p className="text-xs text-gray-400 mt-1">
-              Supports files exported from Export JSON
-            </p>
+            <p className="text-sm font-medium text-gray-700">Drag &amp; drop a .json file here</p>
+            <p className="text-xs text-gray-400 mt-1">Supports files exported from Export JSON</p>
           </div>
 
           {/* Error message */}
-          {error && (
-            <p className="text-sm text-red-500 -mt-2">
-              {error}
-            </p>
-          )}
+          {error && <p className="text-sm text-red-500 -mt-2">{error}</p>}
 
           {/* Separator */}
           <div className="flex items-center gap-3">
