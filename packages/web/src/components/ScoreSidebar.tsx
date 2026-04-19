@@ -17,7 +17,6 @@ interface ScoreSidebarProps {
   depthMap: Map<string, number>;
   outboundMap: Map<string, number>;
   rootId: string | null;
-  highlightedRouteNodeId?: string | null;
   onNodeHighlight?: (id: string | null) => void;
 }
 
@@ -51,7 +50,7 @@ function flattenTree(treeNodes: UrlTreeNode[]): UrlTreeNode[] {
   return result;
 }
 
-export function ScoreSidebar({ nodes, scores, weakNodes, orphanNodes, unreachableNodes, depthMap, outboundMap, rootId, highlightedRouteNodeId, onNodeHighlight }: ScoreSidebarProps) {
+export function ScoreSidebar({ nodes, scores, weakNodes, orphanNodes, unreachableNodes, depthMap, outboundMap, rootId, onNodeHighlight }: ScoreSidebarProps) {
   const { fitView, setNodes } = useReactFlow();
   const [activeTab, setActiveTab] = useState<'score' | 'health'>('score');
 
@@ -83,21 +82,6 @@ export function ScoreSidebar({ nodes, scores, weakNodes, orphanNodes, unreachabl
 
   return (
     <aside className="relative border-l border-border bg-white overflow-y-auto h-full">
-
-      {/* Route highlight indicator */}
-      {highlightedRouteNodeId && (
-        <div className="flex items-center justify-between px-3 py-1.5 bg-indigo-50 border-b border-indigo-100">
-          <span className="text-[11px] text-indigo-700 font-medium">Route highlighted</span>
-          <button
-            type="button"
-            onClick={() => onNodeHighlight?.(null)}
-            className="text-[11px] text-indigo-500 hover:text-indigo-700 transition-colors font-medium"
-            aria-label="Clear route highlight"
-          >
-            Clear
-          </button>
-        </div>
-      )}
 
       {/* Phase 11.1 D-01: [Score | Health] tab toggle */}
       <div className="flex border-b border-border" data-testid="sidebar-tabs">

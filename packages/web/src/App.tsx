@@ -689,7 +689,6 @@ function AppInner() {
             depthMap={depthMap}
             outboundMap={outboundMap}
             rootId={rootId}
-            highlightedRouteNodeId={highlightedRouteNodeId}
             onNodeHighlight={handleNodeHighlight}
           />
         </ResizablePanel>
