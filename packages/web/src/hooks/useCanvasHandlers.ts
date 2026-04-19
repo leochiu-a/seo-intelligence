@@ -8,13 +8,10 @@ import {
   type ReactFlowInstance,
 } from "@xyflow/react";
 import type { Dispatch, SetStateAction } from "react";
-import {
-  parseImportJson,
-  getClosestHandleIds,
-  type UrlNodeData,
-  type LinkCountEdgeData,
-} from "../lib/graph-utils";
+import { parseImportJson, getClosestHandleIds, type LinkCountEdgeData } from "../lib/graph-utils";
 import type { AppNodeData } from "../App";
+import type { UseNodeCallbacksResult } from "./useNodeCallbacks";
+import type { SerializedGraphNode, SerializedGraphEdge } from "../lib/serialize-graph";
 
 export interface UseCanvasHandlersArgs {
   reactFlowInstance: ReactFlowInstance<Node<AppNodeData>, Edge<LinkCountEdgeData>> | null;
@@ -22,9 +19,7 @@ export interface UseCanvasHandlersArgs {
   nodes: Node<AppNodeData>[];
   setNodes: Dispatch<SetStateAction<Node<AppNodeData>[]>>;
   setEdges: Dispatch<SetStateAction<Edge<LinkCountEdgeData>[]>>;
-  onNodeDataUpdate: (id: string, data: Partial<UrlNodeData>) => void;
-  onRootToggle: (id: string) => void;
-  onNodeZIndexChange: (id: string, z: number) => void;
+  wireCallbacks: UseNodeCallbacksResult["wireCallbacks"];
   onEdgeLinkCountChange: (id: string, c: number) => void;
 }
 
@@ -41,9 +36,7 @@ export function useCanvasHandlers({
   nodes,
   setNodes,
   setEdges,
-  onNodeDataUpdate,
-  onRootToggle,
-  onNodeZIndexChange,
+  wireCallbacks,
   onEdgeLinkCountChange,
 }: UseCanvasHandlersArgs): UseCanvasHandlersResult {
   const onDragOver = useCallback((event: React.DragEvent) => {
@@ -64,26 +57,11 @@ export function useCanvasHandlers({
             const { nodes: importedNodes, edges: importedEdges } = parseImportJson(
               e.target?.result as string,
             );
-            // Wire runtime callbacks into edges before setting state
-            const wiredEdges: Edge<LinkCountEdgeData>[] = importedEdges.map((edge) => ({
-              ...edge,
-              markerEnd: { type: MarkerType.ArrowClosed, color: "#9CA3AF" },
-              data: {
-                linkCount: edge.data?.linkCount ?? 1,
-                onLinkCountChange: onEdgeLinkCountChange,
-              },
-            }));
-            setNodes(
-              importedNodes.map((n) => ({
-                ...n,
-                data: {
-                  ...n.data,
-                  onUpdate: onNodeDataUpdate,
-                  onRootToggle,
-                  onZIndexChange: onNodeZIndexChange,
-                },
-              })),
+            const { wiredNodes, wiredEdges } = wireCallbacks(
+              importedNodes as SerializedGraphNode[],
+              importedEdges as SerializedGraphEdge[],
             );
+            setNodes(wiredNodes);
             setEdges(wiredEdges);
           } catch {
             // Invalid JSON — silently ignore (file was dropped by mistake)
@@ -102,16 +80,7 @@ export function useCanvasHandlers({
       });
       addNode(position);
     },
-    [
-      reactFlowInstance,
-      addNode,
-      setNodes,
-      setEdges,
-      onNodeDataUpdate,
-      onRootToggle,
-      onNodeZIndexChange,
-      onEdgeLinkCountChange,
-    ],
+    [reactFlowInstance, addNode, setNodes, setEdges, wireCallbacks],
   );
 
   const onAddNode = useCallback(() => {

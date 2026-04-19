@@ -5,6 +5,7 @@ import { MarkerType } from "@xyflow/react";
 import { useCanvasHandlers } from "./useCanvasHandlers";
 import type { AppNodeData } from "../App";
 import type { LinkCountEdgeData } from "../lib/graph-utils";
+import type { SerializedGraphNode, SerializedGraphEdge } from "../lib/serialize-graph";
 
 // ---------------------------------------------------------------------------
 // Fixtures
@@ -71,9 +72,7 @@ describe("useCanvasHandlers", () => {
   let setNodes: ReturnType<typeof vi.fn>;
   let setEdges: ReturnType<typeof vi.fn>;
   let addNode: ReturnType<typeof vi.fn>;
-  let onNodeDataUpdate: ReturnType<typeof vi.fn>;
-  let onRootToggle: ReturnType<typeof vi.fn>;
-  let onNodeZIndexChange: ReturnType<typeof vi.fn>;
+  let wireCallbacks: ReturnType<typeof vi.fn>;
   let onEdgeLinkCountChange: ReturnType<typeof vi.fn>;
   let reactFlowInstance: { screenToFlowPosition: ReturnType<typeof vi.fn> } | null;
 
@@ -81,10 +80,20 @@ describe("useCanvasHandlers", () => {
     setNodes = vi.fn();
     setEdges = vi.fn();
     addNode = vi.fn();
-    onNodeDataUpdate = vi.fn();
-    onRootToggle = vi.fn();
-    onNodeZIndexChange = vi.fn();
     onEdgeLinkCountChange = vi.fn();
+    wireCallbacks = vi
+      .fn()
+      .mockImplementation((nodes: SerializedGraphNode[], edges: SerializedGraphEdge[]) => ({
+        wiredNodes: nodes.map((n) => ({
+          ...n,
+          data: { ...n.data, onUpdate: vi.fn(), onRootToggle: vi.fn(), onZIndexChange: vi.fn() },
+        })),
+        wiredEdges: edges.map((e) => ({
+          ...e,
+          markerEnd: { type: MarkerType.ArrowClosed, color: "#9CA3AF" },
+          data: { linkCount: e.data?.linkCount ?? 1, onLinkCountChange: vi.fn() },
+        })),
+      }));
     reactFlowInstance = {
       screenToFlowPosition: vi.fn().mockReturnValue({ x: 50, y: 60 }),
     };
@@ -102,9 +111,7 @@ describe("useCanvasHandlers", () => {
       nodes,
       setNodes,
       setEdges,
-      onNodeDataUpdate,
-      onRootToggle,
-      onNodeZIndexChange,
+      wireCallbacks,
       onEdgeLinkCountChange,
       ...overrides,
     };

@@ -1,10 +1,11 @@
 import { useCallback } from "react";
-import { MarkerType, type Node, type Edge } from "@xyflow/react";
+import { type Node, type Edge } from "@xyflow/react";
 import type { MutableRefObject, Dispatch, SetStateAction } from "react";
 import type { UrlNodeData, LinkCountEdgeData } from "../lib/graph-utils";
 import type { AppNodeData } from "../App";
 import type { UseScenariosResult } from "./useScenarios";
 import type { UseNodeCallbacksResult } from "./useNodeCallbacks";
+import type { SerializedGraphNode, SerializedGraphEdge } from "../lib/serialize-graph";
 
 export interface UseScenarioHandlersArgs {
   store: UseScenariosResult["store"];
@@ -17,10 +18,6 @@ export interface UseScenarioHandlersArgs {
   deleteScenario: UseScenariosResult["deleteScenario"];
   persist: UseScenariosResult["persist"];
   wireCallbacks: UseNodeCallbacksResult["wireCallbacks"];
-  onNodeDataUpdate: (id: string, data: Partial<UrlNodeData>) => void;
-  onRootToggle: (id: string) => void;
-  onNodeZIndexChange: (id: string, z: number) => void;
-  onEdgeLinkCountChange: (id: string, c: number) => void;
   isSwitchingRef: MutableRefObject<boolean>;
 }
 
@@ -42,10 +39,6 @@ export function useScenarioHandlers({
   deleteScenario,
   persist,
   wireCallbacks,
-  onNodeDataUpdate,
-  onRootToggle,
-  onNodeZIndexChange,
-  onEdgeLinkCountChange,
   isSwitchingRef,
 }: UseScenarioHandlersArgs): UseScenarioHandlersResult {
   const handleSwitchScenario = useCallback(
@@ -108,24 +101,14 @@ export function useScenarioHandlers({
 
   const handleImportFromDialog = useCallback(
     (importedNodes: Node<UrlNodeData>[], importedEdges: Edge<LinkCountEdgeData>[]) => {
-      const wiredNodes = importedNodes.map((n) => ({
-        ...n,
-        data: {
-          ...n.data,
-          onUpdate: onNodeDataUpdate,
-          onRootToggle,
-          onZIndexChange: onNodeZIndexChange,
-        },
-      }));
-      const wiredEdges: Edge<LinkCountEdgeData>[] = importedEdges.map((edge) => ({
-        ...edge,
-        markerEnd: { type: MarkerType.ArrowClosed, color: "#9CA3AF" },
-        data: { linkCount: edge.data?.linkCount ?? 1, onLinkCountChange: onEdgeLinkCountChange },
-      }));
-      setNodes(wiredNodes as Node<AppNodeData>[]);
+      const { wiredNodes, wiredEdges } = wireCallbacks(
+        importedNodes as SerializedGraphNode[],
+        importedEdges as SerializedGraphEdge[],
+      );
+      setNodes(wiredNodes);
       setEdges(wiredEdges);
     },
-    [onNodeDataUpdate, onRootToggle, onNodeZIndexChange, onEdgeLinkCountChange, setNodes, setEdges],
+    [wireCallbacks, setNodes, setEdges],
   );
 
   return {

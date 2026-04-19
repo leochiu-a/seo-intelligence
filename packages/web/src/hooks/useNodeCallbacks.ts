@@ -7,9 +7,9 @@ import {
   updateEdgeLinkCount,
   type UrlNodeData,
   type LinkCountEdgeData,
-  type Placement,
 } from "../lib/graph-utils";
 import type { AppNodeData } from "../App";
+import type { SerializedGraphNode, SerializedGraphEdge } from "../lib/serialize-graph";
 
 export interface UseNodeCallbacksArgs {
   setNodes: Dispatch<SetStateAction<Node<AppNodeData>[]>>;
@@ -23,29 +23,8 @@ export interface UseNodeCallbacksResult {
   addNode: (position: { x: number; y: number }) => void;
   onEdgeLinkCountChange: (edgeId: string, linkCount: number) => void;
   wireCallbacks: (
-    serializedNodes: Array<{
-      id: string;
-      type?: string;
-      position: { x: number; y: number };
-      data: {
-        urlTemplate: string;
-        pageCount: number;
-        isGlobal?: boolean;
-        placements?: Placement[];
-        isRoot?: boolean;
-        tags?: string[];
-      };
-    }>,
-    serializedEdges: Array<{
-      id: string;
-      source: string;
-      target: string;
-      sourceHandle?: string | null;
-      targetHandle?: string | null;
-      type?: string;
-      markerEnd?: unknown;
-      data: { linkCount: number };
-    }>,
+    serializedNodes: SerializedGraphNode[],
+    serializedEdges: SerializedGraphEdge[],
   ) => { wiredNodes: Node<AppNodeData>[]; wiredEdges: Edge<LinkCountEdgeData>[] };
 }
 
@@ -116,29 +95,8 @@ export function useNodeCallbacks({
 
   const wireCallbacks = useCallback(
     (
-      serializedNodes: Array<{
-        id: string;
-        type?: string;
-        position: { x: number; y: number };
-        data: {
-          urlTemplate: string;
-          pageCount: number;
-          isGlobal?: boolean;
-          placements?: Placement[];
-          isRoot?: boolean;
-          tags?: string[];
-        };
-      }>,
-      serializedEdges: Array<{
-        id: string;
-        source: string;
-        target: string;
-        sourceHandle?: string | null;
-        targetHandle?: string | null;
-        type?: string;
-        markerEnd?: unknown;
-        data: { linkCount: number };
-      }>,
+      serializedNodes: SerializedGraphNode[],
+      serializedEdges: SerializedGraphEdge[],
     ): { wiredNodes: Node<AppNodeData>[]; wiredEdges: Edge<LinkCountEdgeData>[] } => {
       const wiredNodes: Node<AppNodeData>[] = serializedNodes.map((n) => ({
         ...n,

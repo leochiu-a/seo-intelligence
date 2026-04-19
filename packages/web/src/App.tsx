@@ -112,14 +112,10 @@ function AppInner() {
     setHighlightedRouteNodeId(null);
   }, []);
 
-  const {
-    onNodeDataUpdate,
-    onNodeZIndexChange,
-    onRootToggle,
-    addNode,
-    onEdgeLinkCountChange,
-    wireCallbacks,
-  } = useNodeCallbacks({ setNodes, setEdges });
+  const { addNode, wireCallbacks, onEdgeLinkCountChange } = useNodeCallbacks({
+    setNodes,
+    setEdges,
+  });
 
   const {
     handleSwitchScenario,
@@ -137,10 +133,6 @@ function AppInner() {
     deleteScenario,
     persist,
     wireCallbacks,
-    onNodeDataUpdate,
-    onRootToggle,
-    onNodeZIndexChange,
-    onEdgeLinkCountChange,
     isSwitchingRef,
   });
 
@@ -150,9 +142,7 @@ function AppInner() {
     nodes,
     setNodes,
     setEdges,
-    onNodeDataUpdate,
-    onRootToggle,
-    onNodeZIndexChange,
+    wireCallbacks,
     onEdgeLinkCountChange,
   });
 

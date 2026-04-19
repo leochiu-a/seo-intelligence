@@ -54,10 +54,6 @@ describe("useScenarioHandlers", () => {
   let deleteScenario: ReturnType<typeof vi.fn>;
   let persist: ReturnType<typeof vi.fn>;
   let wireCallbacks: ReturnType<typeof vi.fn>;
-  let onNodeDataUpdate: ReturnType<typeof vi.fn>;
-  let onRootToggle: ReturnType<typeof vi.fn>;
-  let onNodeZIndexChange: ReturnType<typeof vi.fn>;
-  let onEdgeLinkCountChange: ReturnType<typeof vi.fn>;
   let isSwitchingRef: { current: boolean };
   let store: {
     activeScenarioId: string;
@@ -73,10 +69,6 @@ describe("useScenarioHandlers", () => {
     setNodes = vi.fn();
     setEdges = vi.fn();
     persist = vi.fn();
-    onNodeDataUpdate = vi.fn();
-    onRootToggle = vi.fn();
-    onNodeZIndexChange = vi.fn();
-    onEdgeLinkCountChange = vi.fn();
     isSwitchingRef = { current: false };
     store = {
       activeScenarioId: "s1",
@@ -85,36 +77,35 @@ describe("useScenarioHandlers", () => {
       ],
     };
 
-    const wiredNodesResult = [makeNode("n1")];
-    const wiredEdgesResult = [makeEdge("e1", "n1", "n2")];
-    wireCallbacks = vi
-      .fn()
-      .mockReturnValue({ wiredNodes: wiredNodesResult, wiredEdges: wiredEdgesResult });
+    wireCallbacks = vi.fn().mockImplementation((_nodes, edges) => ({
+      wiredNodes: [makeNode("n1")],
+      wiredEdges: edges.map(
+        (e: { id: string; source: string; target: string; data?: { linkCount?: number } }) => ({
+          ...makeEdge(e.id, e.source, e.target),
+          markerEnd: { type: "arrowclosed", color: "#9CA3AF" },
+          data: { linkCount: e.data?.linkCount ?? 1, onLinkCountChange: vi.fn() },
+        }),
+      ),
+    }));
 
-    switchScenario = vi
-      .fn()
-      .mockReturnValue({
-        id: "s2",
-        name: "Scenario 2",
-        nodes: [serializedNode],
-        edges: [serializedEdge],
-      });
-    createScenario = vi
-      .fn()
-      .mockReturnValue({
-        id: "s3",
-        name: "Scenario 3",
-        nodes: [serializedNode],
-        edges: [serializedEdge],
-      });
-    deleteScenario = vi
-      .fn()
-      .mockReturnValue({
-        id: "s1",
-        name: "Scenario 1",
-        nodes: [serializedNode],
-        edges: [serializedEdge],
-      });
+    switchScenario = vi.fn().mockReturnValue({
+      id: "s2",
+      name: "Scenario 2",
+      nodes: [serializedNode],
+      edges: [serializedEdge],
+    });
+    createScenario = vi.fn().mockReturnValue({
+      id: "s3",
+      name: "Scenario 3",
+      nodes: [serializedNode],
+      edges: [serializedEdge],
+    });
+    deleteScenario = vi.fn().mockReturnValue({
+      id: "s1",
+      name: "Scenario 1",
+      nodes: [serializedNode],
+      edges: [serializedEdge],
+    });
 
     // Synchronous rAF mock
     vi.stubGlobal("requestAnimationFrame", (cb: FrameRequestCallback) => {
@@ -137,10 +128,6 @@ describe("useScenarioHandlers", () => {
       deleteScenario,
       persist,
       wireCallbacks,
-      onNodeDataUpdate,
-      onRootToggle,
-      onNodeZIndexChange,
-      onEdgeLinkCountChange,
       isSwitchingRef,
       ...overrides,
     };
