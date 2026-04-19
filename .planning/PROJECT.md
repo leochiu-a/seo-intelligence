@@ -56,6 +56,10 @@ Let PMs visually plan and simulate internal link structures — and immediately 
 
 - [x] PM Health Check Panel: [Score | Health] tab toggle on right sidebar, Health tab renders HealthPanel with 3-metric badges (Links, Depth, Tags), warnings-first sort, "Show warnings only" toggle, and summary line — Validated in Phase 11.1: PM Health Check Panel
 
+### Validated (Phase 11.2)
+
+- [x] Low/Mid/High score tier badges on canvas nodes show hover tooltips explaining link equity tier and providing actionable improvement guidance — Validated in Phase 11.2: Score Badge Tooltip
+
 ### Out of Scope
 
 - Real website crawling / importing live URL data — focus is simulation, not auditing
