@@ -17,10 +17,11 @@ describe("Toolbar", () => {
     expect(screen.getByRole("button", { name: /clear canvas/i })).toBeTruthy();
   });
 
-  it("calls onClearCanvas when Clear Canvas is clicked", () => {
+  it("calls onClearCanvas when Clear Canvas is clicked and confirmed", () => {
     const onClearCanvas = vi.fn();
     render(<Toolbar {...defaultProps} onClearCanvas={onClearCanvas} />);
     fireEvent.click(screen.getByRole("button", { name: /clear canvas/i }));
+    fireEvent.click(screen.getByRole("button", { name: /delete/i }));
     expect(onClearCanvas).toHaveBeenCalledTimes(1);
   });
 
@@ -34,6 +35,31 @@ describe("Toolbar", () => {
     render(<Toolbar {...defaultProps} isEmpty={false} />);
     const btn = screen.getByRole("button", { name: /clear canvas/i });
     expect((btn as HTMLButtonElement).disabled).toBe(false);
+  });
+
+  it("clicking Clear Canvas opens a confirmation dialog and does NOT call onClearCanvas", () => {
+    const onClearCanvas = vi.fn();
+    render(<Toolbar {...defaultProps} onClearCanvas={onClearCanvas} />);
+    fireEvent.click(screen.getByRole("button", { name: /clear canvas/i }));
+    expect(screen.getByRole("alertdialog")).toBeTruthy();
+    expect(onClearCanvas).toHaveBeenCalledTimes(0);
+  });
+
+  it("clicking Cancel in the dialog closes it without calling onClearCanvas", () => {
+    const onClearCanvas = vi.fn();
+    render(<Toolbar {...defaultProps} onClearCanvas={onClearCanvas} />);
+    fireEvent.click(screen.getByRole("button", { name: /clear canvas/i }));
+    fireEvent.click(screen.getByRole("button", { name: /cancel/i }));
+    expect(onClearCanvas).toHaveBeenCalledTimes(0);
+    expect(screen.queryByRole("alertdialog")).toBeNull();
+  });
+
+  it("clicking the destructive confirm action calls onClearCanvas exactly once", () => {
+    const onClearCanvas = vi.fn();
+    render(<Toolbar {...defaultProps} onClearCanvas={onClearCanvas} />);
+    fireEvent.click(screen.getByRole("button", { name: /clear canvas/i }));
+    fireEvent.click(screen.getByRole("button", { name: /delete/i }));
+    expect(onClearCanvas).toHaveBeenCalledTimes(1);
   });
 });
 

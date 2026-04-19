@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { ChevronDown, Download, HelpCircle, Plus, Sparkles, Trash2, Upload } from "lucide-react";
 import {
   DropdownMenu,
@@ -5,6 +6,17 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  AlertDialog,
+  AlertDialogTrigger,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogFooter,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogAction,
+  AlertDialogCancel,
+} from "@/components/ui/alert-dialog";
 
 interface ToolbarProps {
   onAddNode: () => void;
@@ -58,6 +70,13 @@ export function Toolbar({
   isEmpty,
   onLegendOpen,
 }: ToolbarProps) {
+  const [clearDialogOpen, setClearDialogOpen] = useState(false);
+
+  function handleConfirmClear() {
+    onClearCanvas();
+    setClearDialogOpen(false); // AlertDialogAction does not auto-close (no Close primitive)
+  }
+
   return (
     <header className="flex h-12 shrink-0 items-center border-b border-border bg-white px-4 shadow-sm">
       <span className="text-sm font-bold tracking-wide text-pink">SEO INTELLIGENCE</span>
@@ -78,14 +97,30 @@ export function Toolbar({
           Import JSON
         </button>
         <ExportMenu onExportJson={onExportJson} onCopyForAI={onCopyForAI} isEmpty={isEmpty} />
-        <button
-          onClick={onClearCanvas}
-          disabled={isEmpty}
-          className="flex items-center gap-1.5 rounded-md border border-red-200 bg-white px-3 py-1.5 text-sm font-medium text-red-600 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50 transition-colors"
-        >
-          <Trash2 size={14} />
-          Clear Canvas
-        </button>
+        <AlertDialog open={clearDialogOpen} onOpenChange={setClearDialogOpen}>
+          <AlertDialogTrigger
+            disabled={isEmpty}
+            className="flex items-center gap-1.5 rounded-md border border-red-200 bg-white px-3 py-1.5 text-sm font-medium text-red-600 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50 transition-colors"
+          >
+            <Trash2 size={14} />
+            Clear Canvas
+          </AlertDialogTrigger>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Clear canvas?</AlertDialogTitle>
+              <AlertDialogDescription>
+                This will remove all nodes and edges from the current scenario. This action cannot
+                be undone.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction variant="destructive" onClick={handleConfirmClear}>
+                Delete
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
         <button
           onClick={onLegendOpen}
           aria-label="Legend"

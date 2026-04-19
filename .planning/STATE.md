@@ -170,6 +170,7 @@ None yet.
 | 260419-kr4 | Implement Export Dropdown with Copy for AI in Toolbar | 2026-04-19 | 44677ed | [260419-kr4-implement-export-dropdown-with-copy-for-](./quick/260419-kr4-implement-export-dropdown-with-copy-for-/) |
 | 260419-m0t | Refactor App.tsx: extract useGraphAnalytics, useHighlightedNodes, useDialogState hooks | 2026-04-19 | 3aa7dfb | [260419-m0t-refactor-app-tsx-extract-hooks-and-compo](./quick/260419-m0t-refactor-app-tsx-extract-hooks-and-compo/) |
 | 260419-ppw | Refactor App.tsx phase 2: serializeGraph + useNodeCallbacks + useScenarioHandlers + useCanvasHandlers | 2026-04-19 | fd27fd5 | [260419-ppw-refactor-app-tsx-phase-2-extract-seriali](./quick/260419-ppw-refactor-app-tsx-phase-2-extract-seriali/) |
+| 260419-riw | Gate Clear Canvas behind shadcn Alert Dialog confirmation | 2026-04-19 | 93f3a15 | [260419-riw-clear-canvas-alert-dialog](./quick/260419-riw-clear-canvas-alert-dialog/) |
 
 ## Session Continuity
 
