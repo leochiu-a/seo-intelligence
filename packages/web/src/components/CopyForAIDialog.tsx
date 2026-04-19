@@ -35,7 +35,7 @@ export function CopyForAIDialog({ open, onClose, text }: CopyForAIDialogProps) {
           readOnly
           value={text}
           className="flex-1 min-h-0 resize-none rounded-md border border-border bg-surface font-mono text-xs text-ink p-3 overflow-y-auto focus:outline-none"
-          style={{ height: "60vh" }}
+          style={{ height: "60vh", minHeight: "480px" }}
         />
 
         <div className="flex justify-end gap-2 pt-2">
