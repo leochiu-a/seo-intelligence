@@ -18,22 +18,22 @@ function LegendRow({
 }) {
   return (
     <div className="flex items-start gap-3">
-      <div className="flex-shrink-0 w-16 flex justify-center pt-0.5">{indicator}</div>
+      <div className="flex-shrink-0 w-20 flex justify-center pt-0.5">{indicator}</div>
       <div>
-        <span className="text-xs font-semibold text-gray-800">{label}</span>
-        <p className="text-xs text-gray-500 mt-0.5">{description}</p>
+        <span className="text-sm font-semibold text-gray-800">{label}</span>
+        <p className="text-sm text-gray-500 mt-0.5">{description}</p>
       </div>
     </div>
   );
 }
 
 const BADGE =
-  "inline-flex items-center rounded-full px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide";
+  "inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold uppercase tracking-wide";
 
 export function LegendDialog({ open, onClose }: LegendDialogProps) {
   return (
     <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
-      <DialogContent className="max-w-lg overflow-y-auto max-h-[85vh]">
+      <DialogContent className="max-w-2xl sm:max-w-2xl overflow-y-auto max-h-[85vh]">
         <DialogHeader>
           <DialogTitle>Indicators</DialogTitle>
         </DialogHeader>
@@ -41,9 +41,20 @@ export function LegendDialog({ open, onClose }: LegendDialogProps) {
         <div className="flex flex-col gap-5 pt-1">
           {/* Score Tiers */}
           <div className="flex flex-col gap-3">
-            <h3 className="text-[11px] font-semibold uppercase tracking-wider text-gray-400">
+            <h3 className="text-xs font-semibold uppercase tracking-wider text-gray-400">
               Score Tiers
             </h3>
+            <p className="text-sm text-gray-500">
+              Each node's score is a PageRank-style value — pages that receive more internal links
+              from other well-connected pages score higher. Nodes are split into thirds (High / Mid
+              / Low) relative to the rest of the graph.
+            </p>
+            <p className="text-sm text-gray-500">
+              A node's score also affects what it gives away: a{" "}
+              <strong className="text-gray-700">High-scoring page passes more link equity</strong>{" "}
+              to the pages it links to. Getting a link from a High page is more valuable than
+              getting one from a Low page — even if both have the same link count.
+            </p>
             <LegendRow
               indicator={<span className={`${BADGE} bg-green-100 text-green-700`}>High</span>}
               label="High"
@@ -70,13 +81,13 @@ export function LegendDialog({ open, onClose }: LegendDialogProps) {
 
           {/* Node Labels */}
           <div className="flex flex-col gap-3">
-            <h3 className="text-[11px] font-semibold uppercase tracking-wider text-gray-400">
+            <h3 className="text-xs font-semibold uppercase tracking-wider text-gray-400">
               Node Labels
             </h3>
             <LegendRow
               indicator={
                 <span className={`${BADGE} gap-1 bg-blue-100 text-blue-700`}>
-                  <Globe size={9} />
+                  <Globe size={10} />
                   Global
                 </span>
               }
@@ -86,7 +97,7 @@ export function LegendDialog({ open, onClose }: LegendDialogProps) {
             <LegendRow
               indicator={
                 <span className={`${BADGE} gap-1 bg-violet-100 text-violet-700`}>
-                  <Home size={9} />
+                  <Home size={10} />
                   Root
                 </span>
               }
@@ -99,31 +110,36 @@ export function LegendDialog({ open, onClose }: LegendDialogProps) {
 
           {/* Warnings */}
           <div className="flex flex-col gap-3">
-            <h3 className="text-[11px] font-semibold uppercase tracking-wider text-gray-400">
+            <h3 className="text-xs font-semibold uppercase tracking-wider text-gray-400">
               Warnings
             </h3>
+            <p className="text-sm text-gray-500">
+              Warnings appear on canvas nodes (subtitle icons) and in the right sidebar — Orphan /
+              Unreachable pages are listed under the Score tab, and the Health tab shows all pages
+              with any active warning.
+            </p>
             <LegendRow
-              indicator={<TriangleAlert size={14} className="text-amber-500" />}
+              indicator={<TriangleAlert size={16} className="text-amber-500" />}
               label="Weak"
               description="Score is significantly below average — add more internal links pointing here."
             />
             <LegendRow
-              indicator={<Unplug size={14} className="text-red-500" />}
+              indicator={<Unplug size={16} className="text-red-500" />}
               label="Orphan"
               description="No inbound links (excluding Root) — nothing links to this page."
             />
             <LegendRow
-              indicator={<Unplug size={14} className="text-red-500" />}
+              indicator={<Unplug size={16} className="text-red-500" />}
               label="Unreachable"
               description="Cannot be reached via a crawl path from the Root node."
             />
             <LegendRow
-              indicator={<Layers size={14} className="text-amber-500" />}
+              indicator={<Layers size={16} className="text-amber-500" />}
               label="Deep (Depth > 3)"
-              description="More than 3 clicks from Root — may be crawled less often by search engines."
+              description="Depth = shortest click-path from the Root node. Depth 1 means Root links directly here; depth 4+ means search engines may crawl it less frequently."
             />
             <LegendRow
-              indicator={<TriangleAlert size={14} className="text-red-500" />}
+              indicator={<TriangleAlert size={16} className="text-red-500" />}
               label="Over-linked (> 150)"
               description="More than 150 outbound links — dilutes link equity per destination."
             />
@@ -131,14 +147,53 @@ export function LegendDialog({ open, onClose }: LegendDialogProps) {
 
           <hr className="border-gray-100" />
 
+          {/* How to improve */}
+          <div className="flex flex-col gap-3">
+            <h3 className="text-xs font-semibold uppercase tracking-wider text-gray-400">
+              How to Improve Link Equity
+            </h3>
+            <ul className="flex flex-col gap-2 text-sm text-gray-500 list-none">
+              <li>
+                <strong className="text-gray-700">Add inbound links.</strong> The more pages that
+                link to a node, the more equity it receives.
+              </li>
+              <li>
+                <strong className="text-gray-700">Link from high-scoring pages.</strong> A link from
+                a High page transfers more equity than one from a Low page.
+              </li>
+              <li>
+                <strong className="text-gray-700">Share tags with linking pages.</strong> Links
+                between pages that share a tag carry a 1.5× equity bonus.
+              </li>
+              <li>
+                <strong className="text-gray-700">Reduce outbound links on source pages.</strong>{" "}
+                Each page splits its equity across all outbound links — fewer links means more
+                equity per destination.
+              </li>
+              <li>
+                <strong className="text-gray-700">Increase link count on edges.</strong> Higher link
+                count (the number on an edge) gives that destination a larger share of the source's
+                equity.
+              </li>
+            </ul>
+          </div>
+
+          <hr className="border-gray-100" />
+
           {/* Tags / Clusters */}
           <div className="flex flex-col gap-2">
-            <h3 className="text-[11px] font-semibold uppercase tracking-wider text-gray-400">
+            <h3 className="text-xs font-semibold uppercase tracking-wider text-gray-400">
               Tags / Clusters
             </h3>
-            <p className="text-xs text-gray-500">
+            <p className="text-sm text-gray-500">
               Tags group pages by topic. The same tag name always maps to the same colour —
               determined by a hash of the tag name.
+            </p>
+            <p className="text-sm text-gray-500">
+              Tags also affect scoring: when a link connects two pages that share at least one tag,
+              the link equity transferred is multiplied by{" "}
+              <strong className="text-gray-700">1.5×</strong>. Tagging related pages together makes
+              links between them more powerful.
             </p>
             <div className="flex items-center gap-1.5 flex-wrap">
               {CLUSTER_PALETTE.map((c, i) => (
