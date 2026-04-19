@@ -5,16 +5,21 @@ import {
   getHealthStatus,
   hasAnyWarning,
   buildTooltipContent,
+  classifyScoreTier,
   type UrlNodeData,
   type HealthStatus,
+  type ScoreTier,
 } from "../lib/graph-utils";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
+import { ScoreTierBadge } from "./ScoreTierBadge";
 
 interface HealthPanelProps {
   nodes: Node<UrlNodeData>[];
   depthMap: Map<string, number>;
   outboundMap: Map<string, number>;
+  scores: Map<string, number>;
+  allScoreValues: number[];
 }
 
 interface HealthRow {
@@ -24,7 +29,19 @@ interface HealthRow {
   hasWarn: boolean;
 }
 
-export function HealthPanel({ nodes, depthMap, outboundMap }: HealthPanelProps) {
+interface TierRow {
+  id: string;
+  urlTemplate: string;
+  tier: ScoreTier;
+}
+
+export function HealthPanel({
+  nodes,
+  depthMap,
+  outboundMap,
+  scores,
+  allScoreValues,
+}: HealthPanelProps) {
   const [warningsOnly, setWarningsOnly] = useState(true);
 
   const rows = useMemo<HealthRow[]>(() => {
@@ -43,6 +60,22 @@ export function HealthPanel({ nodes, depthMap, outboundMap }: HealthPanelProps) 
     });
     return computed;
   }, [nodes, depthMap, outboundMap]);
+
+  const tierRows = useMemo<TierRow[]>(() => {
+    if (allScoreValues.length === 0) return [];
+    return nodes
+      .map<TierRow>((n) => ({
+        id: n.id,
+        urlTemplate: n.data.urlTemplate,
+        tier: classifyScoreTier(scores.get(n.id) ?? 0, allScoreValues),
+      }))
+      .filter((r) => r.tier === "low" || r.tier === "mid")
+      .sort((a, b) => {
+        // low before mid, then alphabetical by urlTemplate within each tier
+        if (a.tier !== b.tier) return a.tier === "low" ? -1 : 1;
+        return a.urlTemplate.localeCompare(b.urlTemplate);
+      });
+  }, [nodes, scores, allScoreValues]);
 
   const warningCount = rows.filter((r) => r.hasWarn).length;
   const visibleRows = warningsOnly ? rows.filter((r) => r.hasWarn) : rows;
@@ -93,6 +126,36 @@ export function HealthPanel({ nodes, depthMap, outboundMap }: HealthPanelProps) 
             </li>
           ))}
         </ul>
+      )}
+
+      {tierRows.length > 0 && (
+        <div data-testid="score-tier-section">
+          <div className="px-3 py-2.5 border-t border-border">
+            <h2 className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-fg">
+              Score Tier
+            </h2>
+            <p className="text-[11px] text-muted-fg mt-1" data-testid="score-tier-summary">
+              {tierRows.length} pages need attention
+            </p>
+          </div>
+          <ul className="divide-y divide-border">
+            {tierRows.map((row) => (
+              <li
+                key={row.id}
+                data-testid="score-tier-row"
+                data-tier={row.tier}
+                className="px-3 py-2.5 flex items-center gap-2"
+              >
+                <span className="flex-1 min-w-0 text-sm text-dark truncate">{row.urlTemplate}</span>
+                <ScoreTierBadge
+                  tier={row.tier}
+                  className="flex-shrink-0"
+                  testId="score-tier-badge"
+                />
+              </li>
+            ))}
+          </ul>
+        </div>
       )}
     </div>
   );

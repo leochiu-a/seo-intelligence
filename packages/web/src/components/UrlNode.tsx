@@ -2,7 +2,7 @@ import { memo, useState, useEffect } from "react";
 import { Handle, Position, useReactFlow, type NodeProps, type Node } from "@xyflow/react";
 import { Pencil, TriangleAlert, Globe, Home, Unplug, Layers } from "lucide-react";
 import { EditPopover } from "./EditPopover";
-import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
+import { ScoreTierBadge } from "./ScoreTierBadge";
 import {
   formatPageCount,
   type UrlNodeData,
@@ -30,44 +30,26 @@ type UrlNodeExtendedData = UrlNodeData & {
   isDimmed?: boolean;
 };
 
-const TONE_MAP: Record<
-  ScoreTier,
-  { card: string; focus: string; badge: string; badgeLabel: string; tooltip: string }
-> = {
+const TONE_MAP: Record<ScoreTier, { card: string; focus: string }> = {
   high: {
     card: "bg-white border-tier-high/40",
     focus:
       "border-tier-high shadow-[0_0_0_1px_var(--color-tier-high-glow),0_0_24px_var(--color-tier-high-ambient)]",
-    badge: "bg-green-100 text-green-700",
-    badgeLabel: "High",
-    tooltip:
-      "High link equity — this page is in the top third of internal link strength across your graph. It is well-connected; keep it linked from your most important pages.",
   },
   mid: {
     card: "bg-white border-tier-mid/40",
     focus:
       "border-tier-mid shadow-[0_0_0_1px_var(--color-tier-mid-glow),0_0_24px_var(--color-tier-mid-ambient)]",
-    badge: "bg-amber-100 text-amber-700",
-    badgeLabel: "Mid",
-    tooltip:
-      "Mid link equity — this page sits in the middle third of internal link strength. Add more internal links from high-scoring pages to push it higher.",
   },
   low: {
     card: "bg-white border-tier-low/40",
     focus:
       "border-tier-low shadow-[0_0_0_1px_var(--color-tier-low-glow),0_0_24px_var(--color-tier-low-ambient)]",
-    badge: "bg-red-100 text-red-700",
-    badgeLabel: "Low",
-    tooltip:
-      "Low link equity — this page receives less internal link strength than two-thirds of your pages. Point more internal links here from high-scoring pages to improve it.",
   },
   neutral: {
     card: "bg-white border-tier-neutral/40",
     focus:
       "border-tier-neutral shadow-[0_0_0_1px_var(--color-tier-neutral-glow),0_0_24px_var(--color-tier-neutral-ambient)]",
-    badge: "bg-indigo-100 text-indigo-700",
-    badgeLabel: "Neutral",
-    tooltip: "",
   },
 };
 
@@ -159,21 +141,7 @@ function UrlNodeComponent({ id, data, selected }: NodeProps<Node<UrlNodeExtended
         {/* Badges — tier, global, and/or root */}
         {(tier !== "neutral" || data.isGlobal || data.isRoot) && (
           <div className="mb-2 flex flex-wrap items-center gap-1">
-            {tier !== "neutral" && (
-              <Tooltip>
-                <TooltipTrigger
-                  render={<span />}
-                  data-testid="badge-tooltip-trigger"
-                  data-tier={tier}
-                  className={`inline-flex items-center rounded-full px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide cursor-help outline-none ${tone.badge}`}
-                >
-                  {tone.badgeLabel}
-                </TooltipTrigger>
-                <TooltipContent side="top" sideOffset={6}>
-                  {tone.tooltip}
-                </TooltipContent>
-              </Tooltip>
-            )}
+            <ScoreTierBadge tier={tier} />
             {data.isGlobal && (
               <span className="inline-flex items-center gap-1 rounded-full px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide bg-blue-100 text-blue-700">
                 <Globe size={9} />

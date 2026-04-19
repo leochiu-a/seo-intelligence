@@ -142,6 +142,7 @@ Recent decisions affecting current work:
 - [Phase 999.5-topical-cluster-tags]: AND-combine: placementKeys and clusterKeys split by prefix; per-dimension Sets intersected when both dimensions active
 - [Phase 11.1-pm-internal-link-deep-placement-text-filter-warning]: data-testid on span wrapper around lucide icons (not SVG) — SVGAnimatedString className breaks .toMatch() in tests
 - [Phase 11.1-pm-internal-link-deep-placement-text-filter-warning]: Tab underline style (border-b-2 border-blue-500) chosen over pill tabs to match sidebar header aesthetic
+- [Quick 260419-uje]: HealthPanel composes warnings list and Score Tier section as independent sub-components with their own gating — the "Show warnings only" toggle scopes only the warnings list, Score Tier remains unaffected. Badge colors (red-100/red-700 Low, amber-100/amber-700 Mid) reused from UrlNode TONE_MAP for consistent tier vocabulary across canvas + sidebar + health panel.
 
 ### Pending Todos
 
@@ -172,9 +173,10 @@ None yet.
 | 260419-ppw | Refactor App.tsx phase 2: serializeGraph + useNodeCallbacks + useScenarioHandlers + useCanvasHandlers | 2026-04-19 | fd27fd5 | [260419-ppw-refactor-app-tsx-phase-2-extract-seriali](./quick/260419-ppw-refactor-app-tsx-phase-2-extract-seriali/) |
 | 260419-riw | Gate Clear Canvas behind shadcn Alert Dialog confirmation | 2026-04-19 | 93f3a15 | [260419-riw-clear-canvas-alert-dialog](./quick/260419-riw-clear-canvas-alert-dialog/) |
 | 260419-snh | Percentile score tier classification + Landing dialog relative ranking copy | 2026-04-19 | 570ba76 | [260419-snh-percentile-score-tier-landing-dialog](./quick/260419-snh-percentile-score-tier-landing-dialog/) |
+| 260419-uje | Surface Low & Mid pages in Health Panel as a dedicated Score Tier section | 2026-04-19 | e14b695 | [260419-uje-health-panel-low-medium](./quick/260419-uje-health-panel-low-medium/) |
 
 ## Session Continuity
 
-Last session: 2026-04-19T20:46:00.000Z
-Last activity: 2026-04-19 - Completed quick task 260419-snh: Percentile score tier classification + Landing dialog relative ranking copy
+Last session: 2026-04-19T22:08:30.000Z
+Last activity: 2026-04-19 - Completed quick task 260419-uje (implementation): Health Panel Low/Mid Score Tier section (awaiting human-verify checkpoint)
 Resume file: .planning/phases/11.2-add-score-badge-tooltip-and-improvement-guidance-for-low-mid-nodes/11.2-CONTEXT.md

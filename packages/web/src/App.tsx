@@ -271,6 +271,7 @@ function AppInner() {
             <SidePanel
               nodes={nodes}
               scores={scores}
+              allScoreValues={allScoreValues}
               weakNodes={weakNodes}
               orphanNodes={orphanNodes}
               unreachableNodes={unreachableNodes}

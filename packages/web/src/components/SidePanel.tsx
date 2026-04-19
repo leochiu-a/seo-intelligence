@@ -8,6 +8,7 @@ import { ScorePanel } from "./ScorePanel";
 interface SidePanelProps {
   nodes: Node<UrlNodeData>[];
   scores: Map<string, number>;
+  allScoreValues: number[];
   weakNodes: Set<string>;
   orphanNodes: Set<string>;
   unreachableNodes: Set<string>;
@@ -23,6 +24,7 @@ interface SidePanelProps {
 export function SidePanel({
   nodes,
   scores,
+  allScoreValues,
   weakNodes,
   orphanNodes,
   unreachableNodes,
@@ -95,7 +97,13 @@ export function SidePanel({
           />
         )}
         {activeTab === "health" && (
-          <HealthPanel nodes={nodes} depthMap={depthMap} outboundMap={outboundMap} />
+          <HealthPanel
+            nodes={nodes}
+            depthMap={depthMap}
+            outboundMap={outboundMap}
+            scores={scores}
+            allScoreValues={allScoreValues}
+          />
         )}
       </div>
     </aside>
