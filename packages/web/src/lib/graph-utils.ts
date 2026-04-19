@@ -6,18 +6,19 @@ export interface Placement {
   linkCount: number;
 }
 
-export interface UrlNodeData {
+export type UrlNodeData = {
   urlTemplate: string;
   pageCount: number;
   isGlobal?: boolean;
   placements?: Placement[];
   isRoot?: boolean;
-  tags?: string[]; // Phase 999.5 D-01. Optional array of cluster tag names. Empty/missing = unassigned.
-}
+  tags?: string[];
+};
 
-export interface LinkCountEdgeData {
+export type LinkCountEdgeData = {
   linkCount: number;
-}
+  onLinkCountChange?: (edgeId: string, linkCount: number) => void;
+};
 
 let nodeIdCounter = 0;
 

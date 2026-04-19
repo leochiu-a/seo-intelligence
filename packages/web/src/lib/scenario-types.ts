@@ -9,7 +9,7 @@ export interface SerializedNode {
     urlTemplate: string;
     pageCount: number;
     isGlobal?: boolean;
-    placements?: { name: string; linkCount: number }[];
+    placements?: { id: string; name: string; linkCount: number }[];
     isRoot?: boolean;
   };
 }

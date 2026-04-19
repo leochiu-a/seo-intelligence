@@ -38,7 +38,6 @@ describe("ScenarioTabBar", () => {
   it("active tab has the font-semibold class", () => {
     render(<ScenarioTabBar {...defaultProps} />);
     // The active tab button (s1) should have font-semibold
-    const activeButton = screen.getByRole("button", { name: /options for scenario 1/i });
     // The tab itself — find the first button whose text content is 'Scenario 1'
     const allButtons = screen.getAllByRole("button");
     const tabButton = allButtons.find(

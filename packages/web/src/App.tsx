@@ -50,7 +50,7 @@ import {
 
 // Extended node data type that includes the update callback for EditPopover wiring
 // and score fields for dynamic visual rendering
-interface AppNodeData extends UrlNodeData {
+type AppNodeData = UrlNodeData & {
   onUpdate: (id: string, data: Partial<UrlNodeData>) => void;
   onRootToggle: (id: string) => void;
   onZIndexChange: (id: string, zIndex: number) => void;
@@ -61,7 +61,8 @@ interface AppNodeData extends UrlNodeData {
   crawlDepth?: number;
   outboundCount?: number;
   isOverLinked?: boolean;
-}
+  isDimmed?: boolean;
+};
 
 // Define nodeTypes and edgeTypes outside the component to avoid infinite re-renders (React Flow docs requirement)
 const nodeTypes = { urlNode: UrlNode };
@@ -133,13 +134,16 @@ function serializeGraph(
 }
 
 const initialNodes: Node<AppNodeData>[] = [];
-const initialEdges: Edge[] = [];
+const initialEdges: Edge<LinkCountEdgeData>[] = [];
 
 function AppInner() {
-  const [nodes, setNodes, onNodesChange] = useNodesState<AppNodeData>(initialNodes);
-  const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
+  const [nodes, setNodes, onNodesChange] = useNodesState<Node<AppNodeData>>(initialNodes);
+  const [edges, setEdges, onEdgesChange] = useEdgesState<Edge<LinkCountEdgeData>>(initialEdges);
   const reactFlowWrapper = useRef<HTMLDivElement>(null);
-  const [reactFlowInstance, setReactFlowInstance] = useState<ReactFlowInstance | null>(null);
+  const [reactFlowInstance, setReactFlowInstance] = useState<ReactFlowInstance<
+    Node<AppNodeData>,
+    Edge<LinkCountEdgeData>
+  > | null>(null);
   const [showImportDialog, setShowImportDialog] = useState(false);
   // Guard: save effect skips its first invocation (regardless of restore timing), then saves on all subsequent renders
   const isFirstRender = useRef(true);
@@ -270,7 +274,7 @@ function AppInner() {
         markerEnd?: unknown;
         data: { linkCount: number };
       }>,
-    ): { wiredNodes: Node<AppNodeData>[]; wiredEdges: Edge[] } => {
+    ): { wiredNodes: Node<AppNodeData>[]; wiredEdges: Edge<LinkCountEdgeData>[] } => {
       const wiredNodes: Node<AppNodeData>[] = serializedNodes.map((n) => ({
         ...n,
         type: n.type ?? "urlNode",
@@ -286,14 +290,14 @@ function AppInner() {
           onZIndexChange: onNodeZIndexChange,
         },
       }));
-      const wiredEdges: Edge[] = serializedEdges.map((e) => ({
+      const wiredEdges: Edge<LinkCountEdgeData>[] = serializedEdges.map((e) => ({
         id: e.id,
         source: e.source,
         target: e.target,
         ...(e.sourceHandle != null ? { sourceHandle: e.sourceHandle } : {}),
         ...(e.targetHandle != null ? { targetHandle: e.targetHandle } : {}),
         type: e.type ?? "linkCountEdge",
-        markerEnd: (e.markerEnd as import("reactflow").EdgeMarkerType | undefined) ?? {
+        markerEnd: (e.markerEnd as import("@xyflow/react").EdgeMarkerType | undefined) ?? {
           type: MarkerType.ArrowClosed,
           color: "#9CA3AF",
         },
@@ -376,10 +380,10 @@ function AppInner() {
           onZIndexChange: onNodeZIndexChange,
         },
       }));
-      const wiredEdges = importedEdges.map((edge) => ({
+      const wiredEdges: Edge<LinkCountEdgeData>[] = importedEdges.map((edge) => ({
         ...edge,
         markerEnd: { type: MarkerType.ArrowClosed, color: "#9CA3AF" },
-        data: { ...edge.data, onLinkCountChange: onEdgeLinkCountChange },
+        data: { linkCount: edge.data?.linkCount ?? 1, onLinkCountChange: onEdgeLinkCountChange },
       }));
       setNodes(wiredNodes as Node<AppNodeData>[]);
       setEdges(wiredEdges);
@@ -406,10 +410,13 @@ function AppInner() {
               e.target?.result as string,
             );
             // Wire runtime callbacks into edges before setting state
-            const wiredEdges = importedEdges.map((edge) => ({
+            const wiredEdges: Edge<LinkCountEdgeData>[] = importedEdges.map((edge) => ({
               ...edge,
               markerEnd: { type: MarkerType.ArrowClosed, color: "#9CA3AF" },
-              data: { ...edge.data, onLinkCountChange: onEdgeLinkCountChange },
+              data: {
+                linkCount: edge.data?.linkCount ?? 1,
+                onLinkCountChange: onEdgeLinkCountChange,
+              },
             }));
             setNodes(
               importedNodes.map((n) => ({
@@ -700,7 +707,7 @@ function AppInner() {
         onDelete={handleDeleteScenario}
       />
       <div className="flex-1 min-h-0 overflow-hidden">
-        <ResizablePanelGroup direction="horizontal" className="h-full">
+        <ResizablePanelGroup orientation="horizontal" className="h-full">
           <ResizablePanel defaultSize="17%" minSize="10%" maxSize="35%">
             <FilterPanel
               nodes={nodes}
@@ -714,7 +721,7 @@ function AppInner() {
 
           <ResizablePanel defaultSize="63%" minSize="30%">
             <div className="h-full" ref={reactFlowWrapper}>
-              <ReactFlow
+              <ReactFlow<Node<AppNodeData>, Edge<LinkCountEdgeData>>
                 nodes={styledNodes}
                 edges={edges}
                 onNodesChange={onNodesChange}

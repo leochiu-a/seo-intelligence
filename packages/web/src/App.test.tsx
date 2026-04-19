@@ -5,10 +5,10 @@ import App from "./App";
 
 // ---- Reactflow mock ----
 // Provide minimal stubs so AppInner can mount without the real ReactFlow
-vi.mock("reactflow", async () => {
+vi.mock("@xyflow/react", async () => {
   const React = await import("react");
 
-  function useNodesState<T>(
+  function useNodesState<T extends Record<string, unknown>>(
     initial: Node<T>[],
   ): [Node<T>[], React.Dispatch<React.SetStateAction<Node<T>[]>>, (changes: NodeChange[]) => void] {
     const [nodes, setNodes] = useState<Node<T>[]>(initial);

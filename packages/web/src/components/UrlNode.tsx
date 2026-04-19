@@ -15,7 +15,12 @@ import { getClusterColor } from "../lib/cluster-colors";
 
 export type { UrlNodeData } from "../lib/graph-utils";
 
-interface UrlNodeExtendedData extends UrlNodeData {
+type UrlNodeExtendedData = {
+  urlTemplate: string;
+  pageCount: number;
+  isGlobal?: boolean;
+  placements?: Placement[];
+  isRoot?: boolean;
   onUpdate?: (id: string, data: Partial<UrlNodeData>) => void;
   onRootToggle?: (id: string) => void;
   onZIndexChange?: (id: string, zIndex: number) => void;
@@ -28,7 +33,7 @@ interface UrlNodeExtendedData extends UrlNodeData {
   isOverLinked?: boolean;
   tags?: string[];
   isDimmed?: boolean;
-}
+};
 
 const TONE_MAP: Record<
   ScoreTier,
@@ -64,7 +69,7 @@ const TONE_MAP: Record<
   },
 };
 
-function UrlNodeComponent({ id, data, selected }: NodeProps<UrlNodeExtendedData>) {
+function UrlNodeComponent({ id, data, selected }: NodeProps<Node<UrlNodeExtendedData>>) {
   const [showPopover, setShowPopover] = useState(false);
   const { getNodes } = useReactFlow();
 

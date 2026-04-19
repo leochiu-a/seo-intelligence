@@ -27,13 +27,7 @@ import {
   hasAnyWarning,
   getConnectedElements,
 } from "./graph-utils";
-import type {
-  UrlNodeData,
-  LinkCountEdgeData,
-  Placement,
-  ClusterGroup,
-  HealthStatus,
-} from "./graph-utils";
+import type { UrlNodeData, LinkCountEdgeData, Placement, HealthStatus } from "./graph-utils";
 
 describe("createDefaultNode", () => {
   beforeEach(() => {
