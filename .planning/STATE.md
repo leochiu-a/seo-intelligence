@@ -163,7 +163,7 @@ None yet.
 | 260417-ljg | 連接點沒有對齊線 — center React Flow handles on node border midline | 2026-04-17 | 9f9b67b | [260417-ljg-center-handles-on-border-midline](./quick/260417-ljg-center-handles-on-border-midline/) |
 | 260418-gy5 | Unify Placement and Cluster UX: derive Global Node from placements length and replace Cluster text input with add-button pattern | 2026-04-18 | 1a3f8f2 | [260418-gy5-unify-placement-and-cluster-ux-derive-gl](./quick/260418-gy5-unify-placement-and-cluster-ux-derive-gl/) |
 | 260418-uhb | Add tooltip to warning icon in Score Ranking panel explaining weak-page criterion | 2026-04-18 | 21901e0 | [260418-uhb-add-tooltip-to-warning-icon-in-score-ran](./quick/260418-uhb-add-tooltip-to-warning-icon-in-score-ran/) |
-| 260419-do7 | increase filter panel text sizes | 2026-04-19 | — | [260419-do7-increase-filter-panel-text-sizes](./quick/260419-do7-increase-filter-panel-text-sizes/) |
+| 260419-do7 | increase filter panel text sizes | 2026-04-19 | 376ec99 | [260419-do7-increase-filter-panel-text-sizes](./quick/260419-do7-increase-filter-panel-text-sizes/) |
 
 ## Session Continuity
 
