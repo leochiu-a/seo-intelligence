@@ -392,8 +392,19 @@ export function buildTooltipContent(status: HealthStatus): string {
 }
 
 /**
- * Classifies a score into a tier based on relative thirds of the score range.
- * If only one unique score exists, returns 'neutral'.
+ * Classifies a score into a tier based on its RANK among allScores (percentile-based).
+ * Top ~1/3 by rank → 'high', middle ~1/3 → 'mid', bottom ~1/3 → 'low'. Ties bias to the
+ * higher tier. Rationale: linear min-max thirds compresses all nodes into 'low' when one
+ * outlier dominates the range (e.g. a global node with 357k pages). Returns 'neutral' when
+ * allScores.length <= 1 or all scores are equal.
+ *
+ * Split rule: highCutoffIdx = n - ceil(n/3), midCutoffIdx = n - ceil(2n/3) (ascending sorted).
+ * On uneven n the TOP tier gets the extra slot (ceil gives top-heavy tie-break).
+ * Example: n=4 → 2 high / 1 mid / 1 low; n=9 → 3/3/3.
+ *
+ * @perf This sorts a copy of allScores on every call. With N nodes in useGraphAnalytics,
+ * that is O(N² log N) total. Fine for MVP scale (<100 nodes). Future optimization:
+ * memoize sorted thresholds in the caller and accept pre-computed cutoffs as an overload.
  */
 export function classifyScoreTier(score: number, allScores: number[]): ScoreTier {
   if (allScores.length <= 1) return "neutral";
@@ -403,12 +414,20 @@ export function classifyScoreTier(score: number, allScores: number[]): ScoreTier
 
   if (min === max) return "neutral";
 
-  const range = max - min;
-  const lowThreshold = min + range / 3;
-  const highThreshold = min + (2 * range) / 3;
+  // Sort ascending copy — do NOT mutate caller's array
+  const sorted = [...allScores].sort((a, b) => a - b);
+  const n = sorted.length;
 
+  // Cutoff indices (ascending sorted). Math.ceil so uneven splits favour the top tier.
+  const highCutoffIdx = n - Math.ceil(n / 3); // e.g. n=9 → 6; n=4 → 2
+  const midCutoffIdx = n - Math.ceil((2 * n) / 3); // e.g. n=9 → 3; n=4 → 1
+
+  const highThreshold = sorted[highCutoffIdx];
+  const midThreshold = sorted[midCutoffIdx];
+
+  // >= comparisons give tie-to-high bias: all scores equal to a cutoff value land in the higher tier
   if (score >= highThreshold) return "high";
-  if (score >= lowThreshold) return "mid";
+  if (score >= midThreshold) return "mid";
   return "low";
 }
 
