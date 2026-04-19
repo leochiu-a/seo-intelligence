@@ -34,6 +34,7 @@ import { useGraphAnalytics } from "./hooks/useGraphAnalytics";
 import { useHighlightedNodes } from "./hooks/useHighlightedNodes";
 import { useDialogState } from "./hooks/useDialogState";
 import { useNodeCallbacks } from "./hooks/useNodeCallbacks";
+import { useScenarioHandlers } from "./hooks/useScenarioHandlers";
 import {
   parseImportJson,
   getClosestHandleIds,
@@ -125,88 +126,28 @@ function AppInner() {
     wireCallbacks,
   } = useNodeCallbacks({ setNodes, setEdges });
 
-  // Scenario switch handler
-  const handleSwitchScenario = useCallback(
-    (targetId: string) => {
-      if (targetId === store.activeScenarioId) return;
-      isSwitchingRef.current = true;
-      const target = switchScenario(targetId, nodes, edges);
-      if (!target) return;
-      const { wiredNodes, wiredEdges } = wireCallbacks(target.nodes, target.edges);
-      setNodes(wiredNodes);
-      setEdges(wiredEdges);
-      persist();
-      requestAnimationFrame(() => {
-        isSwitchingRef.current = false;
-      });
-    },
-    [
-      store.activeScenarioId,
-      nodes,
-      edges,
-      switchScenario,
-      wireCallbacks,
-      setNodes,
-      setEdges,
-      persist,
-    ],
-  );
-
-  // Scenario create handler
-  const handleCreateScenario = useCallback(
-    (mode: "blank" | "clone") => {
-      isSwitchingRef.current = true;
-      const newScenario = createScenario(mode, nodes, edges);
-      const { wiredNodes, wiredEdges } = wireCallbacks(newScenario.nodes, newScenario.edges);
-      setNodes(wiredNodes);
-      setEdges(wiredEdges);
-      persist();
-      requestAnimationFrame(() => {
-        isSwitchingRef.current = false;
-      });
-    },
-    [nodes, edges, createScenario, wireCallbacks, setNodes, setEdges, persist],
-  );
-
-  // Scenario delete handler
-  const handleDeleteScenario = useCallback(
-    (id: string) => {
-      const result = deleteScenario(id);
-      if (!result) return; // only one scenario — D-03
-      isSwitchingRef.current = true;
-      const { wiredNodes, wiredEdges } = wireCallbacks(result.nodes, result.edges);
-      setNodes(wiredNodes);
-      setEdges(wiredEdges);
-      persist();
-      requestAnimationFrame(() => {
-        isSwitchingRef.current = false;
-      });
-    },
-    [deleteScenario, wireCallbacks, setNodes, setEdges, persist],
-  );
-
-  const handleImportFromDialog = useCallback(
-    (importedNodes: Node<UrlNodeData>[], importedEdges: Edge<LinkCountEdgeData>[]) => {
-      // Wire runtime callbacks into imported data (same pattern as onDrop handler)
-      const wiredNodes = importedNodes.map((n) => ({
-        ...n,
-        data: {
-          ...n.data,
-          onUpdate: onNodeDataUpdate,
-          onRootToggle,
-          onZIndexChange: onNodeZIndexChange,
-        },
-      }));
-      const wiredEdges: Edge<LinkCountEdgeData>[] = importedEdges.map((edge) => ({
-        ...edge,
-        markerEnd: { type: MarkerType.ArrowClosed, color: "#9CA3AF" },
-        data: { linkCount: edge.data?.linkCount ?? 1, onLinkCountChange: onEdgeLinkCountChange },
-      }));
-      setNodes(wiredNodes as Node<AppNodeData>[]);
-      setEdges(wiredEdges);
-    },
-    [onNodeDataUpdate, onRootToggle, onNodeZIndexChange, onEdgeLinkCountChange, setNodes, setEdges],
-  );
+  const {
+    handleSwitchScenario,
+    handleCreateScenario,
+    handleDeleteScenario,
+    handleImportFromDialog,
+  } = useScenarioHandlers({
+    store,
+    nodes,
+    edges,
+    setNodes,
+    setEdges,
+    switchScenario,
+    createScenario,
+    deleteScenario,
+    persist,
+    wireCallbacks,
+    onNodeDataUpdate,
+    onRootToggle,
+    onNodeZIndexChange,
+    onEdgeLinkCountChange,
+    isSwitchingRef,
+  });
 
   const onDragOver = useCallback((event: React.DragEvent) => {
     event.preventDefault();
