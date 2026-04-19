@@ -22,7 +22,7 @@ import { UrlNode } from "./components/UrlNode";
 import { LinkCountEdge } from "./components/LinkCountEdge";
 import { Toolbar } from "./components/Toolbar";
 import { ScenarioTabBar } from "./components/ScenarioTabBar";
-import { ScoreSidebar } from "./components/ScoreSidebar";
+import { SidePanel } from "./components/SidePanel";
 import { ImportDialog } from "./components/ImportDialog";
 import { TooltipProvider } from "./components/ui/tooltip";
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "./components/ui/resizable";
@@ -709,7 +709,7 @@ function AppInner() {
       <div className="flex-1 min-h-0 overflow-hidden">
         <ResizablePanelGroup orientation="horizontal" className="h-full">
           <ResizablePanel defaultSize="20%" minSize="15%" maxSize="40%">
-            <ScoreSidebar
+            <SidePanel
               nodes={nodes}
               scores={scores}
               weakNodes={weakNodes}

@@ -5,7 +5,7 @@ import { HealthPanel } from "./HealthPanel";
 import { FilterPanel } from "./FilterPanel";
 import { ScorePanel } from "./ScorePanel";
 
-interface ScoreSidebarProps {
+interface SidePanelProps {
   nodes: Node<UrlNodeData>[];
   scores: Map<string, number>;
   weakNodes: Set<string>;
@@ -20,7 +20,7 @@ interface ScoreSidebarProps {
   onFilterClear: () => void;
 }
 
-export function ScoreSidebar({
+export function SidePanel({
   nodes,
   scores,
   weakNodes,
@@ -33,7 +33,7 @@ export function ScoreSidebar({
   activeFilters,
   onFilterToggle,
   onFilterClear,
-}: ScoreSidebarProps) {
+}: SidePanelProps) {
   const [activeTab, setActiveTab] = useState<"filter" | "score" | "health">("score");
 
   const tabClass = (tab: "filter" | "score" | "health") =>
