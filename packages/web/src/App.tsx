@@ -657,6 +657,7 @@ function AppInner() {
               onNodesChange={onNodesChange}
               onEdgesChange={onEdgesChange}
               onConnect={onConnect}
+              onNodeClick={(_e, node) => handleNodeHighlight(node.id)}
               onPaneClick={clearRouteHighlight}
               connectionMode={ConnectionMode.Loose}
               onInit={setReactFlowInstance}
