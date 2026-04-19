@@ -95,7 +95,7 @@ function ScenarioTab({
         className={
           isActive
             ? "border-b-2 border-dark font-semibold text-dark px-3 py-1 cursor-pointer bg-transparent outline-none"
-            : "text-muted hover:text-ink px-3 py-1 cursor-pointer bg-transparent outline-none"
+            : "text-muted-fg hover:text-ink px-3 py-1 cursor-pointer bg-transparent outline-none"
         }
         aria-pressed={isActive}
       >
@@ -120,7 +120,7 @@ function ScenarioTab({
           e.stopPropagation();
           setShowPopover((v) => !v);
         }}
-        className="ml-0.5 p-0.5 rounded text-muted hover:text-ink hover:bg-surface transition-colors"
+        className="ml-0.5 p-0.5 rounded text-muted-fg hover:text-ink hover:bg-surface transition-colors"
         aria-label={`Options for ${scenario.name}`}
       >
         <Settings size={12} />
@@ -144,7 +144,7 @@ function ScenarioTab({
             className={`w-full text-left px-3 py-1.5 text-sm transition-colors ${
               canDelete
                 ? "text-red-600 hover:bg-red-50"
-                : "opacity-50 cursor-not-allowed text-muted"
+                : "opacity-50 cursor-not-allowed text-muted-fg"
             }`}
           >
             Delete
@@ -201,7 +201,7 @@ export function ScenarioTabBar({
       <div ref={addButtonRef} className="relative ml-1">
         <button
           onClick={() => setShowAddPrompt((v) => !v)}
-          className="flex items-center gap-1 rounded px-2 py-1 text-muted hover:text-ink hover:bg-surface transition-colors"
+          className="flex items-center gap-1 rounded px-2 py-1 text-muted-fg hover:text-ink hover:bg-surface transition-colors"
           aria-label="New scenario"
         >
           <Plus size={14} />
@@ -209,7 +209,7 @@ export function ScenarioTabBar({
 
         {showAddPrompt && (
           <div className="absolute top-full left-0 z-50 mt-1 min-w-[140px] rounded-md border border-border bg-white shadow-md py-1">
-            <p className="px-3 py-1 text-xs text-muted font-medium">New scenario</p>
+            <p className="px-3 py-1 text-xs text-muted-fg font-medium">New scenario</p>
             <button
               onClick={() => handleAdd("blank")}
               className="w-full text-left px-3 py-1.5 text-sm text-ink hover:bg-surface transition-colors"
