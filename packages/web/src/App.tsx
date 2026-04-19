@@ -32,6 +32,7 @@ import { useFilterState } from "./hooks/useFilterState";
 import { useScenarios } from "./hooks/useScenarios";
 import { useGraphAnalytics } from "./hooks/useGraphAnalytics";
 import { useHighlightedNodes } from "./hooks/useHighlightedNodes";
+import { useDialogState } from "./hooks/useDialogState";
 import {
   createDefaultNode,
   updateNodeData,
@@ -141,8 +142,14 @@ function AppInner() {
     Node<AppNodeData>,
     Edge<LinkCountEdgeData>
   > | null>(null);
-  const [showImportDialog, setShowImportDialog] = useState(false);
-  const [showLegendDialog, setShowLegendDialog] = useState(false);
+  const {
+    showImportDialog,
+    setShowImportDialog,
+    showLegendDialog,
+    setShowLegendDialog,
+    showCopyForAIDialog,
+    setShowCopyForAIDialog,
+  } = useDialogState();
   // Guard: save effect skips its first invocation (regardless of restore timing), then saves on all subsequent renders
   const isFirstRender = useRef(true);
   // Guard: suppresses save effect during scenario switch to prevent corrupt writes
@@ -544,7 +551,6 @@ function AppInner() {
     URL.revokeObjectURL(url);
   }, [nodes, edges, scores, depthMap, outboundMap]);
 
-  const [showCopyForAIDialog, setShowCopyForAIDialog] = useState(false);
   const [copyForAIText, setCopyForAIText] = useState("");
 
   const onCopyForAI = useCallback(() => {
