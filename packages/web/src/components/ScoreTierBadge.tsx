@@ -1,4 +1,5 @@
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
+import { cn } from "@/lib/utils";
 import type { ScoreTier } from "../lib/graph-utils";
 
 const TIER_BADGE_MAP: Record<
@@ -28,18 +29,27 @@ const TIER_BADGE_MAP: Record<
 interface ScoreTierBadgeProps {
   tier: ScoreTier;
   className?: string;
+  testId?: string;
 }
 
-export function ScoreTierBadge({ tier, className = "" }: ScoreTierBadgeProps) {
+export function ScoreTierBadge({
+  tier,
+  className,
+  testId = "badge-tooltip-trigger",
+}: ScoreTierBadgeProps) {
   if (tier === "neutral") return null;
   const { className: tierClassName, label, tooltip } = TIER_BADGE_MAP[tier];
   return (
     <Tooltip>
       <TooltipTrigger
         render={<span />}
-        data-testid="badge-tooltip-trigger"
+        data-testid={testId}
         data-tier={tier}
-        className={`inline-flex items-center rounded-full px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide cursor-help outline-none ${tierClassName} ${className}`.trim()}
+        className={cn(
+          "inline-flex items-center rounded-full px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide cursor-help outline-none",
+          tierClassName,
+          className,
+        )}
       >
         {label}
       </TooltipTrigger>

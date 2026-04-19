@@ -147,7 +147,11 @@ export function HealthPanel({
                 className="px-3 py-2.5 flex items-center gap-2"
               >
                 <span className="flex-1 min-w-0 text-sm text-dark truncate">{row.urlTemplate}</span>
-                <ScoreTierBadge tier={row.tier} className="flex-shrink-0" />
+                <ScoreTierBadge
+                  tier={row.tier}
+                  className="flex-shrink-0"
+                  testId="score-tier-badge"
+                />
               </li>
             ))}
           </ul>
