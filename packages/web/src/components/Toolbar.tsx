@@ -74,7 +74,7 @@ export function Toolbar({
 
   function handleConfirmClear() {
     onClearCanvas();
-    setClearDialogOpen(false);
+    setClearDialogOpen(false); // AlertDialogAction does not auto-close (no Close primitive)
   }
 
   return (
