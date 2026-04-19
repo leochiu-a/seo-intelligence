@@ -229,6 +229,7 @@ describe("UrlNode", () => {
       const trigger = screen.getByTestId("badge-tooltip-trigger");
       expect(trigger).toHaveAttribute("data-tier", "mid");
       expect(trigger).toHaveTextContent("Mid");
+      expect(trigger.tagName).toBe("SPAN");
     });
 
     it("renders tooltip trigger with data-tier='high' when scoreTier is high", () => {
@@ -241,6 +242,7 @@ describe("UrlNode", () => {
       const trigger = screen.getByTestId("badge-tooltip-trigger");
       expect(trigger).toHaveAttribute("data-tier", "high");
       expect(trigger).toHaveTextContent("High");
+      expect(trigger.tagName).toBe("SPAN");
     });
 
     it("does NOT render tooltip trigger when scoreTier is neutral", () => {

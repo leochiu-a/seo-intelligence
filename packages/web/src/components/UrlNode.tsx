@@ -165,7 +165,7 @@ function UrlNodeComponent({ id, data, selected }: NodeProps<Node<UrlNodeExtended
                   render={<span />}
                   data-testid="badge-tooltip-trigger"
                   data-tier={tier}
-                  className={`inline-flex items-center rounded-full px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide cursor-default outline-none ${tone.badge}`}
+                  className={`inline-flex items-center rounded-full px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide cursor-help outline-none ${tone.badge}`}
                 >
                   {tone.badgeLabel}
                 </TooltipTrigger>

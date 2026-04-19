@@ -45,9 +45,9 @@ export function LegendDialog({ open, onClose }: LegendDialogProps) {
               Score Tiers
             </h3>
             <p className="text-sm text-gray-500">
-              Each node's score is a PageRank-style value — pages that receive more internal links
-              from other well-connected pages score higher. Nodes are split into thirds (High / Mid
-              / Low) relative to the rest of the graph.
+              Each node's score reflects how well it is connected internally — pages that receive
+              more links from well-connected pages score higher. Nodes are split into thirds (High /
+              Mid / Low) relative to the rest of the graph.
             </p>
             <p className="text-sm text-gray-500">
               A node's score also affects what it gives away: a{" "}
