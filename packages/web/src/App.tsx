@@ -30,21 +30,15 @@ import { TooltipProvider } from "./components/ui/tooltip";
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "./components/ui/resizable";
 import { useFilterState } from "./hooks/useFilterState";
 import { useScenarios } from "./hooks/useScenarios";
+import { useGraphAnalytics } from "./hooks/useGraphAnalytics";
 import {
   createDefaultNode,
   updateNodeData,
   updateEdgeLinkCount,
-  calculatePageRank,
-  classifyScoreTier,
-  identifyWeakNodes,
   parseImportJson,
   getClosestHandleIds,
-  calculateCrawlDepth,
-  identifyOrphanNodes,
-  calculateOutboundLinks,
   getConnectedElements,
   buildCopyForAIText,
-  OUTBOUND_WARNING_THRESHOLD,
   type UrlNodeData,
   type LinkCountEdgeData,
   type ScoreTier,
@@ -53,7 +47,7 @@ import {
 
 // Extended node data type that includes the update callback for EditPopover wiring
 // and score fields for dynamic visual rendering
-type AppNodeData = UrlNodeData & {
+export type AppNodeData = UrlNodeData & {
   onUpdate: (id: string, data: Partial<UrlNodeData>) => void;
   onRootToggle: (id: string) => void;
   onZIndexChange: (id: string, zIndex: number) => void;
@@ -499,86 +493,17 @@ function AppInner() {
     [nodes, setEdges, onEdgeLinkCountChange],
   );
 
-  // Recalculate scores on every graph change (per D-13, SCORE-02)
-  const scores = useMemo(() => calculatePageRank(nodes, edges), [nodes, edges]);
-
-  const weakNodes = useMemo(() => identifyWeakNodes(scores), [scores]);
-
-  const allScoreValues = useMemo(() => [...scores.values()], [scores]);
-
-  // Derive root node ID from nodes state
-  const rootId = useMemo(() => nodes.find((n) => n.data.isRoot)?.id ?? null, [nodes]);
-
-  // Compute crawl depth map using BFS from root
-  const depthMap = useMemo(() => calculateCrawlDepth(nodes, edges, rootId), [nodes, edges, rootId]);
-
-  // Identify orphan nodes (zero inbound, excluding root)
-  const orphanNodes = useMemo(
-    () => identifyOrphanNodes(nodes, edges, rootId),
-    [nodes, edges, rootId],
-  );
-
-  // Identify unreachable nodes (have depth = Infinity in depthMap)
-  const unreachableNodes = useMemo(() => {
-    const set = new Set<string>();
-    for (const [id, depth] of depthMap) {
-      if (depth === Infinity) set.add(id);
-    }
-    return set;
-  }, [depthMap]);
-
-  // Compute total outbound links per node (explicit edges + implicit global contribution).
-  // Global source nodes contribute 0 implicit per Phase 4 D-01 parity.
-  const outboundMap = useMemo(() => calculateOutboundLinks(nodes, edges), [nodes, edges]);
-
-  // Enrich nodes with score tier, weak flag, and crawl depth/orphan fields for UrlNode rendering
-  const enrichedNodes = useMemo(() => {
-    return nodes.map((node) => {
-      const score = scores.get(node.id) ?? 0;
-      const scoreTier = classifyScoreTier(score, allScoreValues);
-      const isWeak = weakNodes.has(node.id);
-      const isOrphan = orphanNodes.has(node.id);
-      const isUnreachable = unreachableNodes.has(node.id);
-      const crawlDepth = depthMap.get(node.id);
-      const outboundCount = outboundMap.get(node.id) ?? 0;
-      const isOverLinked = outboundCount > OUTBOUND_WARNING_THRESHOLD;
-      // Only create new object if any enriched data changed
-      if (
-        node.data.scoreTier === scoreTier &&
-        node.data.isWeak === isWeak &&
-        node.data.isOrphan === isOrphan &&
-        node.data.isUnreachable === isUnreachable &&
-        node.data.crawlDepth === crawlDepth &&
-        node.data.outboundCount === outboundCount &&
-        node.data.isOverLinked === isOverLinked
-      ) {
-        return node;
-      }
-      // Tags, placements, isGlobal, isRoot ride through via ...node.data spread (Phase 999.5 D-17).
-      return {
-        ...node,
-        data: {
-          ...node.data,
-          scoreTier,
-          isWeak,
-          isOrphan,
-          isUnreachable,
-          crawlDepth,
-          outboundCount,
-          isOverLinked,
-        },
-      };
-    });
-  }, [
-    nodes,
+  const {
     scores,
     weakNodes,
     allScoreValues,
+    rootId,
+    depthMap,
     orphanNodes,
     unreachableNodes,
-    depthMap,
     outboundMap,
-  ]);
+    enrichedNodes,
+  } = useGraphAnalytics(nodes, edges);
 
   // Derive highlighted node IDs from active filter keys (AND-combine across dimensions)
   const highlightedNodeIds = useMemo(() => {
