@@ -52,11 +52,11 @@ export function LegendDialog({ open, onClose }: LegendDialogProps) {
               The <strong className="text-gray-700">High / Mid / Low</strong> label is a{" "}
               <strong className="text-gray-700">relative ranking</strong>: nodes are ordered by
               score and split into roughly equal thirds. A page tagged{" "}
-              <strong className="text-gray-700">Low</strong> only means it is in the bottom third
-              of <em>this</em> graph — it does <strong className="text-gray-700">not</strong> mean
-              the page is bad in absolute terms. If you add one extreme-outlier node (e.g. a global
-              page with hundreds of thousands of pages), every other node's label is measured
-              relative to the new outlier-inclusive ranking.
+              <strong className="text-gray-700">Low</strong> only means it is in the bottom third of{" "}
+              <em>this</em> graph — it does <strong className="text-gray-700">not</strong> mean the
+              page is bad in absolute terms. Because the split is by rank (not value range),
+              outliers count as one node — same as any other — so adding one extreme page won't
+              compress everyone else into <strong className="text-gray-700">Low</strong>.
             </p>
             <p className="text-sm text-gray-500">
               A node's score also affects what it gives away: a{" "}

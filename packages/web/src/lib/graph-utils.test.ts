@@ -453,15 +453,16 @@ describe("classifyScoreTier", () => {
     const scores = [100, 1, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 2.0];
     // The outlier itself must be high
     expect(classifyScoreTier(100, scores)).toBe("high");
-    // At least one of the top non-outlier values is mid (not compressed to low)
-    const topNonOutlierInMid = [1.8, 1.9, 2.0].some(
-      (v) => classifyScoreTier(v, scores) === "mid"
+    // Top non-outlier values must escape "low" — they should share 'high' with the outlier
+    // (since the split is rank-based; for n=12 the top ceil(12/3)=4 slots include the
+    // outlier plus the next 3 non-outliers). The bug this guards against is the linear
+    // min-max algorithm compressing all non-outliers into 'low'.
+    const topNonOutlierEscapesLow = [1.8, 1.9, 2.0].every(
+      (v) => classifyScoreTier(v, scores) !== "low",
     );
-    expect(topNonOutlierInMid).toBe(true);
+    expect(topNonOutlierEscapesLow).toBe(true);
     // At least one of the bottom values is low
-    const bottomInLow = [1, 1.1, 1.2].some(
-      (v) => classifyScoreTier(v, scores) === "low"
-    );
+    const bottomInLow = [1, 1.1, 1.2].some((v) => classifyScoreTier(v, scores) === "low");
     expect(bottomInLow).toBe(true);
     // Distribution is roughly balanced: each tier has between floor(n/3) and ceil(n/3) nodes
     const n = scores.length;
@@ -490,6 +491,10 @@ describe("classifyScoreTier", () => {
     expect(classifyScoreTier(3, scores)).toBe("low");
     expect(classifyScoreTier(2, scores)).toBe("low");
     expect(classifyScoreTier(1, scores)).toBe("low");
+    // Guard against off-by-one that still passes per-point assertions
+    expect(scores.filter((s) => classifyScoreTier(s, scores) === "high").length).toBe(3);
+    expect(scores.filter((s) => classifyScoreTier(s, scores) === "mid").length).toBe(3);
+    expect(scores.filter((s) => classifyScoreTier(s, scores) === "low").length).toBe(3);
   });
 
   // Test C: ties — all tied values get the same tier (tie-to-high bias)

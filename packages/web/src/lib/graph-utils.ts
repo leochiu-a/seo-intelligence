@@ -393,14 +393,19 @@ export function buildTooltipContent(status: HealthStatus): string {
 
 /**
  * Classifies a score into a tier based on its RANK among allScores (percentile-based).
- * Top ~1/3 by rank → 'high', middle ~1/3 → 'mid', bottom ~1/3 → 'low'. Ties bias to the
- * higher tier. Rationale: linear min-max thirds compresses all nodes into 'low' when one
- * outlier dominates the range (e.g. a global node with 357k pages). Returns 'neutral' when
- * allScores.length <= 1 or all scores are equal.
+ * Top ~1/3 by rank → 'high', middle ~1/3 → 'mid', bottom ~1/3 → 'low'. Rationale: linear
+ * min-max thirds compresses all nodes into 'low' when one outlier dominates the range
+ * (e.g. a global node with 357k pages). Returns 'neutral' when allScores.length <= 1 or
+ * all scores are equal.
  *
- * Split rule: highCutoffIdx = n - ceil(n/3), midCutoffIdx = n - ceil(2n/3) (ascending sorted).
+ * Split rule: highFirstIdx = n - ceil(n/3), midFirstIdx = n - ceil(2n/3) (ascending sorted).
  * On uneven n the TOP tier gets the extra slot (ceil gives top-heavy tie-break).
- * Example: n=4 → 2 high / 1 mid / 1 low; n=9 → 3/3/3.
+ * Example: n=4 → 2 high / 1 mid / 1 low; n=9 → 3/3/3; n=2 → 1 high / 0 mid / 1 low.
+ *
+ * Tie rule (asymmetric): ties at the mid/high boundary all become 'high' (bias up); ties
+ * at the low/mid boundary all become 'low' (bias down). This keeps the top and bottom
+ * tiers 'sticky' so a tied group spanning a boundary collapses into one tier instead of
+ * splitting arbitrarily by insertion order.
  *
  * @perf This sorts a copy of allScores on every call. With N nodes in useGraphAnalytics,
  * that is O(N² log N) total. Fine for MVP scale (<100 nodes). Future optimization:
@@ -409,25 +414,25 @@ export function buildTooltipContent(status: HealthStatus): string {
 export function classifyScoreTier(score: number, allScores: number[]): ScoreTier {
   if (allScores.length <= 1) return "neutral";
 
-  const min = Math.min(...allScores);
-  const max = Math.max(...allScores);
-
-  if (min === max) return "neutral";
-
   // Sort ascending copy — do NOT mutate caller's array
   const sorted = [...allScores].sort((a, b) => a - b);
   const n = sorted.length;
 
-  // Cutoff indices (ascending sorted). Math.ceil so uneven splits favour the top tier.
-  const highCutoffIdx = n - Math.ceil(n / 3); // e.g. n=9 → 6; n=4 → 2
-  const midCutoffIdx = n - Math.ceil((2 * n) / 3); // e.g. n=9 → 3; n=4 → 1
+  if (sorted[0] === sorted[n - 1]) return "neutral";
 
-  const highThreshold = sorted[highCutoffIdx];
-  const midThreshold = sorted[midCutoffIdx];
+  // First index of each tier in ascending sort. Math.ceil so uneven splits favour the top tier.
+  const highFirstIdx = n - Math.ceil(n / 3); // e.g. n=9 → 6; n=4 → 2
+  const midFirstIdx = n - Math.ceil((2 * n) / 3); // e.g. n=9 → 3; n=4 → 1
 
-  // >= comparisons give tie-to-high bias: all scores equal to a cutoff value land in the higher tier
+  const highThreshold = sorted[highFirstIdx];
+  // Upper bound of the low tier. When midFirstIdx is 0, there is no low-tier element to
+  // bound mid from below; using Infinity makes the mid check always fail, degenerating
+  // the split to high/low only (see n=2 case).
+  const lowLastIdx = midFirstIdx - 1;
+  const midFloor = lowLastIdx >= 0 ? sorted[lowLastIdx] : Infinity;
+
   if (score >= highThreshold) return "high";
-  if (score >= midThreshold) return "mid";
+  if (score > midFloor) return "mid";
   return "low";
 }
 
