@@ -60,7 +60,7 @@ interface AppNodeData extends UrlNodeData {
   crawlDepth?: number;
   outboundCount?: number;
   isOverLinked?: boolean;
-  isRouteHighlighted?: boolean;
+
 }
 
 // Define nodeTypes and edgeTypes outside the component to avoid infinite re-renders (React Flow docs requirement)
@@ -512,59 +512,28 @@ function AppInner() {
     return clusterMatches;
   }, [activeFilters, nodes]);
 
-  // Compute directly connected node IDs and edge IDs for the route-highlight focal node.
-  const routeElements = useMemo(() => {
-    if (!highlightedRouteNodeId) return null;
-    return getConnectedElements(highlightedRouteNodeId, edges);
-  }, [highlightedRouteNodeId, edges]);
+  // Merge filter highlight + node-click route into a single Set — reuses the same isDimmed pipeline.
+  const activeHighlightIds = useMemo(() => {
+    const routeIds = highlightedRouteNodeId
+      ? getConnectedElements(highlightedRouteNodeId, edges).nodeIds
+      : null;
+    if (routeIds === null) return highlightedNodeIds;
+    if (highlightedNodeIds === null) return routeIds;
+    return new Set([...routeIds].filter((id) => highlightedNodeIds.has(id)));
+  }, [highlightedRouteNodeId, edges, highlightedNodeIds]);
 
-  // Apply dim / highlight flags.
-  // Priority: route highlight > filter dimming.
   const styledNodes = useMemo(() => {
-    if (routeElements !== null) {
-      // Route highlight mode: highlight route nodes, dim everything else
-      return enrichedNodes.map((node) => {
-        const isRouteHighlighted = routeElements.nodeIds.has(node.id);
-        const isDimmed = !isRouteHighlighted;
-        if (node.data.isRouteHighlighted === isRouteHighlighted && node.data.isDimmed === isDimmed) {
-          return node;
-        }
-        return { ...node, data: { ...node.data, isRouteHighlighted, isDimmed } };
-      });
-    }
-    // Filter highlight mode (existing behaviour)
-    if (highlightedNodeIds === null) {
+    if (activeHighlightIds === null) {
       return enrichedNodes.map((node) =>
-        (node.data.isDimmed || node.data.isRouteHighlighted)
-          ? { ...node, data: { ...node.data, isDimmed: false, isRouteHighlighted: false } }
-          : node,
+        node.data.isDimmed ? { ...node, data: { ...node.data, isDimmed: false } } : node,
       );
     }
     return enrichedNodes.map((node) => {
-      const isDimmed = !highlightedNodeIds.has(node.id);
-      if (node.data.isDimmed === isDimmed && !node.data.isRouteHighlighted) return node;
-      return { ...node, data: { ...node.data, isDimmed, isRouteHighlighted: false } };
+      const isDimmed = !activeHighlightIds.has(node.id);
+      if (node.data.isDimmed === isDimmed) return node;
+      return { ...node, data: { ...node.data, isDimmed } };
     });
-  }, [enrichedNodes, highlightedNodeIds, routeElements]);
-
-  // Apply route-highlight flag to edges so LinkCountEdge can render highlighted style.
-  const styledEdges = useMemo(() => {
-    if (routeElements === null) {
-      // Clear any lingering route highlight on edges
-      return edges.map((e) =>
-        (e.data as { isRouteHighlighted?: boolean })?.isRouteHighlighted
-          ? { ...e, data: { ...e.data, isRouteHighlighted: false } }
-          : e,
-      );
-    }
-    return edges.map((e) => {
-      const isRouteHighlighted = routeElements.edgeIds.has(e.id);
-      if ((e.data as { isRouteHighlighted?: boolean })?.isRouteHighlighted === isRouteHighlighted) {
-        return e;
-      }
-      return { ...e, data: { ...e.data, isRouteHighlighted } };
-    });
-  }, [edges, routeElements]);
+  }, [enrichedNodes, activeHighlightIds]);
 
   const onExportJson = useCallback(() => {
     const exportData = {
@@ -653,7 +622,7 @@ function AppInner() {
           <div className="h-full" ref={reactFlowWrapper}>
             <ReactFlow
               nodes={styledNodes}
-              edges={styledEdges}
+              edges={edges}
               onNodesChange={onNodesChange}
               onEdgesChange={onEdgesChange}
               onConnect={onConnect}
