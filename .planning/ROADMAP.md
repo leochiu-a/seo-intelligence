@@ -207,7 +207,7 @@ Plans:
 **Goal:** Add hover tooltips to the Low/Mid/High tier badges on canvas UrlNode cards. Each tooltip explains what the tier means in PM-friendly language ("link equity" / "internal link strength" — no "PageRank" jargon) and gives a one-line action (Low/Mid: add more inbound internal links from high-scoring pages; High: affirm well-connected). Neutral badge is excluded. Badge visual (color, size, label) is unchanged. Canvas nodes only — sidebar score list deferred.
 **Requirements**: TBD-11.2-BADGE-TOOLTIP
 **Depends on:** Phase 11
-**Plans:** 1 plan
+**Plans:** 1/1 plans complete
 
 Plans:
 - [ ] 11.2-01-PLAN.md — Extend TONE_MAP with tooltip copy and wrap tier badge in Tooltip/TooltipTrigger/TooltipContent in UrlNode.tsx, plus vitest coverage
