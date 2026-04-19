@@ -1,6 +1,6 @@
-import { useEffect } from "react";
-import { X, TriangleAlert, Unplug, Layers, Globe, Home } from "lucide-react";
+import { TriangleAlert, Unplug, Layers, Globe, Home } from "lucide-react";
 import { CLUSTER_PALETTE } from "../lib/cluster-colors";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 interface LegendDialogProps {
   open: boolean;
@@ -31,45 +31,14 @@ const BADGE =
   "inline-flex items-center rounded-full px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide";
 
 export function LegendDialog({ open, onClose }: LegendDialogProps) {
-  useEffect(() => {
-    if (!open) return;
-    const handler = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
-    };
-    document.addEventListener("keydown", handler);
-    return () => document.removeEventListener("keydown", handler);
-  }, [open, onClose]);
-
-  if (!open) return null;
-
   return (
-    <div
-      className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center"
-      onClick={onClose}
-    >
-      <div
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="legend-dialog-title"
-        className="bg-white rounded-xl shadow-lg w-full max-w-lg mx-4"
-        onClick={(e) => e.stopPropagation()}
-      >
-        {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
-          <h2 id="legend-dialog-title" className="text-base font-semibold text-gray-900">
-            Indicators
-          </h2>
-          <button
-            aria-label="Close"
-            onClick={onClose}
-            className="flex items-center justify-center rounded-md p-1 text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
-          >
-            <X size={18} />
-          </button>
-        </div>
+    <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
+      <DialogContent className="max-w-lg overflow-y-auto max-h-[85vh]">
+        <DialogHeader>
+          <DialogTitle>Indicators</DialogTitle>
+        </DialogHeader>
 
-        {/* Body */}
-        <div className="overflow-y-auto max-h-[70vh] px-6 py-5 flex flex-col gap-5">
+        <div className="flex flex-col gap-5 pt-1">
           {/* Score Tiers */}
           <div className="flex flex-col gap-3">
             <h3 className="text-[11px] font-semibold uppercase tracking-wider text-gray-400">
@@ -178,7 +147,7 @@ export function LegendDialog({ open, onClose }: LegendDialogProps) {
             </div>
           </div>
         </div>
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   );
 }
