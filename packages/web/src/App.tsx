@@ -1,5 +1,6 @@
-import { useState, useCallback, useRef, useMemo, useEffect } from 'react';
-import { ReactFlow,
+import { useState, useCallback, useRef, useMemo, useEffect } from "react";
+import {
+  ReactFlow,
   Background,
   BackgroundVariant,
   Controls,
@@ -14,19 +15,19 @@ import { ReactFlow,
   type Edge,
   type Connection,
   type ReactFlowInstance,
-} from '@xyflow/react';
-import '@xyflow/react/dist/style.css';
-import { UrlNode } from './components/UrlNode';
-import { LinkCountEdge } from './components/LinkCountEdge';
-import { Toolbar } from './components/Toolbar';
-import { ScenarioTabBar } from './components/ScenarioTabBar';
-import { ScoreSidebar } from './components/ScoreSidebar';
-import { FilterPanel } from './components/FilterPanel';
-import { ImportDialog } from './components/ImportDialog';
-import { TooltipProvider } from './components/ui/tooltip';
-import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from './components/ui/resizable';
-import { useFilterState } from './hooks/useFilterState';
-import { useScenarios } from './hooks/useScenarios';
+} from "@xyflow/react";
+import "@xyflow/react/dist/style.css";
+import { UrlNode } from "./components/UrlNode";
+import { LinkCountEdge } from "./components/LinkCountEdge";
+import { Toolbar } from "./components/Toolbar";
+import { ScenarioTabBar } from "./components/ScenarioTabBar";
+import { ScoreSidebar } from "./components/ScoreSidebar";
+import { FilterPanel } from "./components/FilterPanel";
+import { ImportDialog } from "./components/ImportDialog";
+import { TooltipProvider } from "./components/ui/tooltip";
+import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "./components/ui/resizable";
+import { useFilterState } from "./hooks/useFilterState";
+import { useScenarios } from "./hooks/useScenarios";
 import {
   createDefaultNode,
   updateNodeData,
@@ -45,7 +46,7 @@ import {
   type LinkCountEdgeData,
   type ScoreTier,
   type Placement,
-} from './lib/graph-utils';
+} from "./lib/graph-utils";
 
 // Extended node data type that includes the update callback for EditPopover wiring
 // and score fields for dynamic visual rendering
@@ -70,31 +71,64 @@ const edgeTypes = { linkCountEdge: LinkCountEdge };
 function serializeGraph(
   nodes: Node<AppNodeData>[],
   edges: Edge[],
-): { nodes: Array<{ id: string; type?: string; position: { x: number; y: number }; data: { urlTemplate: string; pageCount: number; isGlobal?: boolean; placements?: Placement[]; isRoot?: boolean; tags?: string[] } }>; edges: Array<{ id: string; source: string; target: string; sourceHandle?: string | null; targetHandle?: string | null; type?: string; markerEnd?: unknown; data: { linkCount: number } }> } {
+): {
+  nodes: Array<{
+    id: string;
+    type?: string;
+    position: { x: number; y: number };
+    data: {
+      urlTemplate: string;
+      pageCount: number;
+      isGlobal?: boolean;
+      placements?: Placement[];
+      isRoot?: boolean;
+      tags?: string[];
+    };
+  }>;
+  edges: Array<{
+    id: string;
+    source: string;
+    target: string;
+    sourceHandle?: string | null;
+    targetHandle?: string | null;
+    type?: string;
+    markerEnd?: unknown;
+    data: { linkCount: number };
+  }>;
+} {
   return {
-    nodes: nodes.map(({ id, type, position, data: { urlTemplate, pageCount, isGlobal, placements, isRoot, tags } }) => ({
-      id,
-      type,
-      position,
-      data: {
-        urlTemplate,
-        pageCount,
-        ...(isGlobal && { isGlobal }),
-        ...(placements?.length && { placements }),
-        ...(isRoot && { isRoot }),
-        ...(tags?.length && { tags }),
-      },
-    })),
-    edges: edges.map(({ id, source, target, sourceHandle, targetHandle, type, markerEnd, data }) => ({
-      id,
-      source,
-      target,
-      sourceHandle,
-      targetHandle,
-      type,
-      markerEnd,
-      data: { linkCount: (data as { linkCount?: number })?.linkCount ?? 1 },
-    })),
+    nodes: nodes.map(
+      ({
+        id,
+        type,
+        position,
+        data: { urlTemplate, pageCount, isGlobal, placements, isRoot, tags },
+      }) => ({
+        id,
+        type,
+        position,
+        data: {
+          urlTemplate,
+          pageCount,
+          ...(isGlobal && { isGlobal }),
+          ...(placements?.length && { placements }),
+          ...(isRoot && { isRoot }),
+          ...(tags?.length && { tags }),
+        },
+      }),
+    ),
+    edges: edges.map(
+      ({ id, source, target, sourceHandle, targetHandle, type, markerEnd, data }) => ({
+        id,
+        source,
+        target,
+        sourceHandle,
+        targetHandle,
+        type,
+        markerEnd,
+        data: { linkCount: (data as { linkCount?: number })?.linkCount ?? 1 },
+      }),
+    ),
   };
 }
 
@@ -123,7 +157,8 @@ function AppInner() {
   } = useScenarios();
 
   // Derive active scenario from store
-  const activeScenario = store.scenarios.find((s) => s.id === store.activeScenarioId) ?? store.scenarios[0];
+  const activeScenario =
+    store.scenarios.find((s) => s.id === store.activeScenarioId) ?? store.scenarios[0];
 
   const { activeFilters, toggle: toggleFilter, clear: clearFilters } = useFilterState();
 
@@ -143,7 +178,9 @@ function AppInner() {
   const onNodeDataUpdate = useCallback(
     (nodeId: string, newData: Partial<UrlNodeData>) => {
       // updateNodeData from graph-utils handles the immutable update
-      setNodes((nds) => updateNodeData(nds as Node<UrlNodeData>[], nodeId, newData) as Node<AppNodeData>[]);
+      setNodes(
+        (nds) => updateNodeData(nds as Node<UrlNodeData>[], nodeId, newData) as Node<AppNodeData>[],
+      );
     },
     [setNodes],
   );
@@ -188,7 +225,12 @@ function AppInner() {
       setNodes((nds) =>
         nds.concat({
           ...newNode,
-          data: { ...newNode.data, onUpdate: onNodeDataUpdate, onRootToggle, onZIndexChange: onNodeZIndexChange },
+          data: {
+            ...newNode.data,
+            onUpdate: onNodeDataUpdate,
+            onRootToggle,
+            onZIndexChange: onNodeZIndexChange,
+          },
         }),
       );
     },
@@ -205,12 +247,33 @@ function AppInner() {
   // Helper: re-attach runtime callbacks onto serialized nodes/edges from a scenario record
   const wireCallbacks = useCallback(
     (
-      serializedNodes: Array<{ id: string; type?: string; position: { x: number; y: number }; data: { urlTemplate: string; pageCount: number; isGlobal?: boolean; placements?: Placement[]; isRoot?: boolean; tags?: string[] } }>,
-      serializedEdges: Array<{ id: string; source: string; target: string; sourceHandle?: string | null; targetHandle?: string | null; type?: string; markerEnd?: unknown; data: { linkCount: number } }>,
+      serializedNodes: Array<{
+        id: string;
+        type?: string;
+        position: { x: number; y: number };
+        data: {
+          urlTemplate: string;
+          pageCount: number;
+          isGlobal?: boolean;
+          placements?: Placement[];
+          isRoot?: boolean;
+          tags?: string[];
+        };
+      }>,
+      serializedEdges: Array<{
+        id: string;
+        source: string;
+        target: string;
+        sourceHandle?: string | null;
+        targetHandle?: string | null;
+        type?: string;
+        markerEnd?: unknown;
+        data: { linkCount: number };
+      }>,
     ): { wiredNodes: Node<AppNodeData>[]; wiredEdges: Edge[] } => {
       const wiredNodes: Node<AppNodeData>[] = serializedNodes.map((n) => ({
         ...n,
-        type: n.type ?? 'urlNode',
+        type: n.type ?? "urlNode",
         data: {
           urlTemplate: n.data.urlTemplate,
           pageCount: n.data.pageCount,
@@ -229,8 +292,11 @@ function AppInner() {
         target: e.target,
         ...(e.sourceHandle != null ? { sourceHandle: e.sourceHandle } : {}),
         ...(e.targetHandle != null ? { targetHandle: e.targetHandle } : {}),
-        type: e.type ?? 'linkCountEdge',
-        markerEnd: (e.markerEnd as import('reactflow').EdgeMarkerType | undefined) ?? { type: MarkerType.ArrowClosed, color: '#9CA3AF' },
+        type: e.type ?? "linkCountEdge",
+        markerEnd: (e.markerEnd as import("reactflow").EdgeMarkerType | undefined) ?? {
+          type: MarkerType.ArrowClosed,
+          color: "#9CA3AF",
+        },
         data: { linkCount: e.data?.linkCount ?? 1, onLinkCountChange: onEdgeLinkCountChange },
       }));
       return { wiredNodes, wiredEdges };
@@ -249,21 +315,34 @@ function AppInner() {
       setNodes(wiredNodes);
       setEdges(wiredEdges);
       persist();
-      requestAnimationFrame(() => { isSwitchingRef.current = false; });
+      requestAnimationFrame(() => {
+        isSwitchingRef.current = false;
+      });
     },
-    [store.activeScenarioId, nodes, edges, switchScenario, wireCallbacks, setNodes, setEdges, persist],
+    [
+      store.activeScenarioId,
+      nodes,
+      edges,
+      switchScenario,
+      wireCallbacks,
+      setNodes,
+      setEdges,
+      persist,
+    ],
   );
 
   // Scenario create handler
   const handleCreateScenario = useCallback(
-    (mode: 'blank' | 'clone') => {
+    (mode: "blank" | "clone") => {
       isSwitchingRef.current = true;
       const newScenario = createScenario(mode, nodes, edges);
       const { wiredNodes, wiredEdges } = wireCallbacks(newScenario.nodes, newScenario.edges);
       setNodes(wiredNodes);
       setEdges(wiredEdges);
       persist();
-      requestAnimationFrame(() => { isSwitchingRef.current = false; });
+      requestAnimationFrame(() => {
+        isSwitchingRef.current = false;
+      });
     },
     [nodes, edges, createScenario, wireCallbacks, setNodes, setEdges, persist],
   );
@@ -278,7 +357,9 @@ function AppInner() {
       setNodes(wiredNodes);
       setEdges(wiredEdges);
       persist();
-      requestAnimationFrame(() => { isSwitchingRef.current = false; });
+      requestAnimationFrame(() => {
+        isSwitchingRef.current = false;
+      });
     },
     [deleteScenario, wireCallbacks, setNodes, setEdges, persist],
   );
@@ -288,11 +369,16 @@ function AppInner() {
       // Wire runtime callbacks into imported data (same pattern as onDrop handler)
       const wiredNodes = importedNodes.map((n) => ({
         ...n,
-        data: { ...n.data, onUpdate: onNodeDataUpdate, onRootToggle, onZIndexChange: onNodeZIndexChange },
+        data: {
+          ...n.data,
+          onUpdate: onNodeDataUpdate,
+          onRootToggle,
+          onZIndexChange: onNodeZIndexChange,
+        },
       }));
       const wiredEdges = importedEdges.map((edge) => ({
         ...edge,
-        markerEnd: { type: MarkerType.ArrowClosed, color: '#9CA3AF' },
+        markerEnd: { type: MarkerType.ArrowClosed, color: "#9CA3AF" },
         data: { ...edge.data, onLinkCountChange: onEdgeLinkCountChange },
       }));
       setNodes(wiredNodes as Node<AppNodeData>[]);
@@ -303,7 +389,7 @@ function AppInner() {
 
   const onDragOver = useCallback((event: React.DragEvent) => {
     event.preventDefault();
-    event.dataTransfer.dropEffect = 'move';
+    event.dataTransfer.dropEffect = "move";
   }, []);
 
   const onDrop = useCallback(
@@ -311,9 +397,7 @@ function AppInner() {
       event.preventDefault();
 
       // Handle JSON file import via drag-and-drop
-      const file = Array.from(event.dataTransfer.files).find((f) =>
-        f.name.endsWith('.json'),
-      );
+      const file = Array.from(event.dataTransfer.files).find((f) => f.name.endsWith(".json"));
       if (file) {
         const reader = new FileReader();
         reader.onload = (e) => {
@@ -324,13 +408,20 @@ function AppInner() {
             // Wire runtime callbacks into edges before setting state
             const wiredEdges = importedEdges.map((edge) => ({
               ...edge,
-              markerEnd: { type: MarkerType.ArrowClosed, color: '#9CA3AF' },
+              markerEnd: { type: MarkerType.ArrowClosed, color: "#9CA3AF" },
               data: { ...edge.data, onLinkCountChange: onEdgeLinkCountChange },
             }));
-            setNodes(importedNodes.map((n) => ({
-              ...n,
-              data: { ...n.data, onUpdate: onNodeDataUpdate, onRootToggle, onZIndexChange: onNodeZIndexChange },
-            })));
+            setNodes(
+              importedNodes.map((n) => ({
+                ...n,
+                data: {
+                  ...n.data,
+                  onUpdate: onNodeDataUpdate,
+                  onRootToggle,
+                  onZIndexChange: onNodeZIndexChange,
+                },
+              })),
+            );
             setEdges(wiredEdges);
           } catch {
             // Invalid JSON — silently ignore (file was dropped by mistake)
@@ -341,15 +432,24 @@ function AppInner() {
       }
 
       // Handle sidebar node drag onto canvas
-      const type = event.dataTransfer.getData('application/reactflow');
-      if (type !== 'urlNode' || !reactFlowInstance) return;
+      const type = event.dataTransfer.getData("application/reactflow");
+      if (type !== "urlNode" || !reactFlowInstance) return;
       const position = reactFlowInstance.screenToFlowPosition({
         x: event.clientX,
         y: event.clientY,
       });
       addNode(position);
     },
-    [reactFlowInstance, addNode, setNodes, setEdges, onNodeDataUpdate, onRootToggle, onNodeZIndexChange, onEdgeLinkCountChange],
+    [
+      reactFlowInstance,
+      addNode,
+      setNodes,
+      setEdges,
+      onNodeDataUpdate,
+      onRootToggle,
+      onNodeZIndexChange,
+      onEdgeLinkCountChange,
+    ],
   );
 
   const onAddNode = useCallback(() => {
@@ -377,8 +477,8 @@ function AppInner() {
         addEdge(
           {
             ...conn,
-            type: 'linkCountEdge',
-            markerEnd: { type: MarkerType.ArrowClosed, color: '#9CA3AF' },
+            type: "linkCountEdge",
+            markerEnd: { type: MarkerType.ArrowClosed, color: "#9CA3AF" },
             data: { linkCount: 1, onLinkCountChange: onEdgeLinkCountChange },
           },
           eds,
@@ -389,32 +489,17 @@ function AppInner() {
   );
 
   // Recalculate scores on every graph change (per D-13, SCORE-02)
-  const scores = useMemo(
-    () => calculatePageRank(nodes, edges),
-    [nodes, edges],
-  );
+  const scores = useMemo(() => calculatePageRank(nodes, edges), [nodes, edges]);
 
-  const weakNodes = useMemo(
-    () => identifyWeakNodes(scores),
-    [scores],
-  );
+  const weakNodes = useMemo(() => identifyWeakNodes(scores), [scores]);
 
-  const allScoreValues = useMemo(
-    () => [...scores.values()],
-    [scores],
-  );
+  const allScoreValues = useMemo(() => [...scores.values()], [scores]);
 
   // Derive root node ID from nodes state
-  const rootId = useMemo(
-    () => nodes.find((n) => n.data.isRoot)?.id ?? null,
-    [nodes],
-  );
+  const rootId = useMemo(() => nodes.find((n) => n.data.isRoot)?.id ?? null, [nodes]);
 
   // Compute crawl depth map using BFS from root
-  const depthMap = useMemo(
-    () => calculateCrawlDepth(nodes, edges, rootId),
-    [nodes, edges, rootId],
-  );
+  const depthMap = useMemo(() => calculateCrawlDepth(nodes, edges, rootId), [nodes, edges, rootId]);
 
   // Identify orphan nodes (zero inbound, excluding root)
   const orphanNodes = useMemo(
@@ -433,10 +518,7 @@ function AppInner() {
 
   // Compute total outbound links per node (explicit edges + implicit global contribution).
   // Global source nodes contribute 0 implicit per Phase 4 D-01 parity.
-  const outboundMap = useMemo(
-    () => calculateOutboundLinks(nodes, edges),
-    [nodes, edges],
-  );
+  const outboundMap = useMemo(() => calculateOutboundLinks(nodes, edges), [nodes, edges]);
 
   // Enrich nodes with score tier, weak flag, and crawl depth/orphan fields for UrlNode rendering
   const enrichedNodes = useMemo(() => {
@@ -476,18 +558,27 @@ function AppInner() {
         },
       };
     });
-  }, [nodes, scores, weakNodes, allScoreValues, orphanNodes, unreachableNodes, depthMap, outboundMap]);
+  }, [
+    nodes,
+    scores,
+    weakNodes,
+    allScoreValues,
+    orphanNodes,
+    unreachableNodes,
+    depthMap,
+    outboundMap,
+  ]);
 
   // Derive highlighted node IDs from active filter keys (AND-combine across dimensions)
   const highlightedNodeIds = useMemo(() => {
-    const placementKeys = [...activeFilters].filter((k) => k.startsWith('placement-name:'));
-    const clusterKeys = [...activeFilters].filter((k) => k.startsWith('cluster:'));
+    const placementKeys = [...activeFilters].filter((k) => k.startsWith("placement-name:"));
+    const clusterKeys = [...activeFilters].filter((k) => k.startsWith("cluster:"));
 
     let filterIds: Set<string> | null = null;
     if (placementKeys.length > 0 || clusterKeys.length > 0) {
       const placementMatches = new Set<string>();
       for (const key of placementKeys) {
-        const name = key.slice('placement-name:'.length);
+        const name = key.slice("placement-name:".length);
         for (const node of nodes) {
           if (node.data.isGlobal && node.data.placements?.some((p) => p.name === name)) {
             placementMatches.add(node.id);
@@ -496,7 +587,7 @@ function AppInner() {
       }
       const clusterMatches = new Set<string>();
       for (const key of clusterKeys) {
-        const tag = key.slice('cluster:'.length);
+        const tag = key.slice("cluster:".length);
         for (const node of nodes) {
           if (node.data.tags?.includes(tag)) clusterMatches.add(node.id);
         }
@@ -552,11 +643,11 @@ function AppInner() {
       depthMap: Object.fromEntries(depthMap),
       outboundMap: Object.fromEntries(outboundMap),
     };
-    const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+    const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: "application/json" });
     const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
+    const a = document.createElement("a");
     a.href = url;
-    a.download = 'seo-planner-export.json';
+    a.download = "seo-planner-export.json";
     a.click();
     URL.revokeObjectURL(url);
   }, [nodes, edges, scores, depthMap, outboundMap]);
@@ -590,103 +681,112 @@ function AppInner() {
 
   return (
     <div className="h-screen w-screen flex flex-col bg-canvas text-dark">
-      <Toolbar onAddNode={onAddNode} onImportJson={() => setShowImportDialog(true)} onExportJson={onExportJson} onClearCanvas={handleClearCanvas} isEmpty={nodes.length === 0} />
+      <Toolbar
+        onAddNode={onAddNode}
+        onImportJson={() => setShowImportDialog(true)}
+        onExportJson={onExportJson}
+        onClearCanvas={handleClearCanvas}
+        isEmpty={nodes.length === 0}
+      />
       <ScenarioTabBar
         scenarios={store.scenarios}
         activeId={store.activeScenarioId}
         onSwitch={handleSwitchScenario}
         onAdd={handleCreateScenario}
-        onRename={(id, name) => { renameScenario(id, name); persist(); }}
+        onRename={(id, name) => {
+          renameScenario(id, name);
+          persist();
+        }}
         onDelete={handleDeleteScenario}
       />
       <div className="flex-1 min-h-0 overflow-hidden">
-      <ResizablePanelGroup direction="horizontal" className="h-full">
-        <ResizablePanel defaultSize="17%" minSize="10%" maxSize="35%">
-          <FilterPanel
-            nodes={nodes}
-            activeFilters={activeFilters}
-            onToggle={toggleFilter}
-            onClear={clearFilters}
-          />
-        </ResizablePanel>
+        <ResizablePanelGroup direction="horizontal" className="h-full">
+          <ResizablePanel defaultSize="17%" minSize="10%" maxSize="35%">
+            <FilterPanel
+              nodes={nodes}
+              activeFilters={activeFilters}
+              onToggle={toggleFilter}
+              onClear={clearFilters}
+            />
+          </ResizablePanel>
 
-        <ResizableHandle />
+          <ResizableHandle />
 
-        <ResizablePanel defaultSize="63%" minSize="30%">
-          <div className="h-full" ref={reactFlowWrapper}>
-            <ReactFlow
-              nodes={styledNodes}
-              edges={edges}
-              onNodesChange={onNodesChange}
-              onEdgesChange={onEdgesChange}
-              onConnect={onConnect}
-              onNodeClick={(_e, node) => handleNodeHighlight(node.id)}
-              onPaneClick={clearRouteHighlight}
-              connectionMode={ConnectionMode.Loose}
-              onInit={setReactFlowInstance}
-              onDrop={onDrop}
-              onDragOver={onDragOver}
-              nodeTypes={nodeTypes}
-              edgeTypes={edgeTypes}
-              deleteKeyCode={['Backspace', 'Delete']}
-              fitView
-              fitViewOptions={{ padding: 0.2, maxZoom: 1 }}
-              minZoom={0.3}
-              style={{ background: 'var(--color-canvas)' }}
-            >
-              <Background
-                color="var(--color-border)"
-                variant={BackgroundVariant.Dots}
-                gap={28}
-                size={1.5}
-              />
-              <Controls
-                showInteractive={false}
-                orientation="horizontal"
-                style={{
-                  background: '#ffffff',
-                  border: '1px solid var(--color-border)',
-                  borderRadius: 12,
-                  padding: 4,
-                }}
-              />
-              <MiniMap />
-              {nodes.length === 0 && (
-                <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
-                  <div className="text-center">
-                    <p className="text-lg font-semibold text-muted-fg">
-                      Start mapping your link structure
-                    </p>
-                    <p className="text-sm text-muted-fg mt-2 max-w-sm">
-                      Drag a URL Node from the left panel onto the canvas, then connect nodes to model
-                      how pages link to each other.
-                    </p>
-                    <p className="text-xs text-muted-fg mt-1">
-                      Or use Add Node above to place a node at canvas center.
-                    </p>
+          <ResizablePanel defaultSize="63%" minSize="30%">
+            <div className="h-full" ref={reactFlowWrapper}>
+              <ReactFlow
+                nodes={styledNodes}
+                edges={edges}
+                onNodesChange={onNodesChange}
+                onEdgesChange={onEdgesChange}
+                onConnect={onConnect}
+                onNodeClick={(_e, node) => handleNodeHighlight(node.id)}
+                onPaneClick={clearRouteHighlight}
+                connectionMode={ConnectionMode.Loose}
+                onInit={setReactFlowInstance}
+                onDrop={onDrop}
+                onDragOver={onDragOver}
+                nodeTypes={nodeTypes}
+                edgeTypes={edgeTypes}
+                deleteKeyCode={["Backspace", "Delete"]}
+                fitView
+                fitViewOptions={{ padding: 0.2, maxZoom: 1 }}
+                minZoom={0.3}
+                style={{ background: "var(--color-canvas)" }}
+              >
+                <Background
+                  color="var(--color-border)"
+                  variant={BackgroundVariant.Dots}
+                  gap={28}
+                  size={1.5}
+                />
+                <Controls
+                  showInteractive={false}
+                  orientation="horizontal"
+                  style={{
+                    background: "#ffffff",
+                    border: "1px solid var(--color-border)",
+                    borderRadius: 12,
+                    padding: 4,
+                  }}
+                />
+                <MiniMap />
+                {nodes.length === 0 && (
+                  <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
+                    <div className="text-center">
+                      <p className="text-lg font-semibold text-muted-fg">
+                        Start mapping your link structure
+                      </p>
+                      <p className="text-sm text-muted-fg mt-2 max-w-sm">
+                        Drag a URL Node from the left panel onto the canvas, then connect nodes to
+                        model how pages link to each other.
+                      </p>
+                      <p className="text-xs text-muted-fg mt-1">
+                        Or use Add Node above to place a node at canvas center.
+                      </p>
+                    </div>
                   </div>
-                </div>
-              )}
-            </ReactFlow>
-          </div>
-        </ResizablePanel>
+                )}
+              </ReactFlow>
+            </div>
+          </ResizablePanel>
 
-        <ResizableHandle />
+          <ResizableHandle />
 
-        <ResizablePanel defaultSize="20%" minSize="10%" maxSize="40%">
-          <ScoreSidebar
-            nodes={nodes}
-            scores={scores}
-            weakNodes={weakNodes}
-            orphanNodes={orphanNodes}
-            unreachableNodes={unreachableNodes}
-            depthMap={depthMap}
-            outboundMap={outboundMap}
-            rootId={rootId}
-            onNodeHighlight={handleNodeHighlight}
-          />
-        </ResizablePanel>
-      </ResizablePanelGroup>
+          <ResizablePanel defaultSize="20%" minSize="10%" maxSize="40%">
+            <ScoreSidebar
+              nodes={nodes}
+              scores={scores}
+              weakNodes={weakNodes}
+              orphanNodes={orphanNodes}
+              unreachableNodes={unreachableNodes}
+              depthMap={depthMap}
+              outboundMap={outboundMap}
+              rootId={rootId}
+              onNodeHighlight={handleNodeHighlight}
+            />
+          </ResizablePanel>
+        </ResizablePanelGroup>
       </div>
       <ImportDialog
         open={showImportDialog}

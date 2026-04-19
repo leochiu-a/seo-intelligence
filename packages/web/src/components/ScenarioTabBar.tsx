@@ -1,12 +1,12 @@
-import { useState, useRef, useEffect } from 'react';
-import { Plus, Settings } from 'lucide-react';
-import type { ScenarioRecord } from '../lib/scenario-types';
+import { useState, useRef, useEffect } from "react";
+import { Plus, Settings } from "lucide-react";
+import type { ScenarioRecord } from "../lib/scenario-types";
 
 interface ScenarioTabBarProps {
   scenarios: ScenarioRecord[];
   activeId: string;
   onSwitch: (id: string) => void;
-  onAdd: (mode: 'blank' | 'clone') => void;
+  onAdd: (mode: "blank" | "clone") => void;
   onRename: (id: string, name: string) => void;
   onDelete: (id: string) => void;
 }
@@ -20,7 +20,14 @@ interface ScenarioTabProps {
   onDelete: () => void;
 }
 
-function ScenarioTab({ scenario, isActive, canDelete, onActivate, onRename, onDelete }: ScenarioTabProps) {
+function ScenarioTab({
+  scenario,
+  isActive,
+  canDelete,
+  onActivate,
+  onRename,
+  onDelete,
+}: ScenarioTabProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [editValue, setEditValue] = useState(scenario.name);
   const [showPopover, setShowPopover] = useState(false);
@@ -43,8 +50,8 @@ function ScenarioTab({ scenario, isActive, canDelete, onActivate, onRename, onDe
         setShowPopover(false);
       }
     };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [showPopover]);
 
   const commitRename = () => {
@@ -59,9 +66,9 @@ function ScenarioTab({ scenario, isActive, canDelete, onActivate, onRename, onDe
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter') {
+    if (e.key === "Enter") {
       commitRename();
-    } else if (e.key === 'Escape') {
+    } else if (e.key === "Escape") {
       setEditValue(scenario.name);
       setIsEditing(false);
       setShowPopover(false);
@@ -87,8 +94,8 @@ function ScenarioTab({ scenario, isActive, canDelete, onActivate, onRename, onDe
         onClick={onActivate}
         className={
           isActive
-            ? 'border-b-2 border-dark font-semibold text-dark px-3 py-1 cursor-pointer bg-transparent outline-none'
-            : 'text-muted hover:text-ink px-3 py-1 cursor-pointer bg-transparent outline-none'
+            ? "border-b-2 border-dark font-semibold text-dark px-3 py-1 cursor-pointer bg-transparent outline-none"
+            : "text-muted hover:text-ink px-3 py-1 cursor-pointer bg-transparent outline-none"
         }
         aria-pressed={isActive}
       >
@@ -109,7 +116,10 @@ function ScenarioTab({ scenario, isActive, canDelete, onActivate, onRename, onDe
 
       {/* Gear button */}
       <button
-        onClick={(e) => { e.stopPropagation(); setShowPopover((v) => !v); }}
+        onClick={(e) => {
+          e.stopPropagation();
+          setShowPopover((v) => !v);
+        }}
         className="ml-0.5 p-0.5 rounded text-muted hover:text-ink hover:bg-surface transition-colors"
         aria-label={`Options for ${scenario.name}`}
       >
@@ -133,8 +143,8 @@ function ScenarioTab({ scenario, isActive, canDelete, onActivate, onRename, onDe
             disabled={!canDelete}
             className={`w-full text-left px-3 py-1.5 text-sm transition-colors ${
               canDelete
-                ? 'text-red-600 hover:bg-red-50'
-                : 'opacity-50 cursor-not-allowed text-muted'
+                ? "text-red-600 hover:bg-red-50"
+                : "opacity-50 cursor-not-allowed text-muted"
             }`}
           >
             Delete
@@ -164,11 +174,11 @@ export function ScenarioTabBar({
         setShowAddPrompt(false);
       }
     };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [showAddPrompt]);
 
-  const handleAdd = (mode: 'blank' | 'clone') => {
+  const handleAdd = (mode: "blank" | "clone") => {
     setShowAddPrompt(false);
     onAdd(mode);
   };
@@ -201,13 +211,13 @@ export function ScenarioTabBar({
           <div className="absolute top-full left-0 z-50 mt-1 min-w-[140px] rounded-md border border-border bg-white shadow-md py-1">
             <p className="px-3 py-1 text-xs text-muted font-medium">New scenario</p>
             <button
-              onClick={() => handleAdd('blank')}
+              onClick={() => handleAdd("blank")}
               className="w-full text-left px-3 py-1.5 text-sm text-ink hover:bg-surface transition-colors"
             >
               Blank
             </button>
             <button
-              onClick={() => handleAdd('clone')}
+              onClick={() => handleAdd("clone")}
               className="w-full text-left px-3 py-1.5 text-sm text-ink hover:bg-surface transition-colors"
             >
               Clone Current

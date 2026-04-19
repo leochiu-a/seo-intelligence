@@ -1,7 +1,7 @@
-import { useState, useEffect, useRef } from 'react';
-import { X } from 'lucide-react';
-import { Autocomplete } from '@base-ui/react/autocomplete';
-import { type Placement } from '../lib/graph-utils';
+import { useState, useEffect, useRef } from "react";
+import { X } from "lucide-react";
+import { Autocomplete } from "@base-ui/react/autocomplete";
+import { type Placement } from "../lib/graph-utils";
 
 interface EditPopoverProps {
   nodeId: string;
@@ -24,21 +24,37 @@ interface EditPopoverProps {
   onClose: () => void;
 }
 
-export function EditPopover({ nodeId, urlTemplate, pageCount, isGlobal: _isGlobal, isRoot, placements, placementSuggestions, tags, clusterSuggestions, onSave, onRootToggle, onClose }: EditPopoverProps) {
+export function EditPopover({
+  nodeId,
+  urlTemplate,
+  pageCount,
+  isGlobal: _isGlobal,
+  isRoot,
+  placements,
+  placementSuggestions,
+  tags,
+  clusterSuggestions,
+  onSave,
+  onRootToggle,
+  onClose,
+}: EditPopoverProps) {
   const [localTemplate, setLocalTemplate] = useState(urlTemplate);
   const [localCount, setLocalCount] = useState(pageCount);
   const [localPlacements, setLocalPlacements] = useState<Placement[]>(placements);
   const [localTags, setLocalTags] = useState<string[]>(tags);
-  const [tagDraft, setTagDraft] = useState('');
-  const [error, setError] = useState('');
+  const [tagDraft, setTagDraft] = useState("");
+  const [error, setError] = useState("");
   const popoverRef = useRef<HTMLDivElement>(null);
 
   const addTag = () => {
     const name = tagDraft.trim();
     if (!name) return;
-    if (localTags.includes(name)) { setTagDraft(''); return; }
+    if (localTags.includes(name)) {
+      setTagDraft("");
+      return;
+    }
     setLocalTags((prev) => [...prev, name]);
-    setTagDraft('');
+    setTagDraft("");
   };
 
   const removeTag = (tag: string) => {
@@ -46,44 +62,61 @@ export function EditPopover({ nodeId, urlTemplate, pageCount, isGlobal: _isGloba
   };
 
   const handleConfirm = () => {
-    if (localTemplate.trim() === '') {
-      setError('URL template cannot be empty');
+    if (localTemplate.trim() === "") {
+      setError("URL template cannot be empty");
       return;
     }
     const allTags = tagDraft.trim() ? [...localTags, tagDraft.trim()] : localTags;
     const cleanTags = [...new Set(allTags.filter((t) => t.length > 0))];
-    onSave(localTemplate.trim(), Math.max(1, localCount), localPlacements.length > 0, localPlacements, cleanTags);
+    onSave(
+      localTemplate.trim(),
+      Math.max(1, localCount),
+      localPlacements.length > 0,
+      localPlacements,
+      cleanTags,
+    );
     onClose();
   };
 
   useEffect(() => {
     const handleMouseDown = (e: MouseEvent) => {
       if (popoverRef.current && !popoverRef.current.contains(e.target as Node)) {
-        if (localTemplate.trim() === '') {
-          setError('URL template cannot be empty');
+        if (localTemplate.trim() === "") {
+          setError("URL template cannot be empty");
         } else {
           const allTags = tagDraft.trim() ? [...localTags, tagDraft.trim()] : localTags;
           const cleanTags = [...new Set(allTags.filter((t) => t.length > 0))];
-          onSave(localTemplate.trim(), Math.max(1, localCount), localPlacements.length > 0, localPlacements, cleanTags);
+          onSave(
+            localTemplate.trim(),
+            Math.max(1, localCount),
+            localPlacements.length > 0,
+            localPlacements,
+            cleanTags,
+          );
           onClose();
         }
       }
     };
 
-    document.addEventListener('mousedown', handleMouseDown);
-    return () => document.removeEventListener('mousedown', handleMouseDown);
+    document.addEventListener("mousedown", handleMouseDown);
+    return () => document.removeEventListener("mousedown", handleMouseDown);
   }, [localTemplate, localCount, localPlacements, localTags, tagDraft, onSave, onClose]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
+      if (e.key === "Escape") onClose();
       // Skip Enter when focus is inside an input/textarea — those handle their own Enter behavior
       // (e.g. tag input adds a chip; pressing Enter there must not also confirm the popover)
-      if (e.key === 'Enter' && !(e.target instanceof HTMLInputElement) && !(e.target instanceof HTMLTextAreaElement)) handleConfirm();
+      if (
+        e.key === "Enter" &&
+        !(e.target instanceof HTMLInputElement) &&
+        !(e.target instanceof HTMLTextAreaElement)
+      )
+        handleConfirm();
     };
 
-    document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
   }, [localTemplate, localCount, localPlacements, localTags, onClose]);
 
   return (
@@ -106,7 +139,7 @@ export function EditPopover({ nodeId, urlTemplate, pageCount, isGlobal: _isGloba
             value={localTemplate}
             onChange={(e) => {
               setLocalTemplate(e.target.value);
-              if (error) setError('');
+              if (error) setError("");
             }}
           />
           {error && <p className="text-[11px] text-red-500 mt-1">{error}</p>}
@@ -133,9 +166,11 @@ export function EditPopover({ nodeId, urlTemplate, pageCount, isGlobal: _isGloba
             role="switch"
             aria-checked={isRoot}
             onClick={() => onRootToggle(nodeId)}
-            className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${isRoot ? 'bg-violet-600' : 'bg-gray-300'}`}
+            className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${isRoot ? "bg-violet-600" : "bg-gray-300"}`}
           >
-            <span className={`inline-block h-3.5 w-3.5 rounded-full bg-white transition-transform ${isRoot ? 'translate-x-[18px]' : 'translate-x-[3px]'}`} />
+            <span
+              className={`inline-block h-3.5 w-3.5 rounded-full bg-white transition-transform ${isRoot ? "translate-x-[18px]" : "translate-x-[3px]"}`}
+            />
           </button>
         </div>
 
@@ -151,7 +186,7 @@ export function EditPopover({ nodeId, urlTemplate, pageCount, isGlobal: _isGloba
                     value={p.name}
                     onValueChange={(value) =>
                       setLocalPlacements((prev) =>
-                        prev.map((pl) => (pl.id === p.id ? { ...pl, name: value } : pl))
+                        prev.map((pl) => (pl.id === p.id ? { ...pl, name: value } : pl)),
                       )
                     }
                     items={placementSuggestions}
@@ -159,10 +194,7 @@ export function EditPopover({ nodeId, urlTemplate, pageCount, isGlobal: _isGloba
                   >
                     {/* Portal with container=popoverRef keeps dropdown inside popoverRef so click-outside handler works correctly */}
                     <Autocomplete.Portal container={popoverRef}>
-                      <Autocomplete.Positioner
-                        sideOffset={4}
-                        className="z-[60]"
-                      >
+                      <Autocomplete.Positioner sideOffset={4} className="z-[60]">
                         <Autocomplete.Popup className="bg-white border border-border rounded-lg shadow-lg overflow-hidden max-h-40 overflow-y-auto">
                           {placementSuggestions.map((name) => (
                             <Autocomplete.Item
@@ -192,7 +224,7 @@ export function EditPopover({ nodeId, urlTemplate, pageCount, isGlobal: _isGloba
                     value={p.name}
                     onChange={(e) =>
                       setLocalPlacements((prev) =>
-                        prev.map((pl) => (pl.id === p.id ? { ...pl, name: e.target.value } : pl))
+                        prev.map((pl) => (pl.id === p.id ? { ...pl, name: e.target.value } : pl)),
                       )
                     }
                   />
@@ -204,15 +236,17 @@ export function EditPopover({ nodeId, urlTemplate, pageCount, isGlobal: _isGloba
                   value={p.linkCount}
                   onChange={(e) =>
                     setLocalPlacements((prev) =>
-                      prev.map((pl) => (pl.id === p.id ? { ...pl, linkCount: Math.max(1, Number(e.target.value) || 1) } : pl))
+                      prev.map((pl) =>
+                        pl.id === p.id
+                          ? { ...pl, linkCount: Math.max(1, Number(e.target.value) || 1) }
+                          : pl,
+                      ),
                     )
                   }
                 />
                 <button
                   type="button"
-                  onClick={() =>
-                    setLocalPlacements((prev) => prev.filter((pl) => pl.id !== p.id))
-                  }
+                  onClick={() => setLocalPlacements((prev) => prev.filter((pl) => pl.id !== p.id))}
                   className="p-1 text-muted-fg hover:text-red-500 transition-colors"
                   aria-label={`Delete placement ${p.name}`}
                 >
@@ -226,7 +260,7 @@ export function EditPopover({ nodeId, urlTemplate, pageCount, isGlobal: _isGloba
             onClick={() =>
               setLocalPlacements((prev) => [
                 ...prev,
-                { id: crypto.randomUUID(), name: '', linkCount: 1 },
+                { id: crypto.randomUUID(), name: "", linkCount: 1 },
               ])
             }
             className="mt-2 text-[11px] font-medium text-blue-600 hover:text-blue-800 transition-colors"
@@ -247,9 +281,7 @@ export function EditPopover({ nodeId, urlTemplate, pageCount, isGlobal: _isGloba
                   className="flex-1 h-7 text-sm text-dark border border-border rounded-lg px-2 focus:outline-none focus:ring-2 focus:ring-tier-neutral/50 focus:border-tier-neutral transition"
                   value={tag}
                   onChange={(e) =>
-                    setLocalTags((prev) =>
-                      prev.map((t, j) => (j === i ? e.target.value : t))
-                    )
+                    setLocalTags((prev) => prev.map((t, j) => (j === i ? e.target.value : t)))
                   }
                 />
                 <button
@@ -274,15 +306,17 @@ export function EditPopover({ nodeId, urlTemplate, pageCount, isGlobal: _isGloba
               <Autocomplete.Portal container={popoverRef}>
                 <Autocomplete.Positioner sideOffset={4} className="z-[60]">
                   <Autocomplete.Popup className="bg-white border border-border rounded-lg shadow-lg overflow-hidden max-h-40 overflow-y-auto">
-                    {clusterSuggestions.filter((s) => !localTags.includes(s)).map((tag) => (
-                      <Autocomplete.Item
-                        key={tag}
-                        value={tag}
-                        className="px-2 py-1.5 text-sm text-dark cursor-pointer hover:bg-gray-50 data-[highlighted]:bg-gray-100"
-                      >
-                        {tag}
-                      </Autocomplete.Item>
-                    ))}
+                    {clusterSuggestions
+                      .filter((s) => !localTags.includes(s))
+                      .map((tag) => (
+                        <Autocomplete.Item
+                          key={tag}
+                          value={tag}
+                          className="px-2 py-1.5 text-sm text-dark cursor-pointer hover:bg-gray-50 data-[highlighted]:bg-gray-100"
+                        >
+                          {tag}
+                        </Autocomplete.Item>
+                      ))}
                     <Autocomplete.Empty className="px-2 py-1.5 text-sm text-muted-fg">
                       No matches
                     </Autocomplete.Empty>
@@ -293,7 +327,7 @@ export function EditPopover({ nodeId, urlTemplate, pageCount, isGlobal: _isGloba
                 className="mt-2 w-full h-7 text-sm text-dark border border-border rounded-lg px-2 focus:outline-none focus:ring-2 focus:ring-tier-neutral/50 focus:border-tier-neutral transition"
                 placeholder="e.g. food, taipei"
                 onKeyDown={(e) => {
-                  if (e.key === 'Enter') {
+                  if (e.key === "Enter") {
                     e.preventDefault();
                     e.stopPropagation();
                     addTag();
@@ -310,7 +344,7 @@ export function EditPopover({ nodeId, urlTemplate, pageCount, isGlobal: _isGloba
               value={tagDraft}
               onChange={(e) => setTagDraft(e.target.value)}
               onKeyDown={(e) => {
-                if (e.key === 'Enter') {
+                if (e.key === "Enter") {
                   e.preventDefault();
                   e.stopPropagation();
                   addTag();

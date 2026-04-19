@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback } from "react";
 import {
   SCENARIOS_KEY,
   OLD_STORAGE_KEY,
@@ -6,7 +6,7 @@ import {
   type ScenariosStore,
   type SerializedNode,
   type SerializedEdge,
-} from '../lib/scenario-types';
+} from "../lib/scenario-types";
 
 // ---------------------------------------------------------------------------
 // Serialization helpers (mirrors serializeGraph in App.tsx, but works with
@@ -20,7 +20,7 @@ function serializeNodes(nodes: object[]): SerializedNode[] {
     type: n.type,
     position: n.position,
     data: {
-      urlTemplate: n.data?.urlTemplate ?? '',
+      urlTemplate: n.data?.urlTemplate ?? "",
       pageCount: n.data?.pageCount ?? 1,
       ...(n.data?.isGlobal != null && { isGlobal: n.data.isGlobal }),
       ...(n.data?.placements?.length && { placements: n.data.placements }),
@@ -76,7 +76,7 @@ export function loadOrMigrate(): ScenariosStore {
         scenarios: [
           {
             id,
-            name: 'Default',
+            name: "Default",
             nodes: parsed.nodes ?? [],
             edges: parsed.edges ?? [],
           },
@@ -93,7 +93,7 @@ export function loadOrMigrate(): ScenariosStore {
   const id = crypto.randomUUID();
   return {
     activeScenarioId: id,
-    scenarios: [{ id, name: 'Scenario 1', nodes: [], edges: [] }],
+    scenarios: [{ id, name: "Scenario 1", nodes: [], edges: [] }],
   };
 }
 
@@ -103,8 +103,16 @@ export function loadOrMigrate(): ScenariosStore {
 
 export interface UseScenariosResult {
   store: ScenariosStore;
-  createScenario: (mode: 'blank' | 'clone', currentNodes: object[], currentEdges: object[]) => ScenarioRecord;
-  switchScenario: (targetId: string, currentNodes: object[], currentEdges: object[]) => ScenarioRecord | null;
+  createScenario: (
+    mode: "blank" | "clone",
+    currentNodes: object[],
+    currentEdges: object[],
+  ) => ScenarioRecord;
+  switchScenario: (
+    targetId: string,
+    currentNodes: object[],
+    currentEdges: object[],
+  ) => ScenarioRecord | null;
   renameScenario: (id: string, name: string) => void;
   deleteScenario: (id: string) => ScenarioRecord | null;
   persist: () => void;
@@ -119,7 +127,7 @@ export function useScenarios(): UseScenariosResult {
    * Also serializes currentNodes/currentEdges into the currently-active slot.
    */
   const createScenario = useCallback(
-    (mode: 'blank' | 'clone', currentNodes: object[], currentEdges: object[]): ScenarioRecord => {
+    (mode: "blank" | "clone", currentNodes: object[], currentEdges: object[]): ScenarioRecord => {
       const serializedNodes = serializeNodes(currentNodes);
       const serializedEdges = serializeEdges(currentEdges);
 
@@ -139,8 +147,8 @@ export function useScenarios(): UseScenariosResult {
         newScenario = {
           id: newId,
           name: newName,
-          nodes: mode === 'clone' ? structuredClone(serializedNodes) : [],
-          edges: mode === 'clone' ? structuredClone(serializedEdges) : [],
+          nodes: mode === "clone" ? structuredClone(serializedNodes) : [],
+          edges: mode === "clone" ? structuredClone(serializedEdges) : [],
         };
 
         return {
@@ -211,8 +219,7 @@ export function useScenarios(): UseScenariosResult {
       }
 
       const remaining = prev.scenarios.filter((s) => s.id !== id);
-      const newActiveId =
-        prev.activeScenarioId === id ? remaining[0].id : prev.activeScenarioId;
+      const newActiveId = prev.activeScenarioId === id ? remaining[0].id : prev.activeScenarioId;
 
       result = remaining.find((s) => s.id === newActiveId) ?? remaining[0];
 

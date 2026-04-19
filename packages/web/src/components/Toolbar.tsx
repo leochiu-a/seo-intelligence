@@ -1,4 +1,4 @@
-import { Plus, Download, Upload, Trash2 } from 'lucide-react';
+import { Plus, Download, Upload, Trash2 } from "lucide-react";
 
 interface ToolbarProps {
   onAddNode: () => void;
@@ -8,7 +8,13 @@ interface ToolbarProps {
   isEmpty: boolean;
 }
 
-export function Toolbar({ onAddNode, onImportJson, onExportJson, onClearCanvas, isEmpty }: ToolbarProps) {
+export function Toolbar({
+  onAddNode,
+  onImportJson,
+  onExportJson,
+  onClearCanvas,
+  isEmpty,
+}: ToolbarProps) {
   return (
     <header className="flex h-12 shrink-0 items-center border-b border-border bg-white px-4 shadow-sm">
       <span className="text-sm font-bold tracking-wide text-pink">SEO INTELLIGENCE</span>

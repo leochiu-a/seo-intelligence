@@ -1,4 +1,4 @@
-import type { Node, Edge } from '@xyflow/react';
+import type { Node, Edge } from "@xyflow/react";
 
 export interface Placement {
   id: string;
@@ -12,7 +12,7 @@ export interface UrlNodeData {
   isGlobal?: boolean;
   placements?: Placement[];
   isRoot?: boolean;
-  tags?: string[];  // Phase 999.5 D-01. Optional array of cluster tag names. Empty/missing = unassigned.
+  tags?: string[]; // Phase 999.5 D-01. Optional array of cluster tag names. Empty/missing = unassigned.
 }
 
 export interface LinkCountEdgeData {
@@ -34,10 +34,10 @@ export function createDefaultNode(position: { x: number; y: number }): Node<UrlN
   nodeIdCounter += 1;
   return {
     id: `node-${nodeIdCounter}`,
-    type: 'urlNode',
+    type: "urlNode",
     position,
     data: {
-      urlTemplate: '/page/<id>',
+      urlTemplate: "/page/<id>",
       pageCount: 1,
     },
   };
@@ -52,9 +52,7 @@ export function updateNodeData(
   nodeId: string,
   newData: Partial<UrlNodeData>,
 ): Node<UrlNodeData>[] {
-  return nodes.map((n) =>
-    n.id === nodeId ? { ...n, data: { ...n.data, ...newData } } : n,
-  );
+  return nodes.map((n) => (n.id === nodeId ? { ...n, data: { ...n.data, ...newData } } : n));
 }
 
 /**
@@ -66,24 +64,19 @@ export function updateEdgeLinkCount(
   edgeId: string,
   linkCount: number,
 ): Edge<LinkCountEdgeData>[] {
-  return edges.map((e) =>
-    e.id === edgeId ? { ...e, data: { ...e.data, linkCount } } : e,
-  );
+  return edges.map((e) => (e.id === edgeId ? { ...e, data: { ...e.data, linkCount } } : e));
 }
 
 /**
  * Validates node form data.
  * Returns an error string if invalid, null if valid.
  */
-export function validateNodeData(data: {
-  urlTemplate: string;
-  pageCount: number;
-}): string | null {
-  if (data.urlTemplate.trim() === '') {
-    return 'URL template cannot be empty';
+export function validateNodeData(data: { urlTemplate: string; pageCount: number }): string | null {
+  if (data.urlTemplate.trim() === "") {
+    return "URL template cannot be empty";
   }
   if (data.pageCount < 1) {
-    return 'Page count must be at least 1';
+    return "Page count must be at least 1";
   }
   return null;
 }
@@ -104,10 +97,10 @@ export function validateLinkCount(count: number): number {
  * Returns "1 page" for 1, "{n} pages" for all other values.
  */
 export function formatPageCount(n: number): string {
-  return n === 1 ? '1 page' : `${n} pages`;
+  return n === 1 ? "1 page" : `${n} pages`;
 }
 
-export type ScoreTier = 'high' | 'mid' | 'low' | 'neutral';
+export type ScoreTier = "high" | "mid" | "low" | "neutral";
 
 const DAMPING = 0.85;
 const MAX_ITER = 100;
@@ -136,10 +129,7 @@ export const DEPTH_WARNING_THRESHOLD = 3;
  * Handles undefined/empty inputs by returning false. Used by calculatePageRank
  * to decide whether an edge gets the CLUSTER_BONUS_FACTOR multiplier.
  */
-export function hasSameCluster(
-  a: string[] | undefined,
-  b: string[] | undefined,
-): boolean {
+export function hasSameCluster(a: string[] | undefined, b: string[] | undefined): boolean {
   if (!a || !b || a.length === 0 || b.length === 0) return false;
   const setB = new Set(b);
   for (const tag of a) {
@@ -175,9 +165,15 @@ export function calculatePageRank(
   }
 
   // Build inbound adjacency: targetId -> Array<{ sourceId, linkCount, sameCluster }>
-  const inbound = new Map<string, Array<{ sourceId: string; linkCount: number; sameCluster: boolean }>>();
+  const inbound = new Map<
+    string,
+    Array<{ sourceId: string; linkCount: number; sameCluster: boolean }>
+  >();
   // Build outbound adjacency: sourceId -> Array<{ targetId, linkCount, sameCluster }>
-  const outbound = new Map<string, Array<{ targetId: string; linkCount: number; sameCluster: boolean }>>();
+  const outbound = new Map<
+    string,
+    Array<{ targetId: string; linkCount: number; sameCluster: boolean }>
+  >();
 
   for (const n of nodes) {
     inbound.set(n.id, []);
@@ -257,14 +253,14 @@ export function calculatePageRank(
 
     for (const n of nodes) {
       const pageCount = nodeMap.get(n.id)?.pageCount ?? 1;
-      let rank = (1 - DAMPING) + danglingShare;
+      let rank = 1 - DAMPING + danglingShare;
 
       for (const { sourceId, linkCount, sameCluster } of inbound.get(n.id) ?? []) {
         const sourceScore = scores.get(sourceId) ?? 1.0;
         const sourceTotal = totalWeightedOut.get(sourceId) ?? 0;
         if (sourceTotal > 0) {
           const effectiveLinkCount = sameCluster ? linkCount * CLUSTER_BONUS_FACTOR : linkCount;
-          rank += DAMPING * sourceScore * effectiveLinkCount * pageCount / sourceTotal;
+          rank += (DAMPING * sourceScore * effectiveLinkCount * pageCount) / sourceTotal;
         }
       }
 
@@ -316,10 +312,7 @@ export function calculateOutboundLinks(
   const globalPlacementSum = nodes
     .filter((n) => n.data.isGlobal)
     .reduce((total, g) => {
-      const perGlobal = (g.data.placements ?? []).reduce(
-        (sum, p) => sum + p.linkCount,
-        0,
-      );
+      const perGlobal = (g.data.placements ?? []).reduce((sum, p) => sum + p.linkCount, 0);
       return total + perGlobal;
     }, 0);
 
@@ -338,9 +331,9 @@ export function calculateOutboundLinks(
 // ---------------------------------------------------------------------------
 
 export interface HealthStatus {
-  links: 'ok' | 'warn';
-  depth: 'ok' | 'warn' | 'na';
-  tags: 'ok' | 'warn';
+  links: "ok" | "warn";
+  depth: "ok" | "warn" | "na";
+  tags: "ok" | "warn";
 }
 
 /**
@@ -361,22 +354,22 @@ export function getHealthStatus(
 ): HealthStatus {
   // Links
   const outbound = outboundMap.get(node.id) ?? 0;
-  const links: HealthStatus['links'] = outbound > OUTBOUND_WARNING_THRESHOLD ? 'warn' : 'ok';
+  const links: HealthStatus["links"] = outbound > OUTBOUND_WARNING_THRESHOLD ? "warn" : "ok";
 
   // Depth
-  let depth: HealthStatus['depth'];
+  let depth: HealthStatus["depth"];
   if (depthMap.size === 0) {
-    depth = 'na'; // no root set, depth is not computable
+    depth = "na"; // no root set, depth is not computable
   } else if (!depthMap.has(node.id)) {
-    depth = 'warn'; // root is set but node is unreachable
+    depth = "warn"; // root is set but node is unreachable
   } else {
     const d = depthMap.get(node.id)!;
-    depth = d === Infinity || d > DEPTH_WARNING_THRESHOLD ? 'warn' : 'ok';
+    depth = d === Infinity || d > DEPTH_WARNING_THRESHOLD ? "warn" : "ok";
   }
 
   // Tags — treat whitespace-only entries as empty
-  const trimmed = (node.data.tags ?? []).filter((t) => t.trim() !== '');
-  const tags: HealthStatus['tags'] = trimmed.length === 0 ? 'warn' : 'ok';
+  const trimmed = (node.data.tags ?? []).filter((t) => t.trim() !== "");
+  const tags: HealthStatus["tags"] = trimmed.length === 0 ? "warn" : "ok";
 
   return { links, depth, tags };
 }
@@ -386,48 +379,43 @@ export function getHealthStatus(
  * 'na' depth is NOT a warning (no root set → no actionable signal).
  */
 export function hasAnyWarning(status: HealthStatus): boolean {
-  return status.links === 'warn' || status.depth === 'warn' || status.tags === 'warn';
+  return status.links === "warn" || status.depth === "warn" || status.tags === "warn";
 }
 
 export function buildTooltipContent(status: HealthStatus): string {
   const issues: string[] = [];
-  if (status.links === 'warn') issues.push('Outbound links > 150');
-  if (status.depth === 'warn') issues.push(`Crawl depth > ${DEPTH_WARNING_THRESHOLD}`);
-  if (status.tags === 'warn') issues.push('No tags assigned');
-  return issues.join('\n');
+  if (status.links === "warn") issues.push("Outbound links > 150");
+  if (status.depth === "warn") issues.push(`Crawl depth > ${DEPTH_WARNING_THRESHOLD}`);
+  if (status.tags === "warn") issues.push("No tags assigned");
+  return issues.join("\n");
 }
 
 /**
  * Classifies a score into a tier based on relative thirds of the score range.
  * If only one unique score exists, returns 'neutral'.
  */
-export function classifyScoreTier(
-  score: number,
-  allScores: number[],
-): ScoreTier {
-  if (allScores.length <= 1) return 'neutral';
+export function classifyScoreTier(score: number, allScores: number[]): ScoreTier {
+  if (allScores.length <= 1) return "neutral";
 
   const min = Math.min(...allScores);
   const max = Math.max(...allScores);
 
-  if (min === max) return 'neutral';
+  if (min === max) return "neutral";
 
   const range = max - min;
   const lowThreshold = min + range / 3;
   const highThreshold = min + (2 * range) / 3;
 
-  if (score >= highThreshold) return 'high';
-  if (score >= lowThreshold) return 'mid';
-  return 'low';
+  if (score >= highThreshold) return "high";
+  if (score >= lowThreshold) return "mid";
+  return "low";
 }
 
 /**
  * Identifies weak nodes: those with score below (mean - 1 stddev).
  * If stddev is 0 (all equal), returns empty set.
  */
-export function identifyWeakNodes(
-  scores: Map<string, number>,
-): Set<string> {
+export function identifyWeakNodes(scores: Map<string, number>): Set<string> {
   if (scores.size <= 1) return new Set();
 
   const values = Array.from(scores.values());
@@ -637,7 +625,7 @@ export function collectClusterSuggestions(
 ): string[] {
   const tags = nodes
     .filter((n) => n.id !== currentNodeId && n.data.tags?.length)
-    .flatMap((n) => (n.data.tags ?? []).filter((t) => t.trim() !== ''));
+    .flatMap((n) => (n.data.tags ?? []).filter((t) => t.trim() !== ""));
   return [...new Set(tags)];
 }
 
@@ -684,9 +672,7 @@ export function buildUrlTree(
     id: n.id,
     urlTemplate: n.data.urlTemplate,
     score: scores.get(n.id) ?? 0,
-    segments: n.data.urlTemplate
-      .split('/')
-      .filter((s) => s.length > 0),
+    segments: n.data.urlTemplate.split("/").filter((s) => s.length > 0),
   }));
 
   // Sort by segment count ascending so potential parents come first
@@ -749,10 +735,10 @@ export function buildUrlTree(
  * With ConnectionMode.Loose, each handle acts as both source and target.
  */
 export const HANDLE_IDS = {
-  top: 'handle-top',
-  right: 'handle-right',
-  bottom: 'handle-bottom',
-  left: 'handle-left',
+  top: "handle-top",
+  right: "handle-right",
+  bottom: "handle-bottom",
+  left: "handle-left",
 } as const;
 
 /**
@@ -796,7 +782,7 @@ export function parseImportJson(raw: string): {
   const data = JSON.parse(raw) as unknown;
 
   if (
-    typeof data !== 'object' ||
+    typeof data !== "object" ||
     data === null ||
     !Array.isArray((data as Record<string, unknown>).nodes) ||
     !Array.isArray((data as Record<string, unknown>).edges)
@@ -811,22 +797,22 @@ export function parseImportJson(raw: string): {
 
   const nodes: Node<UrlNodeData>[] = rawNodes.map((n, i) => {
     const node = n as Record<string, unknown>;
-    if (typeof node.urlTemplate !== 'string') {
+    if (typeof node.urlTemplate !== "string") {
       throw new Error(`Node at index ${i} is missing "urlTemplate"`);
     }
-    if (typeof node.pageCount !== 'number') {
+    if (typeof node.pageCount !== "number") {
       throw new Error(`Node at index ${i} is missing "pageCount"`);
     }
-    const isGlobal = typeof node.isGlobal === 'boolean' ? node.isGlobal : undefined;
-    const isRoot = typeof node.isRoot === 'boolean' ? node.isRoot : undefined;
-    const placements = Array.isArray(node.placements) ? (node.placements as Placement[]) : undefined;
-    const tagsRaw = Array.isArray(node.tags) ? node.tags : undefined;
-    const tags = tagsRaw
-      ? tagsRaw.filter((t): t is string => typeof t === 'string')
+    const isGlobal = typeof node.isGlobal === "boolean" ? node.isGlobal : undefined;
+    const isRoot = typeof node.isRoot === "boolean" ? node.isRoot : undefined;
+    const placements = Array.isArray(node.placements)
+      ? (node.placements as Placement[])
       : undefined;
+    const tagsRaw = Array.isArray(node.tags) ? node.tags : undefined;
+    const tags = tagsRaw ? tagsRaw.filter((t): t is string => typeof t === "string") : undefined;
     return {
       id: String(node.id),
-      type: 'urlNode',
+      type: "urlNode",
       position: { x: Number(node.x ?? 0), y: Number(node.y ?? 0) },
       data: {
         urlTemplate: node.urlTemplate,
@@ -843,8 +829,8 @@ export function parseImportJson(raw: string): {
 
   const edges: Edge<LinkCountEdgeData>[] = rawEdges.map((e) => {
     const edge = e as Record<string, unknown>;
-    const sourceHandle = typeof edge.sourceHandle === 'string' ? edge.sourceHandle : undefined;
-    const targetHandle = typeof edge.targetHandle === 'string' ? edge.targetHandle : undefined;
+    const sourceHandle = typeof edge.sourceHandle === "string" ? edge.sourceHandle : undefined;
+    const targetHandle = typeof edge.targetHandle === "string" ? edge.targetHandle : undefined;
 
     let resolvedSourceHandle = sourceHandle;
     let resolvedTargetHandle = targetHandle;
@@ -863,8 +849,8 @@ export function parseImportJson(raw: string): {
       id: String(edge.id),
       source: String(edge.source),
       target: String(edge.target),
-      type: 'linkCountEdge',
-      data: { linkCount: typeof edge.linkCount === 'number' ? edge.linkCount : 1 },
+      type: "linkCountEdge",
+      data: { linkCount: typeof edge.linkCount === "number" ? edge.linkCount : 1 },
       ...(resolvedSourceHandle && { sourceHandle: resolvedSourceHandle }),
       ...(resolvedTargetHandle && { targetHandle: resolvedTargetHandle }),
     };

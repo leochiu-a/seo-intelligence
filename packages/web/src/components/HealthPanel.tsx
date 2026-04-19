@@ -1,15 +1,15 @@
-import { useState, useMemo } from 'react';
-import { TriangleAlert } from 'lucide-react';
-import type { Node } from '@xyflow/react';
+import { useState, useMemo } from "react";
+import { TriangleAlert } from "lucide-react";
+import type { Node } from "@xyflow/react";
 import {
   getHealthStatus,
   hasAnyWarning,
   buildTooltipContent,
   type UrlNodeData,
   type HealthStatus,
-} from '../lib/graph-utils';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
+} from "../lib/graph-utils";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 
 interface HealthPanelProps {
   nodes: Node<UrlNodeData>[];
@@ -23,7 +23,6 @@ interface HealthRow {
   status: HealthStatus;
   hasWarn: boolean;
 }
-
 
 export function HealthPanel({ nodes, depthMap, outboundMap }: HealthPanelProps) {
   const [warningsOnly, setWarningsOnly] = useState(true);
@@ -68,13 +67,9 @@ export function HealthPanel({ nodes, depthMap, outboundMap }: HealthPanelProps) 
       </div>
 
       {nodes.length === 0 ? (
-        <p className="px-3 py-4 text-[11px] text-muted-fg text-center">
-          No nodes to check
-        </p>
+        <p className="px-3 py-4 text-[11px] text-muted-fg text-center">No nodes to check</p>
       ) : visibleRows.length === 0 ? (
-        <p className="px-3 py-4 text-[11px] text-muted-fg text-center">
-          All pages are healthy
-        </p>
+        <p className="px-3 py-4 text-[11px] text-muted-fg text-center">All pages are healthy</p>
       ) : (
         <ul className="divide-y divide-border">
           {visibleRows.map((row) => (
@@ -83,9 +78,7 @@ export function HealthPanel({ nodes, depthMap, outboundMap }: HealthPanelProps) 
               data-testid="health-row"
               className="px-3 py-2.5 flex items-center gap-2"
             >
-              <span className="flex-1 min-w-0 text-sm text-dark truncate">
-                {row.urlTemplate}
-              </span>
+              <span className="flex-1 min-w-0 text-sm text-dark truncate">{row.urlTemplate}</span>
               {row.hasWarn && (
                 <Tooltip>
                   <TooltipTrigger
@@ -94,9 +87,7 @@ export function HealthPanel({ nodes, depthMap, outboundMap }: HealthPanelProps) 
                   >
                     <TriangleAlert size={14} />
                   </TooltipTrigger>
-                  <TooltipContent>
-                    {buildTooltipContent(row.status)}
-                  </TooltipContent>
+                  <TooltipContent>{buildTooltipContent(row.status)}</TooltipContent>
                 </Tooltip>
               )}
             </li>
@@ -106,4 +97,3 @@ export function HealthPanel({ nodes, depthMap, outboundMap }: HealthPanelProps) 
     </div>
   );
 }
-
