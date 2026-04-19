@@ -204,4 +204,60 @@ describe("UrlNode", () => {
       expect(dot.className).toContain(color.dot);
     });
   });
+
+  describe("tier badge tooltip", () => {
+    it("renders tooltip trigger with data-tier='low' when scoreTier is low", () => {
+      renderNode({
+        urlTemplate: "/a",
+        pageCount: 1,
+        scoreTier: "low",
+        onUpdate: vi.fn(),
+      });
+      const trigger = screen.getByTestId("badge-tooltip-trigger");
+      expect(trigger).toHaveAttribute("data-tier", "low");
+      expect(trigger).toHaveTextContent("Low");
+      expect(trigger.tagName).toBe("SPAN");
+    });
+
+    it("renders tooltip trigger with data-tier='mid' when scoreTier is mid", () => {
+      renderNode({
+        urlTemplate: "/a",
+        pageCount: 1,
+        scoreTier: "mid",
+        onUpdate: vi.fn(),
+      });
+      const trigger = screen.getByTestId("badge-tooltip-trigger");
+      expect(trigger).toHaveAttribute("data-tier", "mid");
+      expect(trigger).toHaveTextContent("Mid");
+      expect(trigger.tagName).toBe("SPAN");
+    });
+
+    it("renders tooltip trigger with data-tier='high' when scoreTier is high", () => {
+      renderNode({
+        urlTemplate: "/a",
+        pageCount: 1,
+        scoreTier: "high",
+        onUpdate: vi.fn(),
+      });
+      const trigger = screen.getByTestId("badge-tooltip-trigger");
+      expect(trigger).toHaveAttribute("data-tier", "high");
+      expect(trigger).toHaveTextContent("High");
+      expect(trigger.tagName).toBe("SPAN");
+    });
+
+    it("does NOT render tooltip trigger when scoreTier is neutral", () => {
+      renderNode({
+        urlTemplate: "/a",
+        pageCount: 1,
+        scoreTier: "neutral",
+        onUpdate: vi.fn(),
+      });
+      expect(screen.queryByTestId("badge-tooltip-trigger")).toBeNull();
+    });
+
+    it("does NOT render tooltip trigger when scoreTier is undefined", () => {
+      renderNode({ urlTemplate: "/a", pageCount: 1, onUpdate: vi.fn() });
+      expect(screen.queryByTestId("badge-tooltip-trigger")).toBeNull();
+    });
+  });
 });

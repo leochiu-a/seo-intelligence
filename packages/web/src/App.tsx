@@ -24,6 +24,7 @@ import { Toolbar } from "./components/Toolbar";
 import { ScenarioTabBar } from "./components/ScenarioTabBar";
 import { SidePanel } from "./components/SidePanel";
 import { ImportDialog } from "./components/ImportDialog";
+import { LegendDialog } from "./components/LegendDialog";
 import { TooltipProvider } from "./components/ui/tooltip";
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "./components/ui/resizable";
 import { useFilterState } from "./hooks/useFilterState";
@@ -145,6 +146,7 @@ function AppInner() {
     Edge<LinkCountEdgeData>
   > | null>(null);
   const [showImportDialog, setShowImportDialog] = useState(false);
+  const [showLegendDialog, setShowLegendDialog] = useState(false);
   // Guard: save effect skips its first invocation (regardless of restore timing), then saves on all subsequent renders
   const isFirstRender = useRef(true);
   // Guard: suppresses save effect during scenario switch to prevent corrupt writes
@@ -694,6 +696,7 @@ function AppInner() {
         onExportJson={onExportJson}
         onClearCanvas={handleClearCanvas}
         isEmpty={nodes.length === 0}
+        onLegendOpen={() => setShowLegendDialog(true)}
       />
       <ScenarioTabBar
         scenarios={store.scenarios}
@@ -792,6 +795,7 @@ function AppInner() {
         onClose={() => setShowImportDialog(false)}
         onImport={handleImportFromDialog}
       />
+      <LegendDialog open={showLegendDialog} onClose={() => setShowLegendDialog(false)} />
     </div>
   );
 }

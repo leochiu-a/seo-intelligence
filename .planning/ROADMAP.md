@@ -202,6 +202,17 @@ Plans:
 - [ ] 999.5-08-PLAN.md — (carried from backlog, not yet executed)
 **UI hint**: yes
 
+### Phase 11.2: Add score badge tooltip and improvement guidance for low/mid nodes (INSERTED)
+
+**Goal:** Add hover tooltips to the Low/Mid/High tier badges on canvas UrlNode cards. Each tooltip explains what the tier means in PM-friendly language ("link equity" / "internal link strength" — no "PageRank" jargon) and gives a one-line action (Low/Mid: add more inbound internal links from high-scoring pages; High: affirm well-connected). Neutral badge is excluded. Badge visual (color, size, label) is unchanged. Canvas nodes only — sidebar score list deferred.
+**Requirements**: TBD-11.2-BADGE-TOOLTIP
+**Depends on:** Phase 11
+**Plans:** 1/1 plans complete
+
+Plans:
+- [ ] 11.2-01-PLAN.md — Extend TONE_MAP with tooltip copy and wrap tier badge in Tooltip/TooltipTrigger/TooltipContent in UrlNode.tsx, plus vitest coverage
+**UI hint**: yes
+
 ### Phase 11.1: PM 指標健診面板 — 在單一頁面檢查 Internal Link Deep Placement Text 是否達標並 filter warning 危險頁面 (INSERTED)
 
 **Goal**: Add a PM Health Check view inside the existing right sidebar via a [Score | Health] tab toggle. The Health view lists every node with 3 icon badges (Links >150, Depth >3/unreachable, Tags empty), warnings-first sort, and a "Show warnings only" filter toggle. Read-only diagnostic surface — no click-through to canvas.
@@ -257,4 +268,3 @@ Plans:
 
 Plans:
 - [ ] TBD (promote with /gsd:review-backlog when ready)
-

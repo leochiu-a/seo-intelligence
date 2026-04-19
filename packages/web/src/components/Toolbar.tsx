@@ -1,4 +1,4 @@
-import { Plus, Download, Upload, Trash2 } from "lucide-react";
+import { Plus, Download, Upload, Trash2, HelpCircle } from "lucide-react";
 
 interface ToolbarProps {
   onAddNode: () => void;
@@ -6,6 +6,7 @@ interface ToolbarProps {
   onExportJson: () => void;
   onClearCanvas: () => void;
   isEmpty: boolean;
+  onLegendOpen?: () => void;
 }
 
 export function Toolbar({
@@ -14,6 +15,7 @@ export function Toolbar({
   onExportJson,
   onClearCanvas,
   isEmpty,
+  onLegendOpen,
 }: ToolbarProps) {
   return (
     <header className="flex h-12 shrink-0 items-center border-b border-border bg-white px-4 shadow-sm">
@@ -49,6 +51,13 @@ export function Toolbar({
         >
           <Trash2 size={14} />
           Clear Canvas
+        </button>
+        <button
+          onClick={onLegendOpen}
+          aria-label="Legend"
+          className="flex items-center justify-center rounded-md border border-border bg-white p-1.5 text-ink hover:bg-surface transition-colors"
+        >
+          <HelpCircle size={16} />
         </button>
       </div>
     </header>
