@@ -6,6 +6,7 @@ import type { UrlNodeData, UrlTreeNode } from "../lib/graph-utils";
 import { buildUrlTree, OUTBOUND_WARNING_THRESHOLD } from "../lib/graph-utils";
 import { getClusterColor } from "../lib/cluster-colors";
 import { HealthPanel } from "./HealthPanel";
+import { FilterPanel } from "./FilterPanel";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 
 interface ScoreSidebarProps {
@@ -18,6 +19,9 @@ interface ScoreSidebarProps {
   outboundMap: Map<string, number>;
   rootId: string | null;
   onNodeHighlight?: (id: string | null) => void;
+  activeFilters: Set<string>;
+  onFilterToggle: (key: string) => void;
+  onFilterClear: () => void;
 }
 
 /** Renders up to 3 small colored dots for a node's cluster tags. Returns null if no tags. */
@@ -63,9 +67,12 @@ export function ScoreSidebar({
   outboundMap,
   rootId,
   onNodeHighlight,
+  activeFilters,
+  onFilterToggle,
+  onFilterClear,
 }: ScoreSidebarProps) {
   const { fitView, setNodes } = useReactFlow();
-  const [activeTab, setActiveTab] = useState<"score" | "health">("score");
+  const [activeTab, setActiveTab] = useState<"filter" | "score" | "health">("score");
 
   const nodeById = useMemo(() => new Map(nodes.map((n) => [n.id, n])), [nodes]);
 
@@ -94,9 +101,20 @@ export function ScoreSidebar({
   };
 
   return (
-    <aside className="relative border-l border-border bg-white overflow-y-auto h-full">
-      {/* Phase 11.1 D-01: [Score | Health] tab toggle */}
-      <div className="flex border-b border-border" data-testid="sidebar-tabs">
+    <aside className="relative border-r border-border bg-white flex flex-col h-full">
+      <div className="flex border-b border-border flex-shrink-0" data-testid="sidebar-tabs">
+        <button
+          type="button"
+          data-testid="tab-filter"
+          onClick={() => setActiveTab("filter")}
+          className={`flex-1 px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.14em] transition-colors ${
+            activeTab === "filter"
+              ? "text-dark border-b-2 border-blue-500 -mb-px"
+              : "text-muted-fg hover:text-dark"
+          }`}
+        >
+          Filter
+        </button>
         <button
           type="button"
           data-testid="tab-score"
@@ -123,184 +141,196 @@ export function ScoreSidebar({
         </button>
       </div>
 
-      {activeTab === "score" && (
-        <>
-          {/* Root prompt — shown when no root set and nodes exist */}
-          {!rootId && nodes.length > 0 && (
-            <div className="px-3 py-3 bg-amber-50 border-b border-border">
-              <p className="text-[11px] text-amber-700">
-                Set a root node to see crawl depth. Click a node's edit button and enable "Root
-                (Homepage)".
+      <div className="flex-1 overflow-y-auto">
+        {activeTab === "filter" && (
+          <FilterPanel
+            nodes={nodes}
+            activeFilters={activeFilters}
+            onToggle={onFilterToggle}
+            onClear={onFilterClear}
+          />
+        )}
+
+        {activeTab === "score" && (
+          <>
+            {/* Root prompt — shown when no root set and nodes exist */}
+            {!rootId && nodes.length > 0 && (
+              <div className="px-3 py-3 bg-amber-50 border-b border-border">
+                <p className="text-[11px] text-amber-700">
+                  Set a root node to see crawl depth. Click a node's edit button and enable "Root
+                  (Homepage)".
+                </p>
+              </div>
+            )}
+
+            {/* Orphan section */}
+            {orphanList.length > 0 && (
+              <div>
+                <div className="px-3 py-2 bg-red-50 border-b border-border">
+                  <h2 className="text-[11px] font-semibold uppercase tracking-[0.14em] text-red-600 flex items-center gap-1.5">
+                    <Unplug size={12} />
+                    Orphan Pages ({orphanList.length})
+                  </h2>
+                </div>
+                <ul className="divide-y divide-border">
+                  {orphanList.map((node) => (
+                    <li key={node.id}>
+                      <button
+                        className="w-full text-left px-3 py-2.5 hover:bg-surface transition-colors flex items-start gap-2"
+                        onClick={() => handleClick(node.id)}
+                      >
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm text-dark truncate flex items-center">
+                            {renderClusterDots(node.data.tags)}
+                            <span className="truncate">{node.data.urlTemplate}</span>
+                          </p>
+                          <p className="text-[11px] text-muted-fg font-mono">
+                            {(scores.get(node.id) ?? 0).toFixed(4)} ·{" "}
+                            <span className="text-red-500">No inbound links</span>
+                          </p>
+                        </div>
+                        <Unplug
+                          size={14}
+                          className="text-red-500 mt-0.5 flex-shrink-0"
+                          aria-label="Orphan page"
+                        />
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            {/* Unreachable section */}
+            {unreachableOnlyList.length > 0 && (
+              <div>
+                <div className="px-3 py-2 bg-red-50 border-b border-border">
+                  <h2 className="text-[11px] font-semibold uppercase tracking-[0.14em] text-red-600 flex items-center gap-1.5">
+                    <Unplug size={12} />
+                    Unreachable ({unreachableOnlyList.length})
+                  </h2>
+                </div>
+                <ul className="divide-y divide-border">
+                  {unreachableOnlyList.map((node) => (
+                    <li key={node.id}>
+                      <button
+                        className="w-full text-left px-3 py-2.5 hover:bg-surface transition-colors flex items-start gap-2"
+                        onClick={() => handleClick(node.id)}
+                      >
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm text-dark truncate flex items-center">
+                            {renderClusterDots(node.data.tags)}
+                            <span className="truncate">{node.data.urlTemplate}</span>
+                          </p>
+                          <p className="text-[11px] text-muted-fg font-mono">
+                            {(scores.get(node.id) ?? 0).toFixed(4)} ·{" "}
+                            <span className="text-red-500">Unreachable</span>
+                          </p>
+                        </div>
+                        <Unplug
+                          size={14}
+                          className="text-red-500 mt-0.5 flex-shrink-0"
+                          aria-label="Unreachable page"
+                        />
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            <div className="px-3 py-2.5 border-b border-border">
+              <h2 className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-fg">
+                Score Ranking
+              </h2>
+            </div>
+            <ul className="divide-y divide-border">
+              {mainRanked.map((item) => {
+                const sourceNode = nodeById.get(item.id);
+                const tags = sourceNode?.data.tags;
+                return (
+                  <li key={item.id}>
+                    <button
+                      className="w-full text-left py-2.5 pr-3 hover:bg-surface transition-colors flex items-start gap-2"
+                      style={{ paddingLeft: 12 + item.depth * 16 }}
+                      onClick={() => handleClick(item.id)}
+                    >
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm text-dark truncate flex items-center">
+                          {renderClusterDots(tags)}
+                          <span className="truncate">{item.urlTemplate}</span>
+                        </p>
+                        <p className="text-[11px] text-muted-fg font-mono">
+                          {item.score.toFixed(4)}
+                          {depthMap.size > 0 &&
+                            (() => {
+                              const depth = depthMap.get(item.id);
+                              if (depth == null || depth === Infinity) return null;
+                              const isDeep = depth > 3;
+                              return (
+                                <>
+                                  {" · "}
+                                  <span className={isDeep ? "text-amber-500" : ""}>
+                                    Depth {depth}
+                                    {isDeep ? " ⚠" : ""}
+                                  </span>
+                                </>
+                              );
+                            })()}
+                          {outboundMap.size > 0 &&
+                            (() => {
+                              const outbound = outboundMap.get(item.id);
+                              if (outbound == null) return null;
+                              const isOver = outbound > OUTBOUND_WARNING_THRESHOLD;
+                              return (
+                                <>
+                                  {" · "}
+                                  <span className={isOver ? "text-red-500" : ""}>
+                                    {outbound} links
+                                  </span>
+                                </>
+                              );
+                            })()}
+                        </p>
+                      </div>
+                      {weakNodes.has(item.id) && (
+                        <Tooltip>
+                          <TooltipTrigger
+                            render={<span />}
+                            data-testid="score-weak-warning"
+                            className="flex-shrink-0 cursor-default inline-flex outline-none mt-0.5"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            <TriangleAlert
+                              size={14}
+                              className="text-amber-500"
+                              aria-label="Weak page"
+                            />
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            This page&apos;s PageRank score is significantly below average (below
+                            mean − 1σ). Consider adding more inbound internal links to strengthen
+                            it.
+                          </TooltipContent>
+                        </Tooltip>
+                      )}
+                    </button>
+                  </li>
+                );
+              })}
+            </ul>
+            {mainRanked.length === 0 && (
+              <p className="px-3 py-4 text-[11px] text-muted-fg text-center">
+                Add nodes to see scores
               </p>
-            </div>
-          )}
+            )}
+          </>
+        )}
 
-          {/* Orphan section */}
-          {orphanList.length > 0 && (
-            <div>
-              <div className="px-3 py-2 bg-red-50 border-b border-border">
-                <h2 className="text-[11px] font-semibold uppercase tracking-[0.14em] text-red-600 flex items-center gap-1.5">
-                  <Unplug size={12} />
-                  Orphan Pages ({orphanList.length})
-                </h2>
-              </div>
-              <ul className="divide-y divide-border">
-                {orphanList.map((node) => (
-                  <li key={node.id}>
-                    <button
-                      className="w-full text-left px-3 py-2.5 hover:bg-surface transition-colors flex items-start gap-2"
-                      onClick={() => handleClick(node.id)}
-                    >
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm text-dark truncate flex items-center">
-                          {renderClusterDots(node.data.tags)}
-                          <span className="truncate">{node.data.urlTemplate}</span>
-                        </p>
-                        <p className="text-[11px] text-muted-fg font-mono">
-                          {(scores.get(node.id) ?? 0).toFixed(4)} ·{" "}
-                          <span className="text-red-500">No inbound links</span>
-                        </p>
-                      </div>
-                      <Unplug
-                        size={14}
-                        className="text-red-500 mt-0.5 flex-shrink-0"
-                        aria-label="Orphan page"
-                      />
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-
-          {/* Unreachable section */}
-          {unreachableOnlyList.length > 0 && (
-            <div>
-              <div className="px-3 py-2 bg-red-50 border-b border-border">
-                <h2 className="text-[11px] font-semibold uppercase tracking-[0.14em] text-red-600 flex items-center gap-1.5">
-                  <Unplug size={12} />
-                  Unreachable ({unreachableOnlyList.length})
-                </h2>
-              </div>
-              <ul className="divide-y divide-border">
-                {unreachableOnlyList.map((node) => (
-                  <li key={node.id}>
-                    <button
-                      className="w-full text-left px-3 py-2.5 hover:bg-surface transition-colors flex items-start gap-2"
-                      onClick={() => handleClick(node.id)}
-                    >
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm text-dark truncate flex items-center">
-                          {renderClusterDots(node.data.tags)}
-                          <span className="truncate">{node.data.urlTemplate}</span>
-                        </p>
-                        <p className="text-[11px] text-muted-fg font-mono">
-                          {(scores.get(node.id) ?? 0).toFixed(4)} ·{" "}
-                          <span className="text-red-500">Unreachable</span>
-                        </p>
-                      </div>
-                      <Unplug
-                        size={14}
-                        className="text-red-500 mt-0.5 flex-shrink-0"
-                        aria-label="Unreachable page"
-                      />
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-
-          <div className="px-3 py-2.5 border-b border-border">
-            <h2 className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-fg">
-              Score Ranking
-            </h2>
-          </div>
-          <ul className="divide-y divide-border">
-            {mainRanked.map((item) => {
-              const sourceNode = nodeById.get(item.id);
-              const tags = sourceNode?.data.tags;
-              return (
-                <li key={item.id}>
-                  <button
-                    className="w-full text-left py-2.5 pr-3 hover:bg-surface transition-colors flex items-start gap-2"
-                    style={{ paddingLeft: 12 + item.depth * 16 }}
-                    onClick={() => handleClick(item.id)}
-                  >
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm text-dark truncate flex items-center">
-                        {renderClusterDots(tags)}
-                        <span className="truncate">{item.urlTemplate}</span>
-                      </p>
-                      <p className="text-[11px] text-muted-fg font-mono">
-                        {item.score.toFixed(4)}
-                        {depthMap.size > 0 &&
-                          (() => {
-                            const depth = depthMap.get(item.id);
-                            if (depth == null || depth === Infinity) return null;
-                            const isDeep = depth > 3;
-                            return (
-                              <>
-                                {" · "}
-                                <span className={isDeep ? "text-amber-500" : ""}>
-                                  Depth {depth}
-                                  {isDeep ? " ⚠" : ""}
-                                </span>
-                              </>
-                            );
-                          })()}
-                        {outboundMap.size > 0 &&
-                          (() => {
-                            const outbound = outboundMap.get(item.id);
-                            if (outbound == null) return null;
-                            const isOver = outbound > OUTBOUND_WARNING_THRESHOLD;
-                            return (
-                              <>
-                                {" · "}
-                                <span className={isOver ? "text-red-500" : ""}>
-                                  {outbound} links
-                                </span>
-                              </>
-                            );
-                          })()}
-                      </p>
-                    </div>
-                    {weakNodes.has(item.id) && (
-                      <Tooltip>
-                        <TooltipTrigger
-                          render={<span />}
-                          data-testid="score-weak-warning"
-                          className="flex-shrink-0 cursor-default inline-flex outline-none mt-0.5"
-                          onClick={(e) => e.stopPropagation()}
-                        >
-                          <TriangleAlert
-                            size={14}
-                            className="text-amber-500"
-                            aria-label="Weak page"
-                          />
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          This page&apos;s PageRank score is significantly below average (below mean
-                          − 1σ). Consider adding more inbound internal links to strengthen it.
-                        </TooltipContent>
-                      </Tooltip>
-                    )}
-                  </button>
-                </li>
-              );
-            })}
-          </ul>
-          {mainRanked.length === 0 && (
-            <p className="px-3 py-4 text-[11px] text-muted-fg text-center">
-              Add nodes to see scores
-            </p>
-          )}
-        </>
-      )}
-
-      {activeTab === "health" && (
-        <HealthPanel nodes={nodes} depthMap={depthMap} outboundMap={outboundMap} />
-      )}
+        {activeTab === "health" && (
+          <HealthPanel nodes={nodes} depthMap={depthMap} outboundMap={outboundMap} />
+        )}
+      </div>
     </aside>
   );
 }
