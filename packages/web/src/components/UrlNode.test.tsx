@@ -2,14 +2,14 @@ import { describe, it, expect, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { ReactFlowProvider } from "@xyflow/react";
-import type { NodeProps } from "@xyflow/react";
+import type { Node, NodeProps } from "@xyflow/react";
 import { UrlNode } from "./UrlNode";
 import type { UrlNodeData } from "../lib/graph-utils";
 import { getClusterColor } from "../lib/cluster-colors";
 
-const mockGetNodes = vi.fn(() => []);
-vi.mock("reactflow", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("reactflow")>();
+const mockGetNodes = vi.fn((): Node[] => []);
+vi.mock("@xyflow/react", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@xyflow/react")>();
   return {
     ...actual,
     useReactFlow: () => ({ getNodes: mockGetNodes }),
@@ -17,7 +17,7 @@ vi.mock("reactflow", async (importOriginal) => {
 });
 
 // UrlNodeExtendedData mirror for test props
-interface TestNodeData extends UrlNodeData {
+type TestNodeData = UrlNodeData & {
   onUpdate?: (id: string, data: Partial<UrlNodeData>) => void;
   onZIndexChange?: (id: string, zIndex: number) => void;
   scoreTier?: "high" | "mid" | "low" | "neutral";
@@ -26,9 +26,9 @@ interface TestNodeData extends UrlNodeData {
   isOverLinked?: boolean;
   tags?: string[];
   isDimmed?: boolean;
-}
+};
 
-function makeNodeProps(data: TestNodeData): NodeProps<TestNodeData> {
+function makeNodeProps(data: TestNodeData): NodeProps<Node<TestNodeData>> {
   return {
     id: "node-1",
     data,
@@ -44,25 +44,17 @@ function makeNodeProps(data: TestNodeData): NodeProps<TestNodeData> {
     dragHandle: undefined,
     positionAbsoluteX: 0,
     positionAbsoluteY: 0,
-  } as NodeProps<TestNodeData>;
+    width: undefined,
+    height: undefined,
+    parentId: undefined,
+  } as unknown as NodeProps<Node<TestNodeData>>;
 }
 
 function renderNode(data: TestNodeData) {
   const props = makeNodeProps(data);
   return render(
     <ReactFlowProvider>
-      <UrlNode
-        {...(props as NodeProps<
-          UrlNodeData & {
-            onUpdate?: (id: string, data: Partial<UrlNodeData>) => void;
-            onZIndexChange?: (id: string, zIndex: number) => void;
-            scoreTier?: "high" | "mid" | "low" | "neutral";
-            isWeak?: boolean;
-            outboundCount?: number;
-            isOverLinked?: boolean;
-          }
-        >)}
-      />
+      <UrlNode {...(props as unknown as NodeProps<Node<TestNodeData>>)} />
     </ReactFlowProvider>,
   );
 }

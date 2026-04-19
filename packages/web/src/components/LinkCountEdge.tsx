@@ -1,10 +1,14 @@
 import { useState, useCallback, useRef, useEffect } from "react";
-import { BaseEdge, EdgeLabelRenderer, getSmoothStepPath, type EdgeProps } from "@xyflow/react";
+import {
+  BaseEdge,
+  EdgeLabelRenderer,
+  getSmoothStepPath,
+  type Edge,
+  type EdgeProps,
+} from "@xyflow/react";
+import type { LinkCountEdgeData } from "../lib/graph-utils";
 
-export interface LinkCountEdgeData {
-  linkCount: number;
-  onLinkCountChange?: (edgeId: string, linkCount: number) => void;
-}
+export type { LinkCountEdgeData };
 
 export function LinkCountEdge({
   id,
@@ -18,7 +22,7 @@ export function LinkCountEdge({
   selected,
   style,
   markerEnd,
-}: EdgeProps<LinkCountEdgeData>) {
+}: EdgeProps<Edge<LinkCountEdgeData>>) {
   const [edgePath, labelX, labelY] = getSmoothStepPath({
     sourceX,
     sourceY,

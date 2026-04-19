@@ -1,7 +1,9 @@
 import { describe, it, expect, beforeEach, afterEach } from "vitest";
 import { renderHook, act } from "@testing-library/react";
+import type { Edge } from "@xyflow/react";
 import { loadOrMigrate, useScenarios } from "./useScenarios";
 import { SCENARIOS_KEY, OLD_STORAGE_KEY } from "../lib/scenario-types";
+import type { LinkCountEdgeData } from "../lib/graph-utils";
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -174,9 +176,9 @@ describe("useScenarios", () => {
     const secondId = result.current.store.scenarios.find((s) => s.id !== firstId)!.id;
 
     const currentNodes = [makeNode("sw1")];
-    const currentEdges: typeof currentNodes = [];
+    const currentEdges: Edge<LinkCountEdgeData>[] = [];
 
-    let target: ReturnType<typeof result.current.switchScenario>;
+    let target: ReturnType<typeof result.current.switchScenario> | undefined;
     act(() => {
       target = result.current.switchScenario(firstId, currentNodes, currentEdges);
     });
@@ -187,7 +189,7 @@ describe("useScenarios", () => {
     expect(secondSlot.nodes).toHaveLength(1);
     expect(secondSlot.nodes[0].id).toBe("sw1");
 
-    void target; // suppress unused warning
+    void target;
   });
 
   it("renameScenario updates only the name, not nodes/edges", () => {
@@ -252,7 +254,7 @@ describe("useScenarios", () => {
     const id = result.current.store.activeScenarioId;
 
     const serializedNodes = [makeNode("u1")];
-    const serializedEdges: typeof serializedNodes = [];
+    const serializedEdges: [] = [];
 
     act(() => {
       result.current.updateActiveGraph(serializedNodes, serializedEdges);
