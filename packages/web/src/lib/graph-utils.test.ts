@@ -439,6 +439,7 @@ describe("calculatePageRank with global nodes", () => {
 });
 
 describe("classifyScoreTier", () => {
+  // Test D: existing edge cases — KEEP passing
   it("single-element array returns neutral", () => {
     expect(classifyScoreTier(1.0, [1.0])).toBe("neutral");
   });
@@ -447,29 +448,79 @@ describe("classifyScoreTier", () => {
     expect(classifyScoreTier(1.0, [1.0, 1.0, 1.0])).toBe("neutral");
   });
 
-  it("score in top third returns high", () => {
-    // range 0..3, thirds at 1 and 2; score 2.5 -> high
-    expect(classifyScoreTier(2.5, [0, 1, 2, 3])).toBe("high");
+  // Test A: outlier case — the core bug this plan fixes
+  it("outlier does not compress all other nodes into low (n=12)", () => {
+    const scores = [100, 1, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 2.0];
+    // The outlier itself must be high
+    expect(classifyScoreTier(100, scores)).toBe("high");
+    // Top non-outlier values must escape "low" — they should share 'high' with the outlier
+    // (since the split is rank-based; for n=12 the top ceil(12/3)=4 slots include the
+    // outlier plus the next 3 non-outliers). The bug this guards against is the linear
+    // min-max algorithm compressing all non-outliers into 'low'.
+    const topNonOutlierEscapesLow = [1.8, 1.9, 2.0].every(
+      (v) => classifyScoreTier(v, scores) !== "low",
+    );
+    expect(topNonOutlierEscapesLow).toBe(true);
+    // At least one of the bottom values is low
+    const bottomInLow = [1, 1.1, 1.2].some((v) => classifyScoreTier(v, scores) === "low");
+    expect(bottomInLow).toBe(true);
+    // Distribution is roughly balanced: each tier has between floor(n/3) and ceil(n/3) nodes
+    const n = scores.length;
+    const counts = { high: 0, mid: 0, low: 0 };
+    for (const s of scores) {
+      const tier = classifyScoreTier(s, scores);
+      if (tier === "high" || tier === "mid" || tier === "low") counts[tier]++;
+    }
+    const minCount = Math.floor(n / 3);
+    const maxCount = Math.ceil(n / 3);
+    expect(counts.high).toBeGreaterThanOrEqual(minCount);
+    expect(counts.high).toBeLessThanOrEqual(maxCount + 1); // allow 1 extra for rounding
+    expect(counts.mid).toBeGreaterThanOrEqual(minCount);
+    expect(counts.low).toBeGreaterThanOrEqual(minCount);
   });
 
-  it("score in middle third returns mid", () => {
-    // range 0..3, thirds at 1 and 2; score 1.5 -> mid
-    expect(classifyScoreTier(1.5, [0, 1, 2, 3])).toBe("mid");
+  // Test B: exact thirds on n=9
+  it("splits n=9 evenly into 3/3/3 by rank", () => {
+    const scores = [1, 2, 3, 4, 5, 6, 7, 8, 9];
+    expect(classifyScoreTier(9, scores)).toBe("high");
+    expect(classifyScoreTier(8, scores)).toBe("high");
+    expect(classifyScoreTier(7, scores)).toBe("high");
+    expect(classifyScoreTier(6, scores)).toBe("mid");
+    expect(classifyScoreTier(5, scores)).toBe("mid");
+    expect(classifyScoreTier(4, scores)).toBe("mid");
+    expect(classifyScoreTier(3, scores)).toBe("low");
+    expect(classifyScoreTier(2, scores)).toBe("low");
+    expect(classifyScoreTier(1, scores)).toBe("low");
+    // Guard against off-by-one that still passes per-point assertions
+    expect(scores.filter((s) => classifyScoreTier(s, scores) === "high").length).toBe(3);
+    expect(scores.filter((s) => classifyScoreTier(s, scores) === "mid").length).toBe(3);
+    expect(scores.filter((s) => classifyScoreTier(s, scores) === "low").length).toBe(3);
   });
 
-  it("score in bottom third returns low", () => {
-    // range 0..3, thirds at 1 and 2; score 0.5 -> low
-    expect(classifyScoreTier(0.5, [0, 1, 2, 3])).toBe("low");
+  // Test C: ties — all tied values get the same tier (tie-to-high bias)
+  it("ties bias to the higher tier (n=6, two groups of 3)", () => {
+    const scores = [5, 5, 5, 1, 1, 1];
+    expect(classifyScoreTier(5, scores)).toBe("high");
+    expect(classifyScoreTier(1, scores)).toBe("low");
   });
 
-  it("score exactly at highThreshold returns high", () => {
-    // range 0..3, highThreshold = 2; score 2.0 -> high
-    expect(classifyScoreTier(2.0, [0, 1, 2, 3])).toBe("high");
+  // Test E: small n=2 — degenerate split: 1 high / 1 low, no mid
+  it("n=2 gives one high and one low (no mid)", () => {
+    const scores = [10, 1];
+    expect(classifyScoreTier(10, scores)).toBe("high");
+    expect(classifyScoreTier(1, scores)).toBe("low");
   });
 
-  it("score exactly at lowThreshold returns mid", () => {
-    // range 0..3, lowThreshold = 1; score 1.0 -> mid
-    expect(classifyScoreTier(1.0, [0, 1, 2, 3])).toBe("mid");
+  // Test F: n=4 (uneven split — top-heavy: 2 high / 1 mid / 1 low)
+  // highCutoffIdx = 4 - ceil(4/3) = 4 - 2 = 2 → highThreshold = sorted[2] = 2
+  // midCutoffIdx  = 4 - ceil(8/3) = 4 - 3 = 1 → midThreshold  = sorted[1] = 1
+  // 3 >= 2 → high; 2 >= 2 → high; 1 >= 1 → mid; 0 < 1 → low
+  it("n=4 produces top-heavy split: 2/1/1 (high/mid/low)", () => {
+    const scores = [0, 1, 2, 3];
+    expect(classifyScoreTier(3, scores)).toBe("high");
+    expect(classifyScoreTier(2, scores)).toBe("high");
+    expect(classifyScoreTier(1, scores)).toBe("mid");
+    expect(classifyScoreTier(0, scores)).toBe("low");
   });
 });
 
