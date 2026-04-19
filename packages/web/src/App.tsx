@@ -45,6 +45,7 @@ import {
   type ScoreTier,
   type Placement,
 } from "./lib/graph-utils";
+import { serializeGraph } from "./lib/serialize-graph";
 
 // Extended node data type that includes the update callback for EditPopover wiring
 // and score fields for dynamic visual rendering
@@ -65,71 +66,6 @@ export type AppNodeData = UrlNodeData & {
 // Define nodeTypes and edgeTypes outside the component to avoid infinite re-renders (React Flow docs requirement)
 const nodeTypes = { urlNode: UrlNode };
 const edgeTypes = { linkCountEdge: LinkCountEdge };
-
-/** Strips runtime-only fields before writing to localStorage */
-function serializeGraph(
-  nodes: Node<AppNodeData>[],
-  edges: Edge[],
-): {
-  nodes: Array<{
-    id: string;
-    type?: string;
-    position: { x: number; y: number };
-    data: {
-      urlTemplate: string;
-      pageCount: number;
-      isGlobal?: boolean;
-      placements?: Placement[];
-      isRoot?: boolean;
-      tags?: string[];
-    };
-  }>;
-  edges: Array<{
-    id: string;
-    source: string;
-    target: string;
-    sourceHandle?: string | null;
-    targetHandle?: string | null;
-    type?: string;
-    markerEnd?: unknown;
-    data: { linkCount: number };
-  }>;
-} {
-  return {
-    nodes: nodes.map(
-      ({
-        id,
-        type,
-        position,
-        data: { urlTemplate, pageCount, isGlobal, placements, isRoot, tags },
-      }) => ({
-        id,
-        type,
-        position,
-        data: {
-          urlTemplate,
-          pageCount,
-          ...(isGlobal && { isGlobal }),
-          ...(placements?.length && { placements }),
-          ...(isRoot && { isRoot }),
-          ...(tags?.length && { tags }),
-        },
-      }),
-    ),
-    edges: edges.map(
-      ({ id, source, target, sourceHandle, targetHandle, type, markerEnd, data }) => ({
-        id,
-        source,
-        target,
-        sourceHandle,
-        targetHandle,
-        type,
-        markerEnd,
-        data: { linkCount: (data as { linkCount?: number })?.linkCount ?? 1 },
-      }),
-    ),
-  };
-}
 
 const initialNodes: Node<AppNodeData>[] = [];
 const initialEdges: Edge<LinkCountEdgeData>[] = [];
