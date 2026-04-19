@@ -9,6 +9,7 @@ import {
 export interface LinkCountEdgeData {
   linkCount: number;
   onLinkCountChange?: (edgeId: string, linkCount: number) => void;
+  isRouteHighlighted?: boolean;
 }
 
 export function LinkCountEdge({
@@ -63,8 +64,9 @@ export function LinkCountEdge({
         markerEnd={markerEnd}
         style={{
           ...style,
-          stroke: selected ? '#6366F1' : '#9CA3AF',
-          strokeWidth: 2,
+          stroke: data?.isRouteHighlighted ? '#6366F1' : selected ? '#6366F1' : '#9CA3AF',
+          strokeWidth: data?.isRouteHighlighted ? 3 : 2,
+          opacity: data?.isRouteHighlighted !== undefined && !data.isRouteHighlighted ? 0.2 : 1,
         }}
       />
       <EdgeLabelRenderer>

@@ -39,6 +39,7 @@ import {
   calculateCrawlDepth,
   identifyOrphanNodes,
   calculateOutboundLinks,
+  getConnectedElements,
   OUTBOUND_WARNING_THRESHOLD,
   type UrlNodeData,
   type LinkCountEdgeData,
@@ -59,6 +60,7 @@ interface AppNodeData extends UrlNodeData {
   crawlDepth?: number;
   outboundCount?: number;
   isOverLinked?: boolean;
+  isRouteHighlighted?: boolean;
 }
 
 // Define nodeTypes and edgeTypes outside the component to avoid infinite re-renders (React Flow docs requirement)
@@ -125,6 +127,18 @@ function AppInner() {
   const activeScenario = store.scenarios.find((s) => s.id === store.activeScenarioId) ?? store.scenarios[0];
 
   const { activeFilters, toggle: toggleFilter, clear: clearFilters } = useFilterState();
+
+  // Route-highlight state: ID of the focal node whose neighbourhood is highlighted.
+  // null = no route highlight active.
+  const [highlightedRouteNodeId, setHighlightedRouteNodeId] = useState<string | null>(null);
+
+  const handleNodeHighlight = useCallback((id: string | null) => {
+    setHighlightedRouteNodeId((prev) => (prev === id ? null : id));
+  }, []);
+
+  const clearRouteHighlight = useCallback(() => {
+    setHighlightedRouteNodeId(null);
+  }, []);
 
   // Use a ref to hold the stable update callback so nodes don't need to be re-mapped
   const onNodeDataUpdate = useCallback(
@@ -498,19 +512,59 @@ function AppInner() {
     return clusterMatches;
   }, [activeFilters, nodes]);
 
-  // Apply dim flag based on active filters (stripe persists via sibling DOM structure in UrlNode)
+  // Compute directly connected node IDs and edge IDs for the route-highlight focal node.
+  const routeElements = useMemo(() => {
+    if (!highlightedRouteNodeId) return null;
+    return getConnectedElements(highlightedRouteNodeId, edges);
+  }, [highlightedRouteNodeId, edges]);
+
+  // Apply dim / highlight flags.
+  // Priority: route highlight > filter dimming.
   const styledNodes = useMemo(() => {
+    if (routeElements !== null) {
+      // Route highlight mode: highlight route nodes, dim everything else
+      return enrichedNodes.map((node) => {
+        const isRouteHighlighted = routeElements.nodeIds.has(node.id);
+        const isDimmed = !isRouteHighlighted;
+        if (node.data.isRouteHighlighted === isRouteHighlighted && node.data.isDimmed === isDimmed) {
+          return node;
+        }
+        return { ...node, data: { ...node.data, isRouteHighlighted, isDimmed } };
+      });
+    }
+    // Filter highlight mode (existing behaviour)
     if (highlightedNodeIds === null) {
       return enrichedNodes.map((node) =>
-        node.data.isDimmed ? { ...node, data: { ...node.data, isDimmed: false } } : node,
+        (node.data.isDimmed || node.data.isRouteHighlighted)
+          ? { ...node, data: { ...node.data, isDimmed: false, isRouteHighlighted: false } }
+          : node,
       );
     }
     return enrichedNodes.map((node) => {
       const isDimmed = !highlightedNodeIds.has(node.id);
-      if (node.data.isDimmed === isDimmed) return node;
-      return { ...node, data: { ...node.data, isDimmed } };
+      if (node.data.isDimmed === isDimmed && !node.data.isRouteHighlighted) return node;
+      return { ...node, data: { ...node.data, isDimmed, isRouteHighlighted: false } };
     });
-  }, [enrichedNodes, highlightedNodeIds]);
+  }, [enrichedNodes, highlightedNodeIds, routeElements]);
+
+  // Apply route-highlight flag to edges so LinkCountEdge can render highlighted style.
+  const styledEdges = useMemo(() => {
+    if (routeElements === null) {
+      // Clear any lingering route highlight on edges
+      return edges.map((e) =>
+        (e.data as { isRouteHighlighted?: boolean })?.isRouteHighlighted
+          ? { ...e, data: { ...e.data, isRouteHighlighted: false } }
+          : e,
+      );
+    }
+    return edges.map((e) => {
+      const isRouteHighlighted = routeElements.edgeIds.has(e.id);
+      if ((e.data as { isRouteHighlighted?: boolean })?.isRouteHighlighted === isRouteHighlighted) {
+        return e;
+      }
+      return { ...e, data: { ...e.data, isRouteHighlighted } };
+    });
+  }, [edges, routeElements]);
 
   const onExportJson = useCallback(() => {
     const exportData = {
@@ -599,10 +653,11 @@ function AppInner() {
           <div className="h-full" ref={reactFlowWrapper}>
             <ReactFlow
               nodes={styledNodes}
-              edges={edges}
+              edges={styledEdges}
               onNodesChange={onNodesChange}
               onEdgesChange={onEdgesChange}
               onConnect={onConnect}
+              onPaneClick={clearRouteHighlight}
               connectionMode={ConnectionMode.Loose}
               onInit={setReactFlowInstance}
               onDrop={onDrop}
@@ -664,6 +719,8 @@ function AppInner() {
             depthMap={depthMap}
             outboundMap={outboundMap}
             rootId={rootId}
+            highlightedRouteNodeId={highlightedRouteNodeId}
+            onNodeHighlight={handleNodeHighlight}
           />
         </ResizablePanel>
       </ResizablePanelGroup>

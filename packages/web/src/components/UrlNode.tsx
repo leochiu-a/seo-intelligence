@@ -89,9 +89,13 @@ function UrlNodeComponent({ id, data, selected }: NodeProps<UrlNodeExtendedData>
     }
   };
 
+  const routeHighlightClass = data.isRouteHighlighted
+    ? 'ring-2 ring-indigo-400 ring-offset-1'
+    : '';
+
   return (
     <div
-      className={`relative w-[200px] rounded-xl border-2 p-2.5 shadow-md shadow-black/8 transition ${tone.card} ${selected ? tone.focus : ''}`}
+      className={`relative w-[200px] rounded-xl border-2 p-2.5 shadow-md shadow-black/8 transition ${tone.card} ${selected ? tone.focus : ''} ${routeHighlightClass}`}
     >
       <Handle
         type="source"
