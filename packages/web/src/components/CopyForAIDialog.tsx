@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Copy, Check } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
@@ -10,12 +10,21 @@ interface CopyForAIDialogProps {
 
 export function CopyForAIDialog({ open, onClose, text }: CopyForAIDialogProps) {
   const [copied, setCopied] = useState(false);
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(
+    () => () => {
+      if (timerRef.current) clearTimeout(timerRef.current);
+    },
+    [],
+  );
 
   async function handleCopy() {
     try {
       await navigator.clipboard.writeText(text);
       setCopied(true);
-      window.setTimeout(() => setCopied(false), 1500);
+      if (timerRef.current) clearTimeout(timerRef.current);
+      timerRef.current = setTimeout(() => setCopied(false), 1500);
     } catch {
       // Clipboard blocked — silently ignore
     }
@@ -34,8 +43,7 @@ export function CopyForAIDialog({ open, onClose, text }: CopyForAIDialogProps) {
         <textarea
           readOnly
           value={text}
-          className="flex-1 min-h-0 resize-none rounded-md border border-border bg-surface font-mono text-xs text-ink p-3 overflow-y-auto focus:outline-none"
-          style={{ height: "60vh", minHeight: "480px" }}
+          className="flex-1 min-h-[480px] resize-none rounded-md border border-border bg-surface font-mono text-xs text-ink p-3 overflow-y-auto focus:outline-none"
         />
 
         <div className="flex justify-end gap-2 pt-2">
