@@ -641,45 +641,16 @@ export function collectClusterSuggestions(
   return [...new Set(tags)];
 }
 
-// ---------------------------------------------------------------------------
-// Route highlight
-// ---------------------------------------------------------------------------
-
-/**
- * Given a focal node ID and the full edges array, returns the Set of node IDs
- * and edge IDs that form the immediate neighbourhood of that node.
- *
- * Includes:
- *   - The focal node itself
- *   - Every node directly connected by an edge (source OR target)
- *   - Every edge that connects the focal node to any of those neighbours
- *
- * Returns `{ nodeIds: Set<string>, edgeIds: Set<string> }`.
- * If `nodeId` is empty or edges is empty, the returned nodeIds contains only
- * the focal node (if non-empty) and edgeIds is empty.
- */
-export function getConnectedElements(
-  nodeId: string,
-  edges: Edge[],
-): { nodeIds: Set<string>; edgeIds: Set<string> } {
-  const nodeIds = new Set<string>();
-  const edgeIds = new Set<string>();
-
-  if (!nodeId) return { nodeIds, edgeIds };
-
-  nodeIds.add(nodeId);
-
+/** Returns IDs of the focal node and every node directly connected to it (either direction). */
+export function getConnectedElements(nodeId: string, edges: Edge[]): Set<string> {
+  const ids = new Set<string>();
+  if (!nodeId) return ids;
+  ids.add(nodeId);
   for (const edge of edges) {
-    if (edge.source === nodeId) {
-      nodeIds.add(edge.target);
-      edgeIds.add(edge.id);
-    } else if (edge.target === nodeId) {
-      nodeIds.add(edge.source);
-      edgeIds.add(edge.id);
-    }
+    if (edge.source === nodeId) ids.add(edge.target);
+    else if (edge.target === nodeId) ids.add(edge.source);
   }
-
-  return { nodeIds, edgeIds };
+  return ids;
 }
 
 // ---------------------------------------------------------------------------

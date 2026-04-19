@@ -25,6 +25,7 @@ import {
   collectClusterGroups,
   getHealthStatus,
   hasAnyWarning,
+  getConnectedElements,
 } from './graph-utils';
 import type { UrlNodeData, LinkCountEdgeData, Placement, ClusterGroup, HealthStatus } from './graph-utils';
 
@@ -1622,5 +1623,45 @@ describe('hasAnyWarning', () => {
   it('Returns true for { links: warn, depth: na, tags: warn }', () => {
     const status: HealthStatus = { links: 'warn', depth: 'na', tags: 'warn' };
     expect(hasAnyWarning(status)).toBe(true);
+  });
+});
+
+describe('getConnectedElements', () => {
+  const edge = (id: string, source: string, target: string): Edge =>
+    ({ id, source, target, type: 'linkCountEdge', data: { linkCount: 1 } }) as Edge;
+
+  it('returns only the focal node when edges is empty', () => {
+    expect(getConnectedElements('a', [])).toEqual(new Set(['a']));
+  });
+
+  it('returns empty Set when nodeId is empty string', () => {
+    expect(getConnectedElements('', [edge('e1', 'a', 'b')])).toEqual(new Set());
+  });
+
+  it('returns only focal node when it has no connections', () => {
+    expect(getConnectedElements('z', [edge('e1', 'a', 'b')])).toEqual(new Set(['z']));
+  });
+
+  it('reaches neighbour via source direction (A→B, focus A)', () => {
+    expect(getConnectedElements('a', [edge('e1', 'a', 'b')])).toEqual(new Set(['a', 'b']));
+  });
+
+  it('reaches neighbour via target direction (A→B, focus B)', () => {
+    expect(getConnectedElements('b', [edge('e1', 'a', 'b')])).toEqual(new Set(['a', 'b']));
+  });
+
+  it('collects multiple neighbours (A→B, A→C, focus A)', () => {
+    const edges = [edge('e1', 'a', 'b'), edge('e2', 'a', 'c')];
+    expect(getConnectedElements('a', edges)).toEqual(new Set(['a', 'b', 'c']));
+  });
+
+  it('traverses chain (A→B→C, focus B)', () => {
+    const edges = [edge('e1', 'a', 'b'), edge('e2', 'b', 'c')];
+    expect(getConnectedElements('b', edges)).toEqual(new Set(['a', 'b', 'c']));
+  });
+
+  it('excludes disconnected component (A→B, C→D, focus A)', () => {
+    const edges = [edge('e1', 'a', 'b'), edge('e2', 'c', 'd')];
+    expect(getConnectedElements('a', edges)).toEqual(new Set(['a', 'b']));
   });
 });

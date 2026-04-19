@@ -483,57 +483,53 @@ function AppInner() {
   const highlightedNodeIds = useMemo(() => {
     const placementKeys = [...activeFilters].filter((k) => k.startsWith('placement-name:'));
     const clusterKeys = [...activeFilters].filter((k) => k.startsWith('cluster:'));
-    if (placementKeys.length === 0 && clusterKeys.length === 0) return null;
 
-    const placementMatches = new Set<string>();
-    for (const key of placementKeys) {
-      const name = key.slice('placement-name:'.length);
-      for (const node of nodes) {
-        if (node.data.isGlobal && node.data.placements?.some((p) => p.name === name)) {
-          placementMatches.add(node.id);
+    let filterIds: Set<string> | null = null;
+    if (placementKeys.length > 0 || clusterKeys.length > 0) {
+      const placementMatches = new Set<string>();
+      for (const key of placementKeys) {
+        const name = key.slice('placement-name:'.length);
+        for (const node of nodes) {
+          if (node.data.isGlobal && node.data.placements?.some((p) => p.name === name)) {
+            placementMatches.add(node.id);
+          }
         }
+      }
+      const clusterMatches = new Set<string>();
+      for (const key of clusterKeys) {
+        const tag = key.slice('cluster:'.length);
+        for (const node of nodes) {
+          if (node.data.tags?.includes(tag)) clusterMatches.add(node.id);
+        }
+      }
+      if (placementKeys.length > 0 && clusterKeys.length > 0) {
+        filterIds = new Set([...placementMatches].filter((id) => clusterMatches.has(id)));
+      } else {
+        filterIds = placementKeys.length > 0 ? placementMatches : clusterMatches;
       }
     }
 
-    const clusterMatches = new Set<string>();
-    for (const key of clusterKeys) {
-      const tag = key.slice('cluster:'.length);
-      for (const node of nodes) {
-        if (node.data.tags?.includes(tag)) {
-          clusterMatches.add(node.id);
-        }
-      }
-    }
-
-    if (placementKeys.length > 0 && clusterKeys.length > 0) {
-      return new Set([...placementMatches].filter((id) => clusterMatches.has(id)));
-    }
-    if (placementKeys.length > 0) return placementMatches;
-    return clusterMatches;
-  }, [activeFilters, nodes]);
-
-  // Merge filter highlight + node-click route into a single Set — reuses the same isDimmed pipeline.
-  const activeHighlightIds = useMemo(() => {
     const routeIds = highlightedRouteNodeId
-      ? getConnectedElements(highlightedRouteNodeId, edges).nodeIds
+      ? getConnectedElements(highlightedRouteNodeId, edges)
       : null;
-    if (routeIds === null) return highlightedNodeIds;
-    if (highlightedNodeIds === null) return routeIds;
-    return new Set([...routeIds].filter((id) => highlightedNodeIds.has(id)));
-  }, [highlightedRouteNodeId, edges, highlightedNodeIds]);
+
+    if (routeIds === null) return filterIds;
+    if (filterIds === null) return routeIds;
+    return new Set([...routeIds].filter((id) => filterIds!.has(id)));
+  }, [activeFilters, nodes, highlightedRouteNodeId, edges]);
 
   const styledNodes = useMemo(() => {
-    if (activeHighlightIds === null) {
+    if (highlightedNodeIds === null) {
       return enrichedNodes.map((node) =>
         node.data.isDimmed ? { ...node, data: { ...node.data, isDimmed: false } } : node,
       );
     }
     return enrichedNodes.map((node) => {
-      const isDimmed = !activeHighlightIds.has(node.id);
+      const isDimmed = !highlightedNodeIds.has(node.id);
       if (node.data.isDimmed === isDimmed) return node;
       return { ...node, data: { ...node.data, isDimmed } };
     });
-  }, [enrichedNodes, activeHighlightIds]);
+  }, [enrichedNodes, highlightedNodeIds]);
 
   const onExportJson = useCallback(() => {
     const exportData = {
