@@ -16,7 +16,7 @@ export function FilterPanel({ nodes, activeFilters, onToggle, onClear }: FilterP
 
   return (
     <aside
-      className="w-[200px] shrink-0 border-r border-border bg-white overflow-y-auto flex flex-col"
+      className="border-r border-border bg-white overflow-y-auto flex flex-col h-full"
       data-testid="filter-panel"
     >
       <div className="px-3 py-2.5 border-b border-border">

@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import { TriangleAlert, Unplug } from 'lucide-react';
 import { useReactFlow } from '@xyflow/react';
 import type { Node } from '@xyflow/react';
@@ -49,17 +49,9 @@ function flattenTree(treeNodes: UrlTreeNode[]): UrlTreeNode[] {
   return result;
 }
 
-const MIN_WIDTH = 160;
-const MAX_WIDTH = 480;
-const DEFAULT_WIDTH = 240;
-
 export function ScoreSidebar({ nodes, scores, weakNodes, orphanNodes, unreachableNodes, depthMap, outboundMap, rootId }: ScoreSidebarProps) {
   const { fitView, setNodes } = useReactFlow();
-  const [width, setWidth] = useState(DEFAULT_WIDTH);
   const [activeTab, setActiveTab] = useState<'score' | 'health'>('score');
-  // Refs hold drag state so mousemove handlers never go stale
-  const dragStartX = useRef<number | null>(null);
-  const dragStartWidth = useRef<number | null>(null);
 
   const nodeById = useMemo(() => new Map(nodes.map((n) => [n.id, n])), [nodes]);
 
@@ -86,44 +78,8 @@ export function ScoreSidebar({ nodes, scores, weakNodes, orphanNodes, unreachabl
     }, 50);
   };
 
-  const handleMouseDown = (e: React.MouseEvent) => {
-    dragStartX.current = e.clientX;
-    dragStartWidth.current = width;
-    e.preventDefault();
-  };
-
-  useEffect(() => {
-    const onMouseMove = (e: MouseEvent) => {
-      if (dragStartX.current === null || dragStartWidth.current === null) return;
-      const delta = dragStartX.current - e.clientX;
-      const next = Math.min(MAX_WIDTH, Math.max(MIN_WIDTH, dragStartWidth.current + delta));
-      setWidth(next);
-    };
-    const onMouseUp = () => {
-      dragStartX.current = null;
-      dragStartWidth.current = null;
-      document.removeEventListener('mousemove', onMouseMove);
-      document.removeEventListener('mouseup', onMouseUp);
-    };
-    document.addEventListener('mousemove', onMouseMove);
-    document.addEventListener('mouseup', onMouseUp);
-    return () => {
-      document.removeEventListener('mousemove', onMouseMove);
-      document.removeEventListener('mouseup', onMouseUp);
-    };
-  }, []);
-
   return (
-    <aside
-      style={{ width }}
-      className="shrink-0 relative border-l border-border bg-white overflow-y-auto"
-    >
-      {/* Drag handle on left edge — mousedown begins resize */}
-      <div
-        data-testid="resize-handle"
-        onMouseDown={handleMouseDown}
-        className="absolute left-0 top-0 bottom-0 w-1 cursor-col-resize hover:bg-blue-400/40 z-10"
-      />
+    <aside className="relative border-l border-border bg-white overflow-y-auto h-full">
 
       {/* Phase 11.1 D-01: [Score | Health] tab toggle */}
       <div className="flex border-b border-border" data-testid="sidebar-tabs">
