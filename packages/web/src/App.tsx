@@ -22,8 +22,7 @@ import { UrlNode } from "./components/UrlNode";
 import { LinkCountEdge } from "./components/LinkCountEdge";
 import { Toolbar } from "./components/Toolbar";
 import { ScenarioTabBar } from "./components/ScenarioTabBar";
-import { ScoreSidebar } from "./components/ScoreSidebar";
-import { FilterPanel } from "./components/FilterPanel";
+import { SidePanel } from "./components/SidePanel";
 import { ImportDialog } from "./components/ImportDialog";
 import { TooltipProvider } from "./components/ui/tooltip";
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "./components/ui/resizable";
@@ -709,18 +708,26 @@ function AppInner() {
       />
       <div className="flex-1 min-h-0 overflow-hidden">
         <ResizablePanelGroup orientation="horizontal" className="h-full">
-          <ResizablePanel defaultSize="17%" minSize="10%" maxSize="35%">
-            <FilterPanel
+          <ResizablePanel defaultSize="20%" minSize="15%" maxSize="40%">
+            <SidePanel
               nodes={nodes}
+              scores={scores}
+              weakNodes={weakNodes}
+              orphanNodes={orphanNodes}
+              unreachableNodes={unreachableNodes}
+              depthMap={depthMap}
+              outboundMap={outboundMap}
+              rootId={rootId}
+              onNodeHighlight={handleNodeHighlight}
               activeFilters={activeFilters}
-              onToggle={toggleFilter}
-              onClear={clearFilters}
+              onFilterToggle={toggleFilter}
+              onFilterClear={clearFilters}
             />
           </ResizablePanel>
 
           <ResizableHandle />
 
-          <ResizablePanel defaultSize="63%" minSize="30%">
+          <ResizablePanel defaultSize="80%" minSize="50%">
             <div className="h-full" ref={reactFlowWrapper}>
               <ReactFlow<Node<AppNodeData>, Edge<LinkCountEdgeData>>
                 nodes={styledNodes}
@@ -766,7 +773,7 @@ function AppInner() {
                         Start mapping your link structure
                       </p>
                       <p className="text-sm text-muted-fg mt-2 max-w-sm">
-                        Drag a URL Node from the left panel onto the canvas, then connect nodes to
+                        Use Add Node above or drag a URL Node onto the canvas, then connect nodes to
                         model how pages link to each other.
                       </p>
                       <p className="text-xs text-muted-fg mt-1">
@@ -777,22 +784,6 @@ function AppInner() {
                 )}
               </ReactFlow>
             </div>
-          </ResizablePanel>
-
-          <ResizableHandle />
-
-          <ResizablePanel defaultSize="20%" minSize="10%" maxSize="40%">
-            <ScoreSidebar
-              nodes={nodes}
-              scores={scores}
-              weakNodes={weakNodes}
-              orphanNodes={orphanNodes}
-              unreachableNodes={unreachableNodes}
-              depthMap={depthMap}
-              outboundMap={outboundMap}
-              rootId={rootId}
-              onNodeHighlight={handleNodeHighlight}
-            />
           </ResizablePanel>
         </ResizablePanelGroup>
       </div>

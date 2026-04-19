@@ -15,10 +15,7 @@ export function FilterPanel({ nodes, activeFilters, onToggle, onClear }: FilterP
   const clusterGroups: ClusterGroup[] = collectClusterGroups(nodes);
 
   return (
-    <aside
-      className="border-r border-border bg-white overflow-y-auto flex flex-col h-full"
-      data-testid="filter-panel"
-    >
+    <div className="bg-white flex flex-col" data-testid="filter-panel">
       <div className="px-3 py-2.5 border-b border-border">
         <h2 className="text-sm font-semibold uppercase tracking-[0.14em] text-muted-fg">
           By placement
@@ -125,6 +122,6 @@ export function FilterPanel({ nodes, activeFilters, onToggle, onClear }: FilterP
           </button>
         </div>
       )}
-    </aside>
+    </div>
   );
 }
