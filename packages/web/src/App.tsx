@@ -31,13 +31,13 @@ import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "./componen
 import { useFilterState } from "./hooks/useFilterState";
 import { useScenarios } from "./hooks/useScenarios";
 import { useGraphAnalytics } from "./hooks/useGraphAnalytics";
+import { useHighlightedNodes } from "./hooks/useHighlightedNodes";
 import {
   createDefaultNode,
   updateNodeData,
   updateEdgeLinkCount,
   parseImportJson,
   getClosestHandleIds,
-  getConnectedElements,
   buildCopyForAIText,
   type UrlNodeData,
   type LinkCountEdgeData,
@@ -505,56 +505,12 @@ function AppInner() {
     enrichedNodes,
   } = useGraphAnalytics(nodes, edges);
 
-  // Derive highlighted node IDs from active filter keys (AND-combine across dimensions)
-  const highlightedNodeIds = useMemo(() => {
-    const placementKeys = [...activeFilters].filter((k) => k.startsWith("placement-name:"));
-    const clusterKeys = [...activeFilters].filter((k) => k.startsWith("cluster:"));
-
-    let filterIds: Set<string> | null = null;
-    if (placementKeys.length > 0 || clusterKeys.length > 0) {
-      const placementMatches = new Set<string>();
-      for (const key of placementKeys) {
-        const name = key.slice("placement-name:".length);
-        for (const node of nodes) {
-          if (node.data.isGlobal && node.data.placements?.some((p) => p.name === name)) {
-            placementMatches.add(node.id);
-          }
-        }
-      }
-      const clusterMatches = new Set<string>();
-      for (const key of clusterKeys) {
-        const tag = key.slice("cluster:".length);
-        for (const node of nodes) {
-          if (node.data.tags?.includes(tag)) clusterMatches.add(node.id);
-        }
-      }
-      if (placementKeys.length > 0 && clusterKeys.length > 0) {
-        filterIds = new Set([...placementMatches].filter((id) => clusterMatches.has(id)));
-      } else {
-        filterIds = placementKeys.length > 0 ? placementMatches : clusterMatches;
-      }
-    }
-
-    const routeIds = highlightedRouteNodeId
-      ? getConnectedElements(highlightedRouteNodeId, edges)
-      : null;
-
-    if (routeIds !== null) return routeIds;
-    return filterIds;
-  }, [activeFilters, nodes, highlightedRouteNodeId, edges]);
-
-  const styledNodes = useMemo(() => {
-    if (highlightedNodeIds === null) {
-      return enrichedNodes.map((node) =>
-        node.data.isDimmed ? { ...node, data: { ...node.data, isDimmed: false } } : node,
-      );
-    }
-    return enrichedNodes.map((node) => {
-      const isDimmed = !highlightedNodeIds.has(node.id);
-      if (node.data.isDimmed === isDimmed) return node;
-      return { ...node, data: { ...node.data, isDimmed } };
-    });
-  }, [enrichedNodes, highlightedNodeIds]);
+  const { styledNodes } = useHighlightedNodes(
+    enrichedNodes,
+    edges,
+    activeFilters,
+    highlightedRouteNodeId,
+  );
 
   const onExportJson = useCallback(() => {
     const exportData = {
