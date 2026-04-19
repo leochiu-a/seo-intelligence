@@ -6,11 +6,9 @@ import {
   type Edge,
   type EdgeProps,
 } from "@xyflow/react";
+import type { LinkCountEdgeData } from "../lib/graph-utils";
 
-export type LinkCountEdgeData = {
-  linkCount: number;
-  onLinkCountChange?: (edgeId: string, linkCount: number) => void;
-};
+export type { LinkCountEdgeData };
 
 export function LinkCountEdge({
   id,

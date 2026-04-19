@@ -15,6 +15,7 @@ import {
   type Edge,
   type Connection,
   type ReactFlowInstance,
+  type EdgeMarkerType,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import { UrlNode } from "./components/UrlNode";
@@ -297,7 +298,7 @@ function AppInner() {
         ...(e.sourceHandle != null ? { sourceHandle: e.sourceHandle } : {}),
         ...(e.targetHandle != null ? { targetHandle: e.targetHandle } : {}),
         type: e.type ?? "linkCountEdge",
-        markerEnd: (e.markerEnd as import("@xyflow/react").EdgeMarkerType | undefined) ?? {
+        markerEnd: (e.markerEnd as EdgeMarkerType | undefined) ?? {
           type: MarkerType.ArrowClosed,
           color: "#9CA3AF",
         },

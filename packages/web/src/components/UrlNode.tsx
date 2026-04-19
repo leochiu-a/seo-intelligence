@@ -15,12 +15,7 @@ import { getClusterColor } from "../lib/cluster-colors";
 
 export type { UrlNodeData } from "../lib/graph-utils";
 
-type UrlNodeExtendedData = {
-  urlTemplate: string;
-  pageCount: number;
-  isGlobal?: boolean;
-  placements?: Placement[];
-  isRoot?: boolean;
+type UrlNodeExtendedData = UrlNodeData & {
   onUpdate?: (id: string, data: Partial<UrlNodeData>) => void;
   onRootToggle?: (id: string) => void;
   onZIndexChange?: (id: string, zIndex: number) => void;
@@ -31,7 +26,6 @@ type UrlNodeExtendedData = {
   crawlDepth?: number;
   outboundCount?: number;
   isOverLinked?: boolean;
-  tags?: string[];
   isDimmed?: boolean;
 };
 
