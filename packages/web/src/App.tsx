@@ -60,7 +60,6 @@ interface AppNodeData extends UrlNodeData {
   crawlDepth?: number;
   outboundCount?: number;
   isOverLinked?: boolean;
-
 }
 
 // Define nodeTypes and edgeTypes outside the component to avoid infinite re-renders (React Flow docs requirement)
@@ -513,9 +512,8 @@ function AppInner() {
       ? getConnectedElements(highlightedRouteNodeId, edges)
       : null;
 
-    if (routeIds === null) return filterIds;
-    if (filterIds === null) return routeIds;
-    return new Set([...routeIds].filter((id) => filterIds!.has(id)));
+    if (routeIds !== null) return routeIds;
+    return filterIds;
   }, [activeFilters, nodes, highlightedRouteNodeId, edges]);
 
   const styledNodes = useMemo(() => {

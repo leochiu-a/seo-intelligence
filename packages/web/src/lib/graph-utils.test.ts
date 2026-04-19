@@ -1655,7 +1655,7 @@ describe('getConnectedElements', () => {
     expect(getConnectedElements('a', edges)).toEqual(new Set(['a', 'b', 'c']));
   });
 
-  it('traverses chain (A→B→C, focus B)', () => {
+  it('includes both directions (A→B, B→C, focus B)', () => {
     const edges = [edge('e1', 'a', 'b'), edge('e2', 'b', 'c')];
     expect(getConnectedElements('b', edges)).toEqual(new Set(['a', 'b', 'c']));
   });
