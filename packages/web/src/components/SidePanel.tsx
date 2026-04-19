@@ -34,7 +34,7 @@ export function SidePanel({
   onFilterToggle,
   onFilterClear,
 }: SidePanelProps) {
-  const [activeTab, setActiveTab] = useState<"filter" | "score" | "health">("score");
+  const [activeTab, setActiveTab] = useState<"filter" | "score" | "health">("filter");
 
   const tabClass = (tab: "filter" | "score" | "health") =>
     `flex-1 px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.14em] transition-colors ${

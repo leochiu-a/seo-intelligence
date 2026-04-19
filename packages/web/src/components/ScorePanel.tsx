@@ -65,16 +65,19 @@ export function ScorePanel({
 
   const nodeById = useMemo(() => new Map(nodes.map((n) => [n.id, n])), [nodes]);
 
-  const tree = buildUrlTree(nodes, scores);
-  const ranked = flattenTree(tree);
-
-  const orphanList = nodes.filter((n) => orphanNodes.has(n.id));
-  const unreachableOnlyList = nodes.filter(
-    (n) => unreachableNodes.has(n.id) && !orphanNodes.has(n.id),
-  );
-  const mainRanked = ranked.filter(
-    (item) => !orphanNodes.has(item.id) && !unreachableNodes.has(item.id),
-  );
+  const { orphanList, unreachableOnlyList, mainRanked } = useMemo(() => {
+    const tree = buildUrlTree(nodes, scores);
+    const ranked = flattenTree(tree);
+    return {
+      orphanList: nodes.filter((n) => orphanNodes.has(n.id)),
+      unreachableOnlyList: nodes.filter(
+        (n) => unreachableNodes.has(n.id) && !orphanNodes.has(n.id),
+      ),
+      mainRanked: ranked.filter(
+        (item) => !orphanNodes.has(item.id) && !unreachableNodes.has(item.id),
+      ),
+    };
+  }, [nodes, scores, orphanNodes, unreachableNodes]);
 
   const handleClick = (nodeId: string) => {
     setNodes((nds) => nds.map((n) => ({ ...n, selected: n.id === nodeId })));
