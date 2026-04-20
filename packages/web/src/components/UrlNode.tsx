@@ -3,15 +3,10 @@ import { Handle, Position, useReactFlow, type NodeProps, type Node } from "@xyfl
 import { Pencil, TriangleAlert, Globe, Home, Unplug, Layers } from "lucide-react";
 import { EditPopover } from "./EditPopover";
 import { ScoreTierBadge } from "./ScoreTierBadge";
-import {
-  formatPageCount,
-  type UrlNodeData,
-  type ScoreTier,
-  type Placement,
-  HANDLE_IDS,
-  collectPlacementSuggestions,
-  collectClusterSuggestions,
-} from "../lib/graph-utils";
+import { formatPageCount, type UrlNodeData, type Placement } from "../lib/graph-utils";
+import { type ScoreTier } from "../lib/graph-pagerank";
+import { collectPlacementSuggestions, collectClusterSuggestions } from "../lib/graph-analysis";
+import { HANDLE_IDS } from "../lib/graph-io";
 import { getClusterColor } from "../lib/cluster-colors";
 
 export type { UrlNodeData } from "../lib/graph-utils";

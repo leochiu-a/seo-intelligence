@@ -1,15 +1,14 @@
 import { useState, useMemo } from "react";
 import { TriangleAlert } from "lucide-react";
 import type { Node } from "@xyflow/react";
+import { type UrlNodeData } from "../lib/graph-utils";
+import { classifyScoreTier, type ScoreTier } from "../lib/graph-pagerank";
 import {
   getHealthStatus,
   hasAnyWarning,
   buildTooltipContent,
-  classifyScoreTier,
-  type UrlNodeData,
   type HealthStatus,
-  type ScoreTier,
-} from "../lib/graph-utils";
+} from "../lib/graph-analysis";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import { ScoreTierBadge } from "./ScoreTierBadge";

@@ -1,6 +1,6 @@
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
-import type { ScoreTier } from "../lib/graph-utils";
+import type { ScoreTier } from "../lib/graph-pagerank";
 
 const TIER_BADGE_MAP: Record<
   Exclude<ScoreTier, "neutral">,

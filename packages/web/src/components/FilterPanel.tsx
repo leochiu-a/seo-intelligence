@@ -1,6 +1,11 @@
 import type { Node } from "@xyflow/react";
-import { collectPlacementGroups, collectClusterGroups } from "../lib/graph-utils";
-import type { UrlNodeData, PlacementGroup, ClusterGroup } from "../lib/graph-utils";
+import {
+  collectPlacementGroups,
+  collectClusterGroups,
+  type PlacementGroup,
+  type ClusterGroup,
+} from "../lib/graph-analysis";
+import type { UrlNodeData } from "../lib/graph-utils";
 import { Checkbox } from "@/components/ui/checkbox";
 
 interface FilterPanelProps {

@@ -1,15 +1,17 @@
 import { useMemo } from "react";
 import type { Node, Edge } from "@xyflow/react";
+import { type LinkCountEdgeData } from "../lib/graph-utils";
 import {
   calculatePageRank,
   identifyWeakNodes,
   classifyScoreTier,
+  calculateOutboundLinks,
+} from "../lib/graph-pagerank";
+import {
   calculateCrawlDepth,
   identifyOrphanNodes,
-  calculateOutboundLinks,
   OUTBOUND_WARNING_THRESHOLD,
-  type LinkCountEdgeData,
-} from "../lib/graph-utils";
+} from "../lib/graph-analysis";
 import type { AppNodeData } from "../App";
 
 export interface GraphAnalyticsResult {

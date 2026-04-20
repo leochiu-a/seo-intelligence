@@ -1,6 +1,7 @@
 import { useMemo } from "react";
 import type { Node, Edge } from "@xyflow/react";
-import { getConnectedElements, type LinkCountEdgeData } from "../lib/graph-utils";
+import { type LinkCountEdgeData } from "../lib/graph-utils";
+import { getConnectedElements } from "../lib/graph-analysis";
 import type { AppNodeData } from "../App";
 
 export interface HighlightedNodesResult {
