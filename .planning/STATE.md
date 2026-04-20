@@ -175,9 +175,10 @@ None yet.
 | 260419-snh | Percentile score tier classification + Landing dialog relative ranking copy | 2026-04-19 | 570ba76 | [260419-snh-percentile-score-tier-landing-dialog](./quick/260419-snh-percentile-score-tier-landing-dialog/) |
 | 260419-uje | Surface Low & Mid pages in Health Panel as a dedicated Score Tier section | 2026-04-19 | e14b695 | [260419-uje-health-panel-low-medium](./quick/260419-uje-health-panel-low-medium/) |
 | 260420-iaj | Fix Add Node graph explosion bug (nodeIdCounter id collision after reload) | 2026-04-20 | fbef292 | [260420-iaj-add-node-bug-node](./quick/260420-iaj-add-node-bug-node/) |
+| 260420-k5m | fix copy-to-ai score showing node score instead of link score | 2026-04-20 | 9741caa | [260420-k5m-fix-copy-to-ai-score-showing-node-score-](./quick/260420-k5m-fix-copy-to-ai-score-showing-node-score-/) |
 
 ## Session Continuity
 
 Last session: 2026-04-19T22:08:30.000Z
-Last activity: 2026-04-20 - Completed quick task 260420-iaj: Fix Add Node graph explosion bug (awaiting human-verify checkpoint)
+Last activity: 2026-04-20 - Completed quick task 260420-k5m: fix copy-to-ai score showing node score instead of link score
 Resume file: .planning/phases/11.2-add-score-badge-tooltip-and-improvement-guidance-for-low-mid-nodes/11.2-CONTEXT.md
