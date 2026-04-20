@@ -2009,7 +2009,6 @@ describe("buildCopyForAIText", () => {
     ["n1", 0.8],
     ["n2", 0.3],
   ]);
-  const baseAllScores = [0.8, 0.3];
   const baseDepthMap = new Map([
     ["n1", 0],
     ["n2", 1],
@@ -2024,7 +2023,6 @@ describe("buildCopyForAIText", () => {
       nodes: baseNodes,
       edges: baseEdges,
       scores: baseScores,
-      allScoreValues: baseAllScores,
       depthMap: baseDepthMap,
       outboundMap: baseOutboundMap,
     });
@@ -2059,7 +2057,6 @@ describe("buildCopyForAIText", () => {
       nodes,
       edges: [],
       scores: new Map(),
-      allScoreValues: [],
       depthMap: new Map([["n1", Infinity]]),
       outboundMap: new Map(),
     });
@@ -2072,7 +2069,6 @@ describe("buildCopyForAIText", () => {
       nodes,
       edges: [],
       scores: new Map(),
-      allScoreValues: [],
       depthMap: new Map(), // n1 absent
       outboundMap: new Map(),
     });
@@ -2085,7 +2081,6 @@ describe("buildCopyForAIText", () => {
       nodes,
       edges: [],
       scores: new Map(), // n1 missing → fallback 0
-      allScoreValues: [],
       depthMap: new Map([["n1", 0]]),
       outboundMap: new Map(),
     });
@@ -2100,7 +2095,6 @@ describe("buildCopyForAIText", () => {
       nodes,
       edges: [],
       scores: new Map([["n1", 0.9]]),
-      allScoreValues: [0.9],
       depthMap: new Map([["n1", 1]]),
       outboundMap: new Map([["n1", 5]]),
     });
@@ -2114,7 +2108,6 @@ describe("buildCopyForAIText", () => {
       nodes,
       edges: [],
       scores: new Map([["n1", 0.9]]),
-      allScoreValues: [0.9],
       depthMap: new Map([["n1", 1]]),
       outboundMap: new Map([["n1", 5]]),
     });
@@ -2128,7 +2121,6 @@ describe("buildCopyForAIText", () => {
       nodes,
       edges: [],
       scores: new Map([["n1", 0.2]]),
-      allScoreValues: [0.2],
       depthMap: new Map<string, number>([["root", 0], ["n1", Infinity]]), // root set, n1 unreachable
       outboundMap: new Map([["n1", 5]]),
     });
@@ -2142,7 +2134,6 @@ describe("buildCopyForAIText", () => {
       nodes,
       edges: [],
       scores: new Map([["n1", 0.5]]),
-      allScoreValues: [0.5],
       depthMap: new Map([["n1", 0]]),
       outboundMap: new Map(), // missing → 0
     });
@@ -2155,7 +2146,6 @@ describe("buildCopyForAIText", () => {
       nodes,
       edges: [],
       scores: new Map([["n1", 0.9]]),
-      allScoreValues: [0.9],
       depthMap: new Map([["n1", 0]]),
       outboundMap: new Map(),
     });
@@ -2168,7 +2158,6 @@ describe("buildCopyForAIText", () => {
       nodes,
       edges: [],
       scores: new Map([["n1", 0.9]]),
-      allScoreValues: [0.9],
       depthMap: new Map(),
       outboundMap: new Map(),
     });
@@ -2185,7 +2174,6 @@ describe("buildCopyForAIText", () => {
       nodes,
       edges,
       scores: new Map(),
-      allScoreValues: [],
       depthMap: new Map(),
       outboundMap: new Map(),
     });
@@ -2200,7 +2188,6 @@ describe("buildCopyForAIText", () => {
       nodes,
       edges,
       scores: new Map(),
-      allScoreValues: [],
       depthMap: new Map(),
       outboundMap: new Map(),
     });
@@ -2214,7 +2201,6 @@ describe("buildCopyForAIText", () => {
       nodes: baseNodes,
       edges: [],
       scores: baseScores,
-      allScoreValues: baseAllScores,
       depthMap: baseDepthMap,
       outboundMap: baseOutboundMap,
     });
@@ -2237,7 +2223,6 @@ describe("buildCopyForAIText", () => {
       ["b", 0.5],
       ["g", 0.1],
     ]);
-    const allScoreValues = [0.9, 0.5, 0.1];
     const depthMap = new Map([
       ["a", 0],
       ["b", 1],
@@ -2252,7 +2237,6 @@ describe("buildCopyForAIText", () => {
       nodes,
       edges,
       scores,
-      allScoreValues,
       depthMap,
       outboundMap,
     });

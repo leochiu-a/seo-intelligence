@@ -921,7 +921,6 @@ export interface CopyForAIInput {
   }>;
   edges: Array<{ source: string; target: string; data?: { linkCount?: number } }>;
   scores: Map<string, number>;
-  allScoreValues: number[];
   depthMap: Map<string, number>;
   outboundMap: Map<string, number>;
 }
