@@ -78,6 +78,7 @@ export function useNodeCallbacks({
   const addNode = useCallback(
     (position: { x: number; y: number }) => {
       setNodes((nds) => {
+        // belt-and-braces: re-sync in case a future load path skips the explicit sync
         const newNode = createDefaultNode(position, nds);
         return nds.concat({
           ...newNode,
