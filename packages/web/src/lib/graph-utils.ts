@@ -929,12 +929,11 @@ export interface CopyForAIInput {
 function formatNodeLine(
   node: CopyForAIInput["nodes"][number],
   scores: Map<string, number>,
-  allScoreValues: number[],
   depthMap: Map<string, number>,
   outboundMap: Map<string, number>,
 ): string {
   const { id, data } = node;
-  const tier = classifyScoreTier(scores.get(id) ?? 0, allScoreValues);
+  const numericScore = (scores.get(id) ?? 0).toFixed(2);
 
   let depthStr: string;
   if (!depthMap.has(id)) {
@@ -946,7 +945,25 @@ function formatNodeLine(
 
   const outbound = outboundMap.get(id) ?? 0;
 
-  let line = `- ${data.urlTemplate}  pages: ${data.pageCount}  score: ${tier}  depth: ${depthStr}  outbound: ${outbound}`;
+  // Health score from 3 indicators: links, depth, tags
+  const warnReasons: string[] = [];
+  if (outbound > OUTBOUND_WARNING_THRESHOLD) warnReasons.push("outbound-warn");
+  if (depthMap.size > 0) {
+    if (!depthMap.has(id)) {
+      warnReasons.push("depth-warn");
+    } else {
+      const d = depthMap.get(id)!;
+      if (d === Infinity || d > DEPTH_WARNING_THRESHOLD) warnReasons.push("depth-warn");
+    }
+  }
+  const trimmedTags = (data.tags ?? []).filter((t) => t.trim() !== "");
+  if (trimmedTags.length === 0) warnReasons.push("no-tags");
+
+  const healthTier = warnReasons.length === 0 ? "high" : warnReasons.length === 1 ? "mid" : "low";
+
+  let line = `- ${data.urlTemplate}  pages: ${data.pageCount}  score: ${numericScore}  health: ${healthTier}`;
+  if (warnReasons.length > 0) line += `  warn: ${warnReasons.join(",")}`;
+  line += `  depth: ${depthStr}  outbound: ${outbound}`;
   if (data.isRoot) line += " [root]";
   if (data.isGlobal) line += " [global]";
   return line;
@@ -968,7 +985,7 @@ function formatEdgeLine(
  * paste-into-LLM usage. Pure function — no side effects, no DOM/clipboard access.
  */
 export function buildCopyForAIText(input: CopyForAIInput): string {
-  const { nodes, edges, scores, allScoreValues, depthMap, outboundMap } = input;
+  const { nodes, edges, scores, depthMap, outboundMap } = input;
 
   const templateById = new Map<string, string>(nodes.map((n) => [n.id, n.data.urlTemplate]));
 
@@ -979,7 +996,7 @@ export function buildCopyForAIText(input: CopyForAIInput): string {
   lines.push(`## Nodes (${nodes.length} total)`);
 
   for (const node of nodes) {
-    lines.push(formatNodeLine(node, scores, allScoreValues, depthMap, outboundMap));
+    lines.push(formatNodeLine(node, scores, depthMap, outboundMap));
   }
 
   lines.push("");

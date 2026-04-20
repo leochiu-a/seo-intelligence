@@ -4,9 +4,9 @@ exports[`buildCopyForAIText > test 12 — snapshot over small fixture (2 non-glo
 "# SEO Internal Link Structure
 
 ## Nodes (3 total)
-- /home  pages: 1  score: high  depth: 0  outbound: 4 [root]
-- /blog/<id>  pages: 20  score: mid  depth: 1  outbound: 0
-- /nav  pages: 1  score: low  depth: -  outbound: 2 [global]
+- /home  pages: 1  score: 0.90  health: mid  warn: no-tags  depth: 0  outbound: 4 [root]
+- /blog/<id>  pages: 20  score: 0.50  health: mid  warn: no-tags  depth: 1  outbound: 0
+- /nav  pages: 1  score: 0.10  health: low  warn: depth-warn,no-tags  depth: -  outbound: 2 [global]
 
 ## Links
 - /home → /blog/<id>  (4 links)
