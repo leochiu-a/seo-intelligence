@@ -190,7 +190,7 @@ describe("HealthPanel — Score Tier section", () => {
     return { nodes, scores, allScoreValues };
   }
 
-  it("renders a Score Tier section listing Low and Mid pages in addition to warnings", () => {
+  it("renders a Score Tier section listing Low, Mid, and High pages", () => {
     const { nodes, scores, allScoreValues } = makeSixNodeFixture();
     render(
       <HealthPanel
@@ -203,12 +203,11 @@ describe("HealthPanel — Score Tier section", () => {
     );
     expect(screen.getByTestId("score-tier-section")).toBeInTheDocument();
     const tierRows = screen.getAllByTestId("score-tier-row");
-    expect(tierRows).toHaveLength(4);
+    expect(tierRows).toHaveLength(6);
     const tiers = tierRows.map((r) => r.getAttribute("data-tier"));
     expect(tiers.filter((t) => t === "low")).toHaveLength(2);
     expect(tiers.filter((t) => t === "mid")).toHaveLength(2);
-    // High tier pages must not appear in Score Tier section
-    expect(tiers.filter((t) => t === "high")).toHaveLength(0);
+    expect(tiers.filter((t) => t === "high")).toHaveLength(2);
   });
 
   it("Score Tier section hides when allScoreValues is empty (no scoring computed yet)", () => {
@@ -251,12 +250,12 @@ describe("HealthPanel — Score Tier section", () => {
         allScoreValues={allScoreValues}
       />,
     );
-    expect(screen.getAllByTestId("score-tier-row")).toHaveLength(4);
+    expect(screen.getAllByTestId("score-tier-row")).toHaveLength(6);
     fireEvent.click(screen.getByTestId("warnings-only-toggle"));
-    expect(screen.getAllByTestId("score-tier-row")).toHaveLength(4);
+    expect(screen.getAllByTestId("score-tier-row")).toHaveLength(6);
   });
 
-  it("Score Tier rows are sorted: low tier before mid tier, then alphabetical by urlTemplate", () => {
+  it("Score Tier rows are sorted: low before mid before high, then alphabetical by urlTemplate", () => {
     const { nodes, scores, allScoreValues } = makeSixNodeFixture();
     render(
       <HealthPanel
@@ -269,8 +268,8 @@ describe("HealthPanel — Score Tier section", () => {
     );
     const tierRows = screen.getAllByTestId("score-tier-row");
     const templates = tierRows.map((r) => within(r).getByText(/\/.*/).textContent);
-    // Low first (alphabetical): /low-a, /low-b ; then Mid (alphabetical): /mid-a, /mid-b
-    expect(templates).toEqual(["/low-a", "/low-b", "/mid-a", "/mid-b"]);
+    // Low first (alphabetical): /low-a, /low-b ; then Mid: /mid-a, /mid-b ; then High: /high-a, /high-b
+    expect(templates).toEqual(["/low-a", "/low-b", "/mid-a", "/mid-b", "/high-a", "/high-b"]);
   });
 
   it("Score Tier header shows count like 'N pages need attention'", () => {
@@ -284,7 +283,7 @@ describe("HealthPanel — Score Tier section", () => {
         allScoreValues={allScoreValues}
       />,
     );
-    expect(screen.getByTestId("score-tier-summary")).toHaveTextContent("4 pages need attention");
+    expect(screen.getByTestId("score-tier-summary")).toHaveTextContent("6 pages scored");
   });
 });
 
