@@ -2009,7 +2009,6 @@ describe("buildCopyForAIText", () => {
     ["n1", 0.8],
     ["n2", 0.3],
   ]);
-  const baseAllScores = [0.8, 0.3];
   const baseDepthMap = new Map([
     ["n1", 0],
     ["n2", 1],
@@ -2024,7 +2023,6 @@ describe("buildCopyForAIText", () => {
       nodes: baseNodes,
       edges: baseEdges,
       scores: baseScores,
-      allScoreValues: baseAllScores,
       depthMap: baseDepthMap,
       outboundMap: baseOutboundMap,
     });
@@ -2059,7 +2057,6 @@ describe("buildCopyForAIText", () => {
       nodes,
       edges: [],
       scores: new Map(),
-      allScoreValues: [],
       depthMap: new Map([["n1", Infinity]]),
       outboundMap: new Map(),
     });
@@ -2072,25 +2069,63 @@ describe("buildCopyForAIText", () => {
       nodes,
       edges: [],
       scores: new Map(),
-      allScoreValues: [],
       depthMap: new Map(), // n1 absent
       outboundMap: new Map(),
     });
     expect(result).toContain("depth: -");
   });
 
-  it("test 5 — score tier uses classifyScoreTier; missing score falls back to neutral via ?? 0", () => {
-    const nodes = [makeNode("n1", "/blog/<id>", 10)];
+  it("test 5 — score shows numeric value; missing score falls back to 0.00", () => {
+    const nodes = [makeNode("n1", "/blog/<id>", 10, { tags: ["travel"] })];
     const result = buildCopyForAIText({
       nodes,
       edges: [],
       scores: new Map(), // n1 missing → fallback 0
-      allScoreValues: [0.8, 0.3],
       depthMap: new Map([["n1", 0]]),
       outboundMap: new Map(),
     });
-    // classifyScoreTier(0, [0.8, 0.3]) should be "low" or "neutral"
-    expect(result).toMatch(/score: (low|neutral)/);
+    expect(result).toContain("score: 0.00");
+    expect(result).toContain("health: high"); // tags ok, depth ok, outbound ok
+    expect(result).not.toContain("warn:");
+  });
+
+  it("health tier: 0 warns → health: high, no warn field", () => {
+    const nodes = [makeNode("n1", "/home", 1, { tags: ["travel"] })];
+    const result = buildCopyForAIText({
+      nodes,
+      edges: [],
+      scores: new Map([["n1", 0.9]]),
+      depthMap: new Map([["n1", 1]]),
+      outboundMap: new Map([["n1", 5]]),
+    });
+    expect(result).toContain("health: high");
+    expect(result).not.toContain("warn:");
+  });
+
+  it("health tier: 1 warn (no-tags) → health: mid  warn: no-tags", () => {
+    const nodes = [makeNode("n1", "/home", 1)]; // no tags
+    const result = buildCopyForAIText({
+      nodes,
+      edges: [],
+      scores: new Map([["n1", 0.9]]),
+      depthMap: new Map([["n1", 1]]),
+      outboundMap: new Map([["n1", 5]]),
+    });
+    expect(result).toContain("health: mid");
+    expect(result).toContain("warn: no-tags");
+  });
+
+  it("health tier: 2+ warns → health: low  warn: depth-warn,no-tags", () => {
+    const nodes = [makeNode("n1", "/page", 1)]; // no tags
+    const result = buildCopyForAIText({
+      nodes,
+      edges: [],
+      scores: new Map([["n1", 0.2]]),
+      depthMap: new Map<string, number>([["root", 0], ["n1", Infinity]]), // root set, n1 unreachable
+      outboundMap: new Map([["n1", 5]]),
+    });
+    expect(result).toContain("health: low");
+    expect(result).toContain("warn: depth-warn,no-tags");
   });
 
   it("test 6 — outbound uses outboundMap; missing defaults to 0", () => {
@@ -2099,7 +2134,6 @@ describe("buildCopyForAIText", () => {
       nodes,
       edges: [],
       scores: new Map([["n1", 0.5]]),
-      allScoreValues: [0.5],
       depthMap: new Map([["n1", 0]]),
       outboundMap: new Map(), // missing → 0
     });
@@ -2112,7 +2146,6 @@ describe("buildCopyForAIText", () => {
       nodes,
       edges: [],
       scores: new Map([["n1", 0.9]]),
-      allScoreValues: [0.9],
       depthMap: new Map([["n1", 0]]),
       outboundMap: new Map(),
     });
@@ -2125,7 +2158,6 @@ describe("buildCopyForAIText", () => {
       nodes,
       edges: [],
       scores: new Map([["n1", 0.9]]),
-      allScoreValues: [0.9],
       depthMap: new Map(),
       outboundMap: new Map(),
     });
@@ -2142,7 +2174,6 @@ describe("buildCopyForAIText", () => {
       nodes,
       edges,
       scores: new Map(),
-      allScoreValues: [],
       depthMap: new Map(),
       outboundMap: new Map(),
     });
@@ -2157,7 +2188,6 @@ describe("buildCopyForAIText", () => {
       nodes,
       edges,
       scores: new Map(),
-      allScoreValues: [],
       depthMap: new Map(),
       outboundMap: new Map(),
     });
@@ -2171,7 +2201,6 @@ describe("buildCopyForAIText", () => {
       nodes: baseNodes,
       edges: [],
       scores: baseScores,
-      allScoreValues: baseAllScores,
       depthMap: baseDepthMap,
       outboundMap: baseOutboundMap,
     });
@@ -2194,7 +2223,6 @@ describe("buildCopyForAIText", () => {
       ["b", 0.5],
       ["g", 0.1],
     ]);
-    const allScoreValues = [0.9, 0.5, 0.1];
     const depthMap = new Map([
       ["a", 0],
       ["b", 1],
@@ -2209,7 +2237,6 @@ describe("buildCopyForAIText", () => {
       nodes,
       edges,
       scores,
-      allScoreValues,
       depthMap,
       outboundMap,
     });

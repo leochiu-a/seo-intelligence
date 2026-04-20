@@ -921,20 +921,40 @@ export interface CopyForAIInput {
   }>;
   edges: Array<{ source: string; target: string; data?: { linkCount?: number } }>;
   scores: Map<string, number>;
-  allScoreValues: number[];
   depthMap: Map<string, number>;
   outboundMap: Map<string, number>;
 }
 
+/**
+ * Serializes one node into a plain-text line for the copy-to-AI output.
+ *
+ * Format:
+ *   - {urlTemplate}  pages: {n}  score: {0.00}  health: {high|mid|low}  [warn: {reasons}]  depth: {n|unreachable|-}  outbound: {n}  [root]  [global]
+ *
+ * Fields:
+ *   score   — numeric PageRank value rounded to 2 decimal places (fallback 0.00 when missing)
+ *   health  — composite of 3 indicators: outbound links, crawl depth, cluster tags
+ *               0 warns → high | 1 warn → mid | 2+ warns → low
+ *   warn    — comma-separated reasons, omitted when health is high
+ *               outbound-warn  outbound count > OUTBOUND_WARNING_THRESHOLD
+ *               depth-warn     depth > DEPTH_WARNING_THRESHOLD, Infinity, or unreachable (only when root is set)
+ *               no-tags        node has no non-empty cluster tags
+ *   depth   — crawl depth from root; "unreachable" when Infinity; "-" when no root is set
+ *
+ * Example (all warns):
+ *   - /zh-tw/theme/{slug}  pages: 2  score: 0.10  health: low  warn: depth-warn,no-tags  depth: unreachable  outbound: 42
+ *
+ * Example (no warns):
+ *   - /zh-tw/destination/{slug}  pages: 274  score: 0.85  health: high  depth: 1  outbound: 37 [global]
+ */
 function formatNodeLine(
   node: CopyForAIInput["nodes"][number],
   scores: Map<string, number>,
-  allScoreValues: number[],
   depthMap: Map<string, number>,
   outboundMap: Map<string, number>,
 ): string {
   const { id, data } = node;
-  const tier = classifyScoreTier(scores.get(id) ?? 0, allScoreValues);
+  const numericScore = (scores.get(id) ?? 0).toFixed(2);
 
   let depthStr: string;
   if (!depthMap.has(id)) {
@@ -946,7 +966,25 @@ function formatNodeLine(
 
   const outbound = outboundMap.get(id) ?? 0;
 
-  let line = `- ${data.urlTemplate}  pages: ${data.pageCount}  score: ${tier}  depth: ${depthStr}  outbound: ${outbound}`;
+  // Health score from 3 indicators: links, depth, tags
+  const warnReasons: string[] = [];
+  if (outbound > OUTBOUND_WARNING_THRESHOLD) warnReasons.push("outbound-warn");
+  if (depthMap.size > 0) {
+    if (!depthMap.has(id)) {
+      warnReasons.push("depth-warn");
+    } else {
+      const d = depthMap.get(id)!;
+      if (d === Infinity || d > DEPTH_WARNING_THRESHOLD) warnReasons.push("depth-warn");
+    }
+  }
+  const trimmedTags = (data.tags ?? []).filter((t) => t.trim() !== "");
+  if (trimmedTags.length === 0) warnReasons.push("no-tags");
+
+  const healthTier = warnReasons.length === 0 ? "high" : warnReasons.length === 1 ? "mid" : "low";
+
+  let line = `- ${data.urlTemplate}  pages: ${data.pageCount}  score: ${numericScore}  health: ${healthTier}`;
+  if (warnReasons.length > 0) line += `  warn: ${warnReasons.join(",")}`;
+  line += `  depth: ${depthStr}  outbound: ${outbound}`;
   if (data.isRoot) line += " [root]";
   if (data.isGlobal) line += " [global]";
   return line;
@@ -968,7 +1006,7 @@ function formatEdgeLine(
  * paste-into-LLM usage. Pure function — no side effects, no DOM/clipboard access.
  */
 export function buildCopyForAIText(input: CopyForAIInput): string {
-  const { nodes, edges, scores, allScoreValues, depthMap, outboundMap } = input;
+  const { nodes, edges, scores, depthMap, outboundMap } = input;
 
   const templateById = new Map<string, string>(nodes.map((n) => [n.id, n.data.urlTemplate]));
 
@@ -979,7 +1017,7 @@ export function buildCopyForAIText(input: CopyForAIInput): string {
   lines.push(`## Nodes (${nodes.length} total)`);
 
   for (const node of nodes) {
-    lines.push(formatNodeLine(node, scores, allScoreValues, depthMap, outboundMap));
+    lines.push(formatNodeLine(node, scores, depthMap, outboundMap));
   }
 
   lines.push("");
