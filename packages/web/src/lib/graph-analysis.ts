@@ -11,6 +11,11 @@ import type { UrlNodeData } from "./graph-utils";
  * flagged as over-linked.
  */
 export const OUTBOUND_WARNING_THRESHOLD = 150;
+
+/**
+ * Crawl-depth warning threshold. A node whose BFS distance from the designated
+ * root exceeds this value (or is Infinity / unreachable) is flagged as buried.
+ */
 export const DEPTH_WARNING_THRESHOLD = 3;
 
 export interface HealthStatus {
