@@ -34,6 +34,7 @@ import { useScenarioHandlers } from "./hooks/useScenarioHandlers";
 import { useCanvasHandlers } from "./hooks/useCanvasHandlers";
 import {
   buildCopyForAIText,
+  syncNodeIdCounter,
   type UrlNodeData,
   type LinkCountEdgeData,
   type ScoreTier,
@@ -227,6 +228,7 @@ function AppInner() {
   useEffect(() => {
     if (activeScenario.nodes.length === 0 && activeScenario.edges.length === 0) return;
     const { wiredNodes, wiredEdges } = wireCallbacks(activeScenario.nodes, activeScenario.edges);
+    syncNodeIdCounter(wiredNodes);
     setNodes(wiredNodes);
     setEdges(wiredEdges);
   }, []); // eslint-disable-line react-hooks/exhaustive-deps

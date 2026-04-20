@@ -8,6 +8,7 @@ import {
   validateLinkCount,
   formatPageCount,
   resetNodeIdCounter,
+  syncNodeIdCounter,
   calculatePageRank,
   classifyScoreTier,
   identifyWeakNodes,
@@ -62,6 +63,62 @@ describe("createDefaultNode", () => {
     expect(node1.id).toBe("node-1");
     expect(node2.id).toBe("node-2");
     expect(node3.id).toBe("node-3");
+  });
+});
+
+describe("syncNodeIdCounter", () => {
+  beforeEach(() => {
+    resetNodeIdCounter();
+  });
+
+  it("syncNodeIdCounter([]) leaves counter at 0 — next createDefaultNode yields node-1", () => {
+    syncNodeIdCounter([]);
+    const node = createDefaultNode({ x: 0, y: 0 });
+    expect(node.id).toBe("node-1");
+  });
+
+  it("advances counter so next createDefaultNode yields node-6 after syncing node-5 and node-2", () => {
+    syncNodeIdCounter([{ id: "node-5" }, { id: "node-2" }]);
+    const node = createDefaultNode({ x: 0, y: 0 });
+    expect(node.id).toBe("node-6");
+  });
+
+  it("ignores ids that do not match the node-\\d+ pattern", () => {
+    syncNodeIdCounter([{ id: "custom-abc" }, { id: "global-xyz" }]);
+    const node = createDefaultNode({ x: 0, y: 0 });
+    expect(node.id).toBe("node-1");
+  });
+
+  it("NEVER lowers the counter — calling with fewer nodes after a higher one keeps progress", () => {
+    syncNodeIdCounter([{ id: "node-10" }]);
+    syncNodeIdCounter([{ id: "node-3" }]);
+    const node = createDefaultNode({ x: 0, y: 0 });
+    expect(node.id).toBe("node-11");
+  });
+
+  it("regression: after syncNodeIdCounter([{ id: 'node-1' }]), createDefaultNode returns node-2 not node-1", () => {
+    syncNodeIdCounter([{ id: "node-1" }]);
+    const node = createDefaultNode({ x: 0, y: 0 });
+    expect(node.id).toBe("node-2");
+  });
+});
+
+describe("createDefaultNode — collision-proof", () => {
+  beforeEach(() => {
+    resetNodeIdCounter();
+  });
+
+  it("skips colliding id when existingNodes contains the would-be id", () => {
+    // Counter is at 0, next would be node-1. Pass node-1 as existing — must skip to node-2.
+    const node = createDefaultNode({ x: 0, y: 0 }, [{ id: "node-1" }]);
+    expect(node.id).toBe("node-2");
+  });
+
+  it("backward compatible — calls without existingNodes still work", () => {
+    const node1 = createDefaultNode({ x: 0, y: 0 });
+    const node2 = createDefaultNode({ x: 0, y: 0 });
+    expect(node1.id).toBe("node-1");
+    expect(node2.id).toBe("node-2");
   });
 });
 

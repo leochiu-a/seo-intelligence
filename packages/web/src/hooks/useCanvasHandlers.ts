@@ -8,7 +8,7 @@ import {
   type ReactFlowInstance,
 } from "@xyflow/react";
 import type { Dispatch, SetStateAction } from "react";
-import { parseImportJson, getClosestHandleIds, type LinkCountEdgeData } from "../lib/graph-utils";
+import { parseImportJson, syncNodeIdCounter, getClosestHandleIds, type LinkCountEdgeData } from "../lib/graph-utils";
 import type { AppNodeData } from "../App";
 import type { UseNodeCallbacksResult } from "./useNodeCallbacks";
 import type { SerializedGraphNode, SerializedGraphEdge } from "../lib/serialize-graph";
@@ -61,6 +61,7 @@ export function useCanvasHandlers({
               importedNodes as SerializedGraphNode[],
               importedEdges as SerializedGraphEdge[],
             );
+            syncNodeIdCounter(wiredNodes);
             setNodes(wiredNodes);
             setEdges(wiredEdges);
           } catch {
