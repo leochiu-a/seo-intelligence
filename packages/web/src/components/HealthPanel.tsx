@@ -35,6 +35,8 @@ interface TierRow {
   tier: ScoreTier;
 }
 
+const TIER_ORDER: Record<string, number> = { low: 0, mid: 1, high: 2 };
+
 export function HealthPanel({
   nodes,
   depthMap,
@@ -69,10 +71,10 @@ export function HealthPanel({
         urlTemplate: n.data.urlTemplate,
         tier: classifyScoreTier(scores.get(n.id) ?? 0, allScoreValues),
       }))
-      .filter((r) => r.tier === "low" || r.tier === "mid")
+      .filter((r) => r.tier in TIER_ORDER)
       .sort((a, b) => {
-        // low before mid, then alphabetical by urlTemplate within each tier
-        if (a.tier !== b.tier) return a.tier === "low" ? -1 : 1;
+        if (a.tier !== b.tier)
+          return (TIER_ORDER[a.tier] ?? Infinity) - (TIER_ORDER[b.tier] ?? Infinity);
         return a.urlTemplate.localeCompare(b.urlTemplate);
       });
   }, [nodes, scores, allScoreValues]);
@@ -135,7 +137,7 @@ export function HealthPanel({
               Score Tier
             </h2>
             <p className="text-[11px] text-muted-fg mt-1" data-testid="score-tier-summary">
-              {tierRows.length} pages need attention
+              {tierRows.length} pages in score tier
             </p>
           </div>
           <ul className="divide-y divide-border">
