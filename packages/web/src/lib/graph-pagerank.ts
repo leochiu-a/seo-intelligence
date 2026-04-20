@@ -16,16 +16,6 @@ const EPSILON = 0.0001;
 const CLUSTER_BONUS_FACTOR = 1.5;
 
 /**
- * Outbound-link warning threshold. A non-global node whose total outbound link
- * count (explicit edges + implicit global injection) exceeds this value is
- * flagged as over-linked. Colocated with DAMPING/MAX_ITER/EPSILON per Phase 10
- * D-05. Exported (not module-private) so UrlNode.tsx and ScoreSidebar.tsx in
- * plan 10-02 can reuse the single source of truth instead of duplicating 150.
- */
-export const OUTBOUND_WARNING_THRESHOLD = 150;
-export const DEPTH_WARNING_THRESHOLD = 3;
-
-/**
  * Returns true when source and target tag arrays share at least one tag.
  * Handles undefined/empty inputs by returning false. Used by calculatePageRank
  * to decide whether an edge gets the CLUSTER_BONUS_FACTOR multiplier.

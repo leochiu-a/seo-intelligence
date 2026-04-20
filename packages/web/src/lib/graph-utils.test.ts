@@ -9,27 +9,29 @@ import {
   formatPageCount,
   resetNodeIdCounter,
   syncNodeIdCounter,
+} from "./graph-utils";
+import {
   calculatePageRank,
   classifyScoreTier,
   identifyWeakNodes,
-  parseImportJson,
-  HANDLE_IDS,
-  getClosestHandleIds,
+  calculateOutboundLinks,
+  hasSameCluster,
+} from "./graph-pagerank";
+import {
   collectPlacementSuggestions,
   collectPlacementGroups,
   calculateCrawlDepth,
   identifyOrphanNodes,
-  calculateOutboundLinks,
   OUTBOUND_WARNING_THRESHOLD,
-  hasSameCluster,
   collectClusterSuggestions,
   collectClusterGroups,
   getHealthStatus,
   hasAnyWarning,
   getConnectedElements,
-  buildCopyForAIText,
-} from "./graph-utils";
-import type { UrlNodeData, LinkCountEdgeData, Placement, HealthStatus } from "./graph-utils";
+  type HealthStatus,
+} from "./graph-analysis";
+import { parseImportJson, HANDLE_IDS, getClosestHandleIds, buildCopyForAIText } from "./graph-io";
+import type { UrlNodeData, LinkCountEdgeData, Placement } from "./graph-utils";
 
 describe("createDefaultNode", () => {
   beforeEach(() => {
@@ -2121,7 +2123,10 @@ describe("buildCopyForAIText", () => {
       nodes,
       edges: [],
       scores: new Map([["n1", 0.2]]),
-      depthMap: new Map<string, number>([["root", 0], ["n1", Infinity]]), // root set, n1 unreachable
+      depthMap: new Map<string, number>([
+        ["root", 0],
+        ["n1", Infinity],
+      ]), // root set, n1 unreachable
       outboundMap: new Map([["n1", 5]]),
     });
     expect(result).toContain("health: low");

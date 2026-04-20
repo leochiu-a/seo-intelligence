@@ -126,9 +126,3 @@ export function validateLinkCount(count: number): number {
 export function formatPageCount(n: number): string {
   return n === 1 ? "1 page" : `${n} pages`;
 }
-
-// Re-exports — preserve backward compatibility with existing consumers.
-// See graph-pagerank.ts, graph-analysis.ts, graph-io.ts for the implementations.
-export * from "./graph-pagerank";
-export * from "./graph-analysis";
-export * from "./graph-io";

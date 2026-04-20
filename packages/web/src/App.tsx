@@ -32,13 +32,9 @@ import { useDialogState } from "./hooks/useDialogState";
 import { useNodeCallbacks } from "./hooks/useNodeCallbacks";
 import { useScenarioHandlers } from "./hooks/useScenarioHandlers";
 import { useCanvasHandlers } from "./hooks/useCanvasHandlers";
-import {
-  buildCopyForAIText,
-  syncNodeIdCounter,
-  type UrlNodeData,
-  type LinkCountEdgeData,
-  type ScoreTier,
-} from "./lib/graph-utils";
+import { syncNodeIdCounter, type UrlNodeData, type LinkCountEdgeData } from "./lib/graph-utils";
+import { type ScoreTier } from "./lib/graph-pagerank";
+import { buildCopyForAIText } from "./lib/graph-io";
 import { serializeGraph } from "./lib/serialize-graph";
 
 // Extended node data type that includes the update callback for EditPopover wiring

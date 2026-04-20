@@ -1,10 +1,17 @@
 import type { Node, Edge } from "@xyflow/react";
 import type { UrlNodeData } from "./graph-utils";
-import { OUTBOUND_WARNING_THRESHOLD, DEPTH_WARNING_THRESHOLD } from "./graph-pagerank";
 
 // ---------------------------------------------------------------------------
 // Phase 11.1: PM Health Check — 3-metric status helper
 // ---------------------------------------------------------------------------
+
+/**
+ * Outbound-link warning threshold. A non-global node whose total outbound link
+ * count (explicit edges + implicit global injection) exceeds this value is
+ * flagged as over-linked.
+ */
+export const OUTBOUND_WARNING_THRESHOLD = 150;
+export const DEPTH_WARNING_THRESHOLD = 3;
 
 export interface HealthStatus {
   links: "ok" | "warn";

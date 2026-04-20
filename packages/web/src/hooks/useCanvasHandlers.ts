@@ -8,7 +8,8 @@ import {
   type ReactFlowInstance,
 } from "@xyflow/react";
 import type { Dispatch, SetStateAction } from "react";
-import { parseImportJson, syncNodeIdCounter, getClosestHandleIds, type LinkCountEdgeData } from "../lib/graph-utils";
+import { syncNodeIdCounter, type LinkCountEdgeData } from "../lib/graph-utils";
+import { parseImportJson, getClosestHandleIds } from "../lib/graph-io";
 import type { AppNodeData } from "../App";
 import type { UseNodeCallbacksResult } from "./useNodeCallbacks";
 import type { SerializedGraphNode, SerializedGraphEdge } from "../lib/serialize-graph";

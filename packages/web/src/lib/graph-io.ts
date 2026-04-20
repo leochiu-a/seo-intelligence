@@ -1,6 +1,6 @@
 import type { Node, Edge } from "@xyflow/react";
 import type { UrlNodeData, LinkCountEdgeData, Placement } from "./graph-utils";
-import { OUTBOUND_WARNING_THRESHOLD, DEPTH_WARNING_THRESHOLD } from "./graph-pagerank";
+import { OUTBOUND_WARNING_THRESHOLD, DEPTH_WARNING_THRESHOLD } from "./graph-analysis";
 
 /**
  * Handle IDs for UrlNode's 4 handles (one per side).

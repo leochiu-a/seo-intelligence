@@ -2,8 +2,8 @@ import { useMemo } from "react";
 import { TriangleAlert, Unplug } from "lucide-react";
 import { useReactFlow } from "@xyflow/react";
 import type { Node } from "@xyflow/react";
-import type { UrlNodeData, UrlTreeNode } from "../lib/graph-utils";
-import { buildUrlTree, OUTBOUND_WARNING_THRESHOLD } from "../lib/graph-utils";
+import type { UrlNodeData } from "../lib/graph-utils";
+import { buildUrlTree, OUTBOUND_WARNING_THRESHOLD, type UrlTreeNode } from "../lib/graph-analysis";
 import { getClusterColor } from "../lib/cluster-colors";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 
