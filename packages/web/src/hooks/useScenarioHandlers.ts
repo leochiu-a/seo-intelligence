@@ -1,7 +1,7 @@
 import { useCallback } from "react";
 import { type Node, type Edge } from "@xyflow/react";
 import type { MutableRefObject, Dispatch, SetStateAction } from "react";
-import type { UrlNodeData, LinkCountEdgeData } from "../lib/graph-utils";
+import { syncNodeIdCounter, type UrlNodeData, type LinkCountEdgeData } from "../lib/graph-utils";
 import type { AppNodeData } from "../App";
 import type { UseScenariosResult } from "./useScenarios";
 import type { UseNodeCallbacksResult } from "./useNodeCallbacks";
@@ -48,6 +48,7 @@ export function useScenarioHandlers({
       const target = switchScenario(targetId, nodes, edges);
       if (!target) return;
       const { wiredNodes, wiredEdges } = wireCallbacks(target.nodes, target.edges);
+      syncNodeIdCounter(wiredNodes);
       setNodes(wiredNodes);
       setEdges(wiredEdges);
       persist();
@@ -73,6 +74,7 @@ export function useScenarioHandlers({
       isSwitchingRef.current = true;
       const newScenario = createScenario(mode, nodes, edges);
       const { wiredNodes, wiredEdges } = wireCallbacks(newScenario.nodes, newScenario.edges);
+      syncNodeIdCounter(wiredNodes);
       setNodes(wiredNodes);
       setEdges(wiredEdges);
       persist();
@@ -89,6 +91,7 @@ export function useScenarioHandlers({
       if (!result) return; // only one scenario — D-03
       isSwitchingRef.current = true;
       const { wiredNodes, wiredEdges } = wireCallbacks(result.nodes, result.edges);
+      syncNodeIdCounter(wiredNodes);
       setNodes(wiredNodes);
       setEdges(wiredEdges);
       persist();
@@ -105,6 +108,7 @@ export function useScenarioHandlers({
         importedNodes as SerializedGraphNode[],
         importedEdges as SerializedGraphEdge[],
       );
+      syncNodeIdCounter(wiredNodes);
       setNodes(wiredNodes);
       setEdges(wiredEdges);
     },

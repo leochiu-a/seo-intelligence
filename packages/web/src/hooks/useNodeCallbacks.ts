@@ -77,9 +77,9 @@ export function useNodeCallbacks({
 
   const addNode = useCallback(
     (position: { x: number; y: number }) => {
-      const newNode = createDefaultNode(position);
-      setNodes((nds) =>
-        nds.concat({
+      setNodes((nds) => {
+        const newNode = createDefaultNode(position, nds);
+        return nds.concat({
           ...newNode,
           data: {
             ...newNode.data,
@@ -87,8 +87,8 @@ export function useNodeCallbacks({
             onRootToggle,
             onZIndexChange: onNodeZIndexChange,
           },
-        }),
-      );
+        });
+      });
     },
     [onNodeDataUpdate, onRootToggle, onNodeZIndexChange, setNodes],
   );
