@@ -1,4 +1,4 @@
-name: Lint and Type Check
+name: Lint, Type Check and Test
 
 on:
   pull_request:
@@ -9,8 +9,8 @@ on:
       - main
 
 jobs:
-  lint:
-    name: Lint and Type Check
+  ci:
+    name: Lint, Type Check and Test
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repo
@@ -33,3 +33,6 @@ jobs:
 
       - name: Type Check
         run: pnpm run type-check
+
+      - name: Test
+        run: pnpm run test
