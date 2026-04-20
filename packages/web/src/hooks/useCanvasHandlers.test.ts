@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { renderHook, act } from "@testing-library/react";
 import type { Node, Edge } from "@xyflow/react";
 import { MarkerType } from "@xyflow/react";
-import { useCanvasHandlers } from "./useCanvasHandlers";
+import { useCanvasHandlers, type UseCanvasHandlersArgs } from "./useCanvasHandlers";
 import type { AppNodeData } from "../App";
 import type { LinkCountEdgeData } from "../lib/graph-utils";
 import type { SerializedGraphNode, SerializedGraphEdge } from "../lib/serialize-graph";
@@ -101,7 +101,7 @@ describe("useCanvasHandlers", () => {
     vi.stubGlobal("window", { innerWidth: 1024, innerHeight: 768 });
   });
 
-  function makeArgs(overrides = {}) {
+  function makeArgs(overrides = {}): UseCanvasHandlersArgs {
     const nodes = [makeNode("n1"), makeNode("n2")];
     return {
       reactFlowInstance: reactFlowInstance as unknown as ReturnType<
@@ -114,7 +114,7 @@ describe("useCanvasHandlers", () => {
       wireCallbacks,
       onEdgeLinkCountChange,
       ...overrides,
-    };
+    } as unknown as UseCanvasHandlersArgs;
   }
 
   it("Test 1 (onDragOver): calls preventDefault and sets dropEffect to move", () => {

@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { renderHook, act } from "@testing-library/react";
 import type { Node, Edge } from "@xyflow/react";
 import { MarkerType } from "@xyflow/react";
-import { useNodeCallbacks } from "./useNodeCallbacks";
+import { useNodeCallbacks, type UseNodeCallbacksArgs } from "./useNodeCallbacks";
 import type { AppNodeData } from "../App";
 import type { LinkCountEdgeData } from "../lib/graph-utils";
 
@@ -49,13 +49,17 @@ describe("useNodeCallbacks", () => {
   let setNodes: ReturnType<typeof vi.fn>;
   let setEdges: ReturnType<typeof vi.fn>;
 
+  function makeArgs(): UseNodeCallbacksArgs {
+    return { setNodes, setEdges } as unknown as UseNodeCallbacksArgs;
+  }
+
   beforeEach(() => {
     setNodes = vi.fn();
     setEdges = vi.fn();
   });
 
   it("Test 1 (onNodeDataUpdate): updater merges new data into matching node, preserving other fields", () => {
-    const { result } = renderHook(() => useNodeCallbacks({ setNodes, setEdges }));
+    const { result } = renderHook(() => useNodeCallbacks(makeArgs()));
 
     act(() => {
       result.current.onNodeDataUpdate("n1", { urlTemplate: "/x" });
@@ -70,7 +74,7 @@ describe("useNodeCallbacks", () => {
   });
 
   it("Test 2 (onNodeZIndexChange): updater sets zIndex on matching node", () => {
-    const { result } = renderHook(() => useNodeCallbacks({ setNodes, setEdges }));
+    const { result } = renderHook(() => useNodeCallbacks(makeArgs()));
 
     act(() => {
       result.current.onNodeZIndexChange("n1", 5);
@@ -85,7 +89,7 @@ describe("useNodeCallbacks", () => {
   });
 
   it("Test 3 (onNodeZIndexChange no-op): returns same reference when zIndex already matches", () => {
-    const { result } = renderHook(() => useNodeCallbacks({ setNodes, setEdges }));
+    const { result } = renderHook(() => useNodeCallbacks(makeArgs()));
 
     act(() => {
       result.current.onNodeZIndexChange("n1", 5);
@@ -100,7 +104,7 @@ describe("useNodeCallbacks", () => {
   });
 
   it("Test 4 (onRootToggle on): sets isRoot=true on toggled node and clears isRoot from others", () => {
-    const { result } = renderHook(() => useNodeCallbacks({ setNodes, setEdges }));
+    const { result } = renderHook(() => useNodeCallbacks(makeArgs()));
 
     act(() => {
       result.current.onRootToggle("n1");
@@ -115,7 +119,7 @@ describe("useNodeCallbacks", () => {
   });
 
   it("Test 5 (onRootToggle off): toggles isRoot=false when node is currently root", () => {
-    const { result } = renderHook(() => useNodeCallbacks({ setNodes, setEdges }));
+    const { result } = renderHook(() => useNodeCallbacks(makeArgs()));
 
     act(() => {
       result.current.onRootToggle("n1");
@@ -129,7 +133,7 @@ describe("useNodeCallbacks", () => {
   });
 
   it("Test 6 (addNode): appends a new node with onUpdate/onRootToggle/onZIndexChange wired", () => {
-    const { result } = renderHook(() => useNodeCallbacks({ setNodes, setEdges }));
+    const { result } = renderHook(() => useNodeCallbacks(makeArgs()));
 
     act(() => {
       result.current.addNode({ x: 10, y: 20 });
@@ -149,7 +153,7 @@ describe("useNodeCallbacks", () => {
   });
 
   it("Test 7 (onEdgeLinkCountChange): calls setEdges with updateEdgeLinkCount updater", () => {
-    const { result } = renderHook(() => useNodeCallbacks({ setNodes, setEdges }));
+    const { result } = renderHook(() => useNodeCallbacks(makeArgs()));
 
     act(() => {
       result.current.onEdgeLinkCountChange("e1", 3);
@@ -163,7 +167,7 @@ describe("useNodeCallbacks", () => {
   });
 
   it("Test 8 (wireCallbacks nodes): attaches onUpdate/onRootToggle/onZIndexChange and preserves optional fields", () => {
-    const { result } = renderHook(() => useNodeCallbacks({ setNodes, setEdges }));
+    const { result } = renderHook(() => useNodeCallbacks(makeArgs()));
 
     const serializedNodes = [
       {
@@ -195,7 +199,7 @@ describe("useNodeCallbacks", () => {
   });
 
   it("Test 9 (wireCallbacks edges): wires edges with defaults and onLinkCountChange", () => {
-    const { result } = renderHook(() => useNodeCallbacks({ setNodes, setEdges }));
+    const { result } = renderHook(() => useNodeCallbacks(makeArgs()));
 
     const serializedEdges = [
       {
@@ -216,7 +220,7 @@ describe("useNodeCallbacks", () => {
   });
 
   it("Test 10 (sourceHandle passthrough): preserves explicit null sourceHandle, omits when undefined", () => {
-    const { result } = renderHook(() => useNodeCallbacks({ setNodes, setEdges }));
+    const { result } = renderHook(() => useNodeCallbacks(makeArgs()));
 
     const edgesWithNull = [
       {
@@ -242,7 +246,7 @@ describe("useNodeCallbacks", () => {
     let renderCount = 0;
     const { result, rerender } = renderHook(() => {
       renderCount++;
-      return useNodeCallbacks({ setNodes, setEdges });
+      return useNodeCallbacks(makeArgs());
     });
 
     const first = result.current;

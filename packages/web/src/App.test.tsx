@@ -49,7 +49,6 @@ vi.mock("@xyflow/react", async () => {
 vi.mock("./components/Sidebar", () => ({ Sidebar: () => null }));
 vi.mock("./components/Toolbar", () => ({ Toolbar: () => null }));
 vi.mock("./components/ScenarioTabBar", () => ({ ScenarioTabBar: () => null }));
-vi.mock("./components/ScoreSidebar", () => ({ ScoreSidebar: () => null }));
 vi.mock("./components/ImportDialog", () => ({ ImportDialog: () => null }));
 
 // ---- Helpers ----

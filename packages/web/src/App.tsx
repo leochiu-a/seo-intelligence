@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef, useEffect } from "react";
+import { useState, useCallback, useRef, useEffect, type MouseEvent } from "react";
 import {
   ReactFlow,
   Background,
@@ -209,7 +209,6 @@ function AppInner() {
         data: { linkCount: (e.data as LinkCountEdgeData | undefined)?.linkCount ?? 1 },
       })),
       scores,
-      allScoreValues,
       depthMap,
       outboundMap,
     });
@@ -297,7 +296,9 @@ function AppInner() {
                 onNodesChange={onNodesChange}
                 onEdgesChange={onEdgesChange}
                 onConnect={onConnect}
-                onNodeClick={(_e, node) => handleNodeHighlight(node.id)}
+                onNodeClick={(_e: MouseEvent, node: Node<AppNodeData>) =>
+                  handleNodeHighlight(node.id)
+                }
                 onPaneClick={clearRouteHighlight}
                 connectionMode={ConnectionMode.Loose}
                 onInit={setReactFlowInstance}

@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { renderHook, act } from "@testing-library/react";
 import type { Node, Edge } from "@xyflow/react";
-import { useScenarioHandlers } from "./useScenarioHandlers";
+import { useScenarioHandlers, type UseScenarioHandlersArgs } from "./useScenarioHandlers";
 import type { AppNodeData } from "../App";
 import type { LinkCountEdgeData } from "../lib/graph-utils";
 
@@ -114,7 +114,7 @@ describe("useScenarioHandlers", () => {
     });
   });
 
-  function makeArgs(overrides = {}) {
+  function makeArgs(overrides = {}): UseScenarioHandlersArgs {
     const nodes = [makeNode("n1")];
     const edges = [makeEdge("e1", "n1", "n2")];
     return {
@@ -130,7 +130,7 @@ describe("useScenarioHandlers", () => {
       wireCallbacks,
       isSwitchingRef,
       ...overrides,
-    };
+    } as unknown as UseScenarioHandlersArgs;
   }
 
   it("Test 1 (handleSwitchScenario same ID): no-op when targetId === activeScenarioId", () => {
@@ -246,7 +246,6 @@ describe("useScenarioHandlers", () => {
     };
 
     act(() => {
-      // @ts-expect-error -- simplified node for test
       result.current.handleImportFromDialog([importedNode], [importedEdge]);
     });
 
