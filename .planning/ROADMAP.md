@@ -268,3 +268,13 @@ Plans:
 
 Plans:
 - [ ] TBD (promote with /gsd:review-backlog when ready)
+
+### Phase 999.12: Fix Add Node 相關的 broken tests (BACKLOG)
+
+**Goal:** 修復 Add Node / Add Tag 邏輯壞掉的 3 個 test file 共 6 個 failing tests
+**Context:** EditPopover 的 tag 現在 render 成 editable `<input>` 而非 chip badge，導致 `getByText` 找不到；HealthPanel score tier summary 文字改了但 test 沒跟著更新；ScoreSidebar.test.tsx import 了不存在的 `./ScoreSidebar`（已改名為 ScorePanel）
+**Requirements:** TBD
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (promote with /gsd:review-backlog when ready)
