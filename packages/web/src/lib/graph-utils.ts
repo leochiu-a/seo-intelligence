@@ -28,11 +28,44 @@ export function resetNodeIdCounter(): void {
 }
 
 /**
+ * Advances the internal id counter so future createDefaultNode() calls
+ * produce ids strictly greater than every `node-<N>` id already present.
+ * Safe to call repeatedly (monotonically non-decreasing).
+ * Non-matching ids (e.g. "custom-abc") are ignored.
+ */
+export function syncNodeIdCounter(nodes: ReadonlyArray<{ id: string }>): void {
+  let max = nodeIdCounter;
+  for (const n of nodes) {
+    const m = /^node-(\d+)$/.exec(n.id);
+    if (m) {
+      const v = Number(m[1]);
+      if (Number.isFinite(v) && v > max) max = v;
+    }
+  }
+  nodeIdCounter = max;
+}
+
+/**
  * Creates a new URL node with default values and a unique auto-incremented id.
  * Default urlTemplate: '/page/<id>', default pageCount: 1.
+ *
+ * Optional `existingNodes` provides a collision-proof guard: if the generated id
+ * already exists in the set, the counter is advanced until a free id is found.
+ * Backward compatible — calls without existingNodes behave exactly as before.
  */
-export function createDefaultNode(position: { x: number; y: number }): Node<UrlNodeData> {
+export function createDefaultNode(
+  position: { x: number; y: number },
+  existingNodes?: ReadonlyArray<{ id: string }>,
+): Node<UrlNodeData> {
+  if (existingNodes && existingNodes.length) syncNodeIdCounter(existingNodes);
   nodeIdCounter += 1;
+  // Collision guard: loop forward if id already exists in existingNodes
+  if (existingNodes && existingNodes.length) {
+    const existingIds = new Set(existingNodes.map((n) => n.id));
+    while (existingIds.has(`node-${nodeIdCounter}`)) {
+      nodeIdCounter += 1;
+    }
+  }
   return {
     id: `node-${nodeIdCounter}`,
     type: "urlNode",
