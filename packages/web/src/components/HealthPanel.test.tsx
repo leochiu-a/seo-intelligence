@@ -283,7 +283,7 @@ describe("HealthPanel — Score Tier section", () => {
         allScoreValues={allScoreValues}
       />,
     );
-    expect(screen.getByTestId("score-tier-summary")).toHaveTextContent("6 pages scored");
+    expect(screen.getByTestId("score-tier-summary")).toHaveTextContent("6 pages in score tier");
   });
 });
 

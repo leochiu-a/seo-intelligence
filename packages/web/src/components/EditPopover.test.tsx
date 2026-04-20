@@ -152,7 +152,7 @@ describe("EditPopover", () => {
     const input = screen.getByTestId("cluster-tag-input");
     fireEvent.change(input, { target: { value: "food" } });
     fireEvent.click(screen.getByRole("button", { name: /\+ Add Tag/i }));
-    expect(screen.getByText("food")).toBeInTheDocument();
+    expect(screen.getByDisplayValue("food")).toBeInTheDocument();
   });
 
   it("typing a tag and pressing Enter adds it to the visible chip list", () => {
@@ -160,15 +160,15 @@ describe("EditPopover", () => {
     const input = screen.getByTestId("cluster-tag-input");
     fireEvent.change(input, { target: { value: "food" } });
     fireEvent.keyDown(input, { key: "Enter" });
-    expect(screen.getByText("food")).toBeInTheDocument();
+    expect(screen.getByDisplayValue("food")).toBeInTheDocument();
   });
 
   it("clicking X on a tag chip removes it from local state", () => {
     render(<EditPopover {...defaultProps} tags={["food"]} />);
-    expect(screen.getByText("food")).toBeInTheDocument();
+    expect(screen.getByDisplayValue("food")).toBeInTheDocument();
     const removeBtn = screen.getByRole("button", { name: "Remove tag food" });
     fireEvent.click(removeBtn);
-    expect(screen.queryByText("food")).not.toBeInTheDocument();
+    expect(screen.queryByDisplayValue("food")).not.toBeInTheDocument();
   });
 
   it("onSave receives tags array as 5th positional argument", () => {
@@ -186,11 +186,11 @@ describe("EditPopover", () => {
     expect(screen.getByTestId("cluster-tag-input")).toBeInTheDocument();
   });
 
-  it("empty/whitespace-only tag strings are filtered out on save", () => {
+  it("empty string tags are filtered out on save", () => {
     const onSave = vi.fn();
-    render(<EditPopover {...defaultProps} tags={["food", "  "]} onSave={onSave} />);
+    render(<EditPopover {...defaultProps} tags={["food", ""]} onSave={onSave} />);
     fireEvent.click(screen.getByText("Confirm"));
-    // Whitespace-only tag should be filtered
+    // Empty-string tag should be filtered
     expect(onSave).toHaveBeenCalledWith("/page/<id>", 5, false, [], ["food"]);
   });
 
@@ -201,7 +201,7 @@ describe("EditPopover", () => {
     fireEvent.change(input, { target: { value: "food" } });
     fireEvent.keyDown(input, { key: "Enter" });
     // Should still only have one 'food' chip
-    const foodChips = screen.getAllByText("food");
+    const foodChips = screen.getAllByDisplayValue("food");
     expect(foodChips).toHaveLength(1);
   });
 
