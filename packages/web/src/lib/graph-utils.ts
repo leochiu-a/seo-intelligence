@@ -926,6 +926,28 @@ export interface CopyForAIInput {
   outboundMap: Map<string, number>;
 }
 
+/**
+ * Serializes one node into a plain-text line for the copy-to-AI output.
+ *
+ * Format:
+ *   - {urlTemplate}  pages: {n}  score: {0.00}  health: {high|mid|low}  [warn: {reasons}]  depth: {n|unreachable|-}  outbound: {n}  [root]  [global]
+ *
+ * Fields:
+ *   score   — numeric PageRank value rounded to 2 decimal places (fallback 0.00 when missing)
+ *   health  — composite of 3 indicators: outbound links, crawl depth, cluster tags
+ *               0 warns → high | 1 warn → mid | 2+ warns → low
+ *   warn    — comma-separated reasons, omitted when health is high
+ *               outbound-warn  outbound count > OUTBOUND_WARNING_THRESHOLD
+ *               depth-warn     depth > DEPTH_WARNING_THRESHOLD, Infinity, or unreachable (only when root is set)
+ *               no-tags        node has no non-empty cluster tags
+ *   depth   — crawl depth from root; "unreachable" when Infinity; "-" when no root is set
+ *
+ * Example (all warns):
+ *   - /zh-tw/theme/{slug}  pages: 2  score: 0.10  health: low  warn: depth-warn,no-tags  depth: unreachable  outbound: 42
+ *
+ * Example (no warns):
+ *   - /zh-tw/destination/{slug}  pages: 274  score: 0.85  health: high  depth: 1  outbound: 37 [global]
+ */
 function formatNodeLine(
   node: CopyForAIInput["nodes"][number],
   scores: Map<string, number>,
