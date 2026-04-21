@@ -287,7 +287,7 @@ Plans:
 | 9. Scenario Comparison | 2/2 | Complete   | 2026-04-16 |
 | 10. Outbound Link Warning | 2/2 | Complete    | 2026-04-17 |
 | 11. Topical Cluster Tags | 3/8 | In progress | - |
-| 12. Unified Pages Panel | 3/3 | Complete   | 2026-04-21 |
+| 12. Unified Pages Panel | 3/3 | Complete    | 2026-04-21 |
 | 13. Inbound/Outbound Highlight | 0/0 | Not started | - |
 | 14. Anchor Text Type on Edge | 0/0 | Not started | - |
 
