@@ -29,6 +29,7 @@ import {
   getHealthStatus,
   hasAnyWarning,
   getConnectedElements,
+  buildTooltipContent,
   type HealthStatus,
 } from "./graph-analysis";
 import { parseImportJson, HANDLE_IDS, getClosestHandleIds, buildCopyForAIText } from "./graph-io";
@@ -2329,5 +2330,37 @@ describe("buildCopyForAIText", () => {
       outboundMap,
     });
     expect(result).toMatchSnapshot();
+  });
+});
+
+describe("buildTooltipContent", () => {
+  it('returns "Outbound links > 150" for links warn', () => {
+    expect(buildTooltipContent({ links: "warn", depth: "ok", tags: "ok" })).toBe(
+      "Outbound links > 150",
+    );
+  });
+
+  it('returns "Crawl depth > 3" for depth warn', () => {
+    expect(buildTooltipContent({ links: "ok", depth: "warn", tags: "ok" })).toBe("Crawl depth > 3");
+  });
+
+  it('returns "No tags assigned" for tags warn', () => {
+    expect(buildTooltipContent({ links: "ok", depth: "ok", tags: "warn" })).toBe(
+      "No tags assigned",
+    );
+  });
+
+  it("joins multiple issues with newline", () => {
+    expect(buildTooltipContent({ links: "warn", depth: "warn", tags: "warn" })).toBe(
+      "Outbound links > 150\nCrawl depth > 3\nNo tags assigned",
+    );
+  });
+
+  it("returns empty string when all ok", () => {
+    expect(buildTooltipContent({ links: "ok", depth: "ok", tags: "ok" })).toBe("");
+  });
+
+  it("depth na does not produce a warning line", () => {
+    expect(buildTooltipContent({ links: "ok", depth: "na", tags: "ok" })).toBe("");
   });
 });
