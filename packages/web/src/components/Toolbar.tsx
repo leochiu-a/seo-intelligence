@@ -17,6 +17,8 @@ import {
   AlertDialogAction,
   AlertDialogCancel,
 } from "@/components/ui/alert-dialog";
+import { Button, buttonVariants } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 interface ToolbarProps {
   onAddNode: () => void;
@@ -41,11 +43,11 @@ function ExportMenu({
     <DropdownMenu>
       <DropdownMenuTrigger
         disabled={isEmpty}
-        className="flex items-center gap-1.5 rounded-md border border-border bg-white px-3 py-1.5 text-sm font-medium text-ink hover:bg-surface disabled:cursor-not-allowed disabled:opacity-50 transition-colors"
+        className={cn(buttonVariants({ variant: "outline", size: "sm" }))}
       >
-        <Download size={14} />
+        <Download />
         Export
-        <ChevronDown size={12} />
+        <ChevronDown />
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" side="bottom">
         <DropdownMenuItem onClick={onExportJson}>
@@ -82,27 +84,21 @@ export function Toolbar({
       <span className="text-sm font-bold tracking-wide text-pink">SEO INTELLIGENCE</span>
 
       <div className="ml-auto flex items-center gap-2">
-        <button
-          onClick={onAddNode}
-          className="flex items-center gap-1.5 rounded-md bg-dark px-4 py-1.5 text-sm font-semibold text-white hover:bg-ink transition-colors"
-        >
-          <Plus size={16} />
+        <Button onClick={onAddNode} size="sm" className="bg-dark text-white hover:bg-ink">
+          <Plus />
           Add Node
-        </button>
-        <button
-          onClick={onImportJson}
-          className="flex items-center gap-1.5 rounded-md border border-border bg-white px-3 py-1.5 text-sm font-medium text-ink hover:bg-surface transition-colors"
-        >
-          <Upload size={14} />
+        </Button>
+        <Button onClick={onImportJson} variant="outline" size="sm">
+          <Upload />
           Import JSON
-        </button>
+        </Button>
         <ExportMenu onExportJson={onExportJson} onCopyForAI={onCopyForAI} isEmpty={isEmpty} />
         <AlertDialog open={clearDialogOpen} onOpenChange={setClearDialogOpen}>
           <AlertDialogTrigger
             disabled={isEmpty}
-            className="flex items-center gap-1.5 rounded-md border border-red-200 bg-white px-3 py-1.5 text-sm font-medium text-red-600 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50 transition-colors"
+            className={cn(buttonVariants({ variant: "destructive", size: "sm" }))}
           >
-            <Trash2 size={14} />
+            <Trash2 />
             Clear Canvas
           </AlertDialogTrigger>
           <AlertDialogContent>
@@ -121,13 +117,9 @@ export function Toolbar({
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
-        <button
-          onClick={onLegendOpen}
-          aria-label="Legend"
-          className="flex items-center justify-center rounded-md border border-border bg-white p-1.5 text-ink hover:bg-surface transition-colors"
-        >
-          <HelpCircle size={16} />
-        </button>
+        <Button onClick={onLegendOpen} variant="outline" size="icon-sm" aria-label="Legend">
+          <HelpCircle />
+        </Button>
       </div>
     </header>
   );
