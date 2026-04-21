@@ -30,7 +30,7 @@ Four phases deliver a browser-based visual tool for modeling internal link struc
 - [x] **Phase 9: Scenario Comparison** - Multi-scenario management with independent graph state, localStorage persistence (completed 2026-04-16)
 - [x] **Phase 10: Outbound Link Warning** - Per-node total outbound link calculation with threshold warning at >150 links on canvas and sidebar (completed 2026-04-17)
 - [ ] **Phase 11: Topical Cluster Tags** - Tag nodes by topic cluster, bonus weight for same-cluster edges, visual cluster color coding
-- [ ] **Phase 12: Unified Pages Panel** - Merge ScorePanel + HealthPanel into a single "Pages" panel with one row per page (score / depth / inbound / outbound / warnings), default sort by weakness, sortable/filterable
+- [x] **Phase 12: Unified Pages Panel** - Merge ScorePanel + HealthPanel into a single "Pages" panel with one row per page (score / depth / inbound / outbound / warnings), default sort by weakness, sortable/filterable (completed 2026-04-21)
 - [ ] **Phase 13: Inbound/Outbound Highlight** - On node click, color inbound edges blue and outbound edges orange while dimming others, plus a Selected Node side panel listing inbound/outbound pages with click-to-navigate
 - [ ] **Phase 14: Anchor Text Type on Edge** - Label edges with anchor text type (exact/partial/branded/generic) and display inbound anchor diversity per node
 
@@ -240,7 +240,7 @@ Plans:
 Plans:
 - [x] 12-01-PLAN.md — Extend useGraphAnalytics with inboundMap: Map<string, number> + unit tests for calculateInboundLinks
 - [x] 12-02-PLAN.md — Create PagesPanel + tests; wire into SidePanel (tabs: filter | pages, default pages) and App.tsx (pass inboundMap)
-- [ ] 12-03-PLAN.md — Delete legacy ScorePanel.tsx, HealthPanel.tsx, HealthPanel.test.tsx; re-home buildTooltipContent tests
+- [x] 12-03-PLAN.md — Delete legacy ScorePanel.tsx, HealthPanel.tsx, HealthPanel.test.tsx; re-home buildTooltipContent tests
 
 ### Phase 13: Inbound/Outbound Highlight
 **Goal**: When a PM clicks a node, they can instantly see which pages link TO it and which pages it links FROM — both visually on the canvas and as clickable lists in a side panel
@@ -287,7 +287,7 @@ Plans:
 | 9. Scenario Comparison | 2/2 | Complete   | 2026-04-16 |
 | 10. Outbound Link Warning | 2/2 | Complete    | 2026-04-17 |
 | 11. Topical Cluster Tags | 3/8 | In progress | - |
-| 12. Unified Pages Panel | 2/3 | In Progress|  |
+| 12. Unified Pages Panel | 3/3 | Complete   | 2026-04-21 |
 | 13. Inbound/Outbound Highlight | 0/0 | Not started | - |
 | 14. Anchor Text Type on Edge | 0/0 | Not started | - |
 
@@ -298,7 +298,7 @@ Plans:
 **Goal:** 根據 URL prefix 自動填入 cluster 欄位作為預設值，PM 仍可手動覆寫，大幅降低 999.5 的使用成本
 **Context:** 999.5 要求手動打 cluster tag，節點多時（50+）繁瑣。多數網站 URL 已有主題結構（`/food/*`、`/hotel/*`），應能從 prefix 自動推斷。依賴 999.5。
 **Requirements:** TBD
-**Plans:** 2/3 plans executed
+**Plans:** 3/3 plans complete
 
 Plans:
 - [ ] TBD (promote with /gsd:review-backlog when ready)

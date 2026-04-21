@@ -2,14 +2,14 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: MVP
-status: executing
-last_updated: "2026-04-21T14:18:39.880Z"
+status: verifying
+last_updated: "2026-04-21T14:23:08.573Z"
 last_activity: 2026-04-21
 progress:
   total_phases: 17
-  completed_phases: 10
+  completed_phases: 11
   total_plans: 28
-  completed_plans: 27
+  completed_plans: 28
   percent: 0
 ---
 
@@ -26,7 +26,7 @@ See: .planning/PROJECT.md (updated 2026-04-16)
 
 Phase: 12 (unified-pages-panel) — EXECUTING
 Plan: 3 of 3
-Status: Ready to execute
+Status: Phase complete — ready for verification
 Last activity: 2026-04-21
 
 Progress: [░░░░░░░░░░] 0%
@@ -76,6 +76,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 11.1-pm-internal-link-deep-placement-text-filter-warning P02 | 4 | 2 tasks | 4 files |
 | Phase 12-unified-pages-panel P01 | 3 | 2 tasks | 3 files |
 | Phase 12-unified-pages-panel P02 | 4 | 3 tasks | 4 files |
+| Phase 12-unified-pages-panel P03 | 2 min | 2 tasks | 1 files |
 
 ## Accumulated Context
 
@@ -154,6 +155,8 @@ Recent decisions affecting current work:
 - [Phase 12-unified-pages-panel]: PagesPanel uses native <select> for sort — @/components/ui/select primitive doesn't exist in repo (CONTEXT D-05 fallback)
 - [Phase 12-unified-pages-panel]: PagesPanel warning badge priority orphan > unreachable > general; weak appended to general tooltip rather than stacking icons (D-11)
 - [Phase 12-unified-pages-panel]: Sort runs on unfiltered rows; filters applied after — keeps within-group ordering stable across tier/warning toggles
+- [Phase 12-unified-pages-panel]: Re-home pure-function tests (buildTooltipContent) before deleting UI test file — preserves coverage independently of component lifecycle
+- [Phase 12-unified-pages-panel]: CONTEXT D-22 listed ScorePanel.test.tsx for deletion but pre-flight ls confirmed absence — plan only deletes files that actually exist
 
 ### Pending Todos
 
@@ -191,6 +194,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-21T14:18:39.877Z
+Last session: 2026-04-21T14:23:08.570Z
 Last activity: 2026-04-20 - Completed quick task 260420-lwu: graph utils 整個檔案太長了，需要分割
 Resume file: None
