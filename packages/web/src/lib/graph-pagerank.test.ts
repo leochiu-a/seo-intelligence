@@ -15,20 +15,6 @@ function makeNode(id: string, overrides: Partial<UrlNodeData> = {}): Node<UrlNod
   };
 }
 
-function makeEdge(
-  id: string,
-  source: string,
-  target: string,
-  linkCount = 1,
-): Edge<LinkCountEdgeData> {
-  return {
-    id,
-    source,
-    target,
-    data: { linkCount },
-  };
-}
-
 describe("calculatePageRank - rootId parameter", () => {
   it("Test A: root node score is higher than non-root nodes when rootId is provided (3 nodes, no edges)", () => {
     // 3 nodes: root + 2 others, no edges, no global nodes

@@ -30,15 +30,16 @@ export function useGraphAnalytics(
   nodes: Node<AppNodeData>[],
   edges: Edge<LinkCountEdgeData>[],
 ): GraphAnalyticsResult {
+  // Derive root node ID from nodes state (must be before scores so it can be passed as dep)
+  const rootId = useMemo(() => nodes.find((n) => n.data.isRoot)?.id ?? null, [nodes]);
+
   // Recalculate scores on every graph change (per D-13, SCORE-02)
-  const scores = useMemo(() => calculatePageRank(nodes, edges), [nodes, edges]);
+  // rootId passed so root node receives synthetic inbound boost (avoids "low" tier for homepage)
+  const scores = useMemo(() => calculatePageRank(nodes, edges, rootId), [nodes, edges, rootId]);
 
   const weakNodes = useMemo(() => identifyWeakNodes(scores), [scores]);
 
   const allScoreValues = useMemo(() => [...scores.values()], [scores]);
-
-  // Derive root node ID from nodes state
-  const rootId = useMemo(() => nodes.find((n) => n.data.isRoot)?.id ?? null, [nodes]);
 
   // Compute crawl depth map using BFS from root
   const depthMap = useMemo(() => calculateCrawlDepth(nodes, edges, rootId), [nodes, edges, rootId]);
