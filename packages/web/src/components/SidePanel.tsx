@@ -41,7 +41,7 @@ export function SidePanel({
   const tabClass = (tab: "filter" | "score" | "health") =>
     `flex-1 px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.14em] transition-colors ${
       activeTab === tab
-        ? "text-dark border-b-2 border-blue-500 -mb-px"
+        ? "text-dark border-b-2 border-dark -mb-px"
         : "text-muted-fg hover:text-dark"
     }`;
 
