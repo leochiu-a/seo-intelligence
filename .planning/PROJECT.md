@@ -60,6 +60,12 @@ Let PMs visually plan and simulate internal link structures — and immediately 
 
 - [x] Low/Mid/High score tier badges on canvas nodes show hover tooltips explaining link equity tier and providing actionable improvement guidance — Validated in Phase 11.2: Score Badge Tooltip
 
+### Validated (Phase 12)
+
+- [x] Unified "Pages" panel replaces separate Score and Health tabs — each row shows URL template, score, depth, inbound count, outbound count, tier badge, and combined warning badges — Validated in Phase 12: Unified Pages Panel
+- [x] Default issue-tier sort surfaces weakest pages first (orphan → unreachable → warning → clean), with 7-option sort dropdown, warnings-only filter, and tier-pill filter — Validated in Phase 12: Unified Pages Panel
+- [x] Clicking a row highlights and pans to the node on canvas (preserves prior ScorePanel behavior) — Validated in Phase 12: Unified Pages Panel
+
 ### Out of Scope
 
 - Real website crawling / importing live URL data — focus is simulation, not auditing
@@ -106,4 +112,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-18 — Phase 11.1 complete: PM Health Check Panel with [Score|Health] tab toggle, 3-metric badges (Links/Depth/Tags), warnings-first sort, and Show Warnings filter*
+*Last updated: 2026-04-21 — Phase 12 complete: unified Pages panel replaces separate Score and Health tabs; SidePanel now [Filter | Pages] with issue-tier default sort, 7 sort options, warnings-only + tier-pill filters, and legacy ScorePanel/HealthPanel removed*
