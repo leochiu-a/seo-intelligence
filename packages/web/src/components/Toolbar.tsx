@@ -43,7 +43,7 @@ function ExportMenu({
     <DropdownMenu>
       <DropdownMenuTrigger
         disabled={isEmpty}
-        className={cn(buttonVariants({ variant: "outline", size: "sm" }))}
+        className={cn(buttonVariants({ variant: "outline", size: "default" }))}
       >
         <Download />
         Export
@@ -84,11 +84,11 @@ export function Toolbar({
       <span className="text-sm font-bold tracking-wide text-pink">SEO INTELLIGENCE</span>
 
       <div className="ml-auto flex items-center gap-2">
-        <Button onClick={onAddNode} size="sm" className="bg-dark text-white hover:bg-ink">
+        <Button onClick={onAddNode}>
           <Plus />
           Add Node
         </Button>
-        <Button onClick={onImportJson} variant="outline" size="sm">
+        <Button onClick={onImportJson} variant="outline" size="default">
           <Upload />
           Import JSON
         </Button>
@@ -96,7 +96,7 @@ export function Toolbar({
         <AlertDialog open={clearDialogOpen} onOpenChange={setClearDialogOpen}>
           <AlertDialogTrigger
             disabled={isEmpty}
-            className={cn(buttonVariants({ variant: "destructive", size: "sm" }))}
+            className={cn(buttonVariants({ variant: "destructive", size: "default" }))}
           >
             <Trash2 />
             Clear Canvas
@@ -117,7 +117,7 @@ export function Toolbar({
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
-        <Button onClick={onLegendOpen} variant="outline" size="icon-sm" aria-label="Legend">
+        <Button onClick={onLegendOpen} variant="outline" size="icon" aria-label="Legend">
           <HelpCircle />
         </Button>
       </div>
