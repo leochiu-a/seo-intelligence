@@ -239,7 +239,7 @@ Plans:
 
 Plans:
 - [x] 12-01-PLAN.md — Extend useGraphAnalytics with inboundMap: Map<string, number> + unit tests for calculateInboundLinks
-- [ ] 12-02-PLAN.md — Create PagesPanel + tests; wire into SidePanel (tabs: filter | pages, default pages) and App.tsx (pass inboundMap)
+- [x] 12-02-PLAN.md — Create PagesPanel + tests; wire into SidePanel (tabs: filter | pages, default pages) and App.tsx (pass inboundMap)
 - [ ] 12-03-PLAN.md — Delete legacy ScorePanel.tsx, HealthPanel.tsx, HealthPanel.test.tsx; re-home buildTooltipContent tests
 
 ### Phase 13: Inbound/Outbound Highlight
@@ -287,7 +287,7 @@ Plans:
 | 9. Scenario Comparison | 2/2 | Complete   | 2026-04-16 |
 | 10. Outbound Link Warning | 2/2 | Complete    | 2026-04-17 |
 | 11. Topical Cluster Tags | 3/8 | In progress | - |
-| 12. Unified Pages Panel | 1/3 | In Progress|  |
+| 12. Unified Pages Panel | 2/3 | In Progress|  |
 | 13. Inbound/Outbound Highlight | 0/0 | Not started | - |
 | 14. Anchor Text Type on Edge | 0/0 | Not started | - |
 
@@ -298,7 +298,7 @@ Plans:
 **Goal:** 根據 URL prefix 自動填入 cluster 欄位作為預設值，PM 仍可手動覆寫，大幅降低 999.5 的使用成本
 **Context:** 999.5 要求手動打 cluster tag，節點多時（50+）繁瑣。多數網站 URL 已有主題結構（`/food/*`、`/hotel/*`），應能從 prefix 自動推斷。依賴 999.5。
 **Requirements:** TBD
-**Plans:** 1/3 plans executed
+**Plans:** 2/3 plans executed
 
 Plans:
 - [ ] TBD (promote with /gsd:review-backlog when ready)
