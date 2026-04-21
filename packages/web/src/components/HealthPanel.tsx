@@ -84,10 +84,10 @@ export function HealthPanel({
   return (
     <div data-testid="health-panel">
       <div className="px-3 py-2.5 border-b border-border">
-        <h2 className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-fg">
+        <h2 className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-fg">
           Health Check
         </h2>
-        <p className="text-[11px] text-muted-fg mt-1" data-testid="health-summary">
+        <p className="text-xs text-muted-fg mt-1" data-testid="health-summary">
           {warningCount} / {rows.length} pages have warnings
         </p>
         <label className="flex items-center gap-2 mt-2 cursor-pointer">
@@ -96,14 +96,14 @@ export function HealthPanel({
             onCheckedChange={(checked) => setWarningsOnly(checked === true)}
             data-testid="warnings-only-toggle"
           />
-          <span className="text-[11px] text-dark select-none">Show warnings only</span>
+          <span className="text-xs text-dark select-none">Show warnings only</span>
         </label>
       </div>
 
       {nodes.length === 0 ? (
-        <p className="px-3 py-4 text-[11px] text-muted-fg text-center">No nodes to check</p>
+        <p className="px-3 py-4 text-xs text-muted-fg text-center">No nodes to check</p>
       ) : visibleRows.length === 0 ? (
-        <p className="px-3 py-4 text-[11px] text-muted-fg text-center">All pages are healthy</p>
+        <p className="px-3 py-4 text-xs text-muted-fg text-center">All pages are healthy</p>
       ) : (
         <ul className="divide-y divide-border">
           {visibleRows.map((row) => (
@@ -132,10 +132,10 @@ export function HealthPanel({
       {tierRows.length > 0 && (
         <div data-testid="score-tier-section">
           <div className="px-3 py-2.5 border-t border-border">
-            <h2 className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-fg">
+            <h2 className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-fg">
               Score Tier
             </h2>
-            <p className="text-[11px] text-muted-fg mt-1" data-testid="score-tier-summary">
+            <p className="text-xs text-muted-fg mt-1" data-testid="score-tier-summary">
               {tierRows.length} pages in score tier
             </p>
           </div>

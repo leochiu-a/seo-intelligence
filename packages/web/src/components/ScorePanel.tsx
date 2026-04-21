@@ -91,7 +91,7 @@ export function ScorePanel({
     <>
       {!rootId && nodes.length > 0 && (
         <div className="px-3 py-3 bg-amber-50 border-b border-border">
-          <p className="text-[11px] text-amber-700">
+          <p className="text-xs text-amber-700">
             Set a root node to see crawl depth. Click a node's edit button and enable "Root
             (Homepage)".
           </p>
@@ -101,7 +101,7 @@ export function ScorePanel({
       {orphanList.length > 0 && (
         <div>
           <div className="px-3 py-2 bg-red-50 border-b border-border">
-            <h2 className="text-[11px] font-semibold uppercase tracking-[0.14em] text-red-600 flex items-center gap-1.5">
+            <h2 className="text-xs font-semibold uppercase tracking-[0.14em] text-red-600 flex items-center gap-1.5">
               <Unplug size={12} />
               Orphan Pages ({orphanList.length})
             </h2>
@@ -118,7 +118,7 @@ export function ScorePanel({
                       {renderClusterDots(node.data.tags)}
                       <span className="truncate">{node.data.urlTemplate}</span>
                     </p>
-                    <p className="text-[11px] text-muted-fg font-mono">
+                    <p className="text-xs text-muted-fg font-mono">
                       {(scores.get(node.id) ?? 0).toFixed(4)} ·{" "}
                       <span className="text-red-500">No inbound links</span>
                     </p>
@@ -138,7 +138,7 @@ export function ScorePanel({
       {unreachableOnlyList.length > 0 && (
         <div>
           <div className="px-3 py-2 bg-red-50 border-b border-border">
-            <h2 className="text-[11px] font-semibold uppercase tracking-[0.14em] text-red-600 flex items-center gap-1.5">
+            <h2 className="text-xs font-semibold uppercase tracking-[0.14em] text-red-600 flex items-center gap-1.5">
               <Unplug size={12} />
               Unreachable ({unreachableOnlyList.length})
             </h2>
@@ -155,7 +155,7 @@ export function ScorePanel({
                       {renderClusterDots(node.data.tags)}
                       <span className="truncate">{node.data.urlTemplate}</span>
                     </p>
-                    <p className="text-[11px] text-muted-fg font-mono">
+                    <p className="text-xs text-muted-fg font-mono">
                       {(scores.get(node.id) ?? 0).toFixed(4)} ·{" "}
                       <span className="text-red-500">Unreachable</span>
                     </p>
@@ -173,7 +173,7 @@ export function ScorePanel({
       )}
 
       <div className="px-3 py-2.5 border-b border-border">
-        <h2 className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-fg">
+        <h2 className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-fg">
           Score Ranking
         </h2>
       </div>
@@ -193,7 +193,7 @@ export function ScorePanel({
                     {renderClusterDots(tags)}
                     <span className="truncate">{item.urlTemplate}</span>
                   </p>
-                  <p className="text-[11px] text-muted-fg font-mono">
+                  <p className="text-xs text-muted-fg font-mono">
                     {item.score.toFixed(4)}
                     {depthMap.size > 0 &&
                       (() => {
@@ -246,7 +246,7 @@ export function ScorePanel({
         })}
       </ul>
       {mainRanked.length === 0 && (
-        <p className="px-3 py-4 text-[11px] text-muted-fg text-center">Add nodes to see scores</p>
+        <p className="px-3 py-4 text-xs text-muted-fg text-center">Add nodes to see scores</p>
       )}
     </>
   );

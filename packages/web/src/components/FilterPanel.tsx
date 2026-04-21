@@ -22,7 +22,7 @@ export function FilterPanel({ nodes, activeFilters, onToggle, onClear }: FilterP
   return (
     <div className="bg-white flex flex-col" data-testid="filter-panel">
       <div className="px-3 py-2.5 border-b border-border">
-        <h2 className="text-sm font-semibold uppercase tracking-[0.14em] text-muted-fg">
+        <h2 className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-fg">
           By placement
         </h2>
       </div>
@@ -74,7 +74,7 @@ export function FilterPanel({ nodes, activeFilters, onToggle, onClear }: FilterP
       {clusterGroups.length > 0 && (
         <>
           <div className="px-3 py-2.5 border-b border-t border-border">
-            <h2 className="text-sm font-semibold uppercase tracking-[0.14em] text-muted-fg">
+            <h2 className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-fg">
               By cluster
             </h2>
           </div>
