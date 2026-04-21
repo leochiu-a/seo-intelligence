@@ -9,7 +9,7 @@ Four phases deliver a browser-based visual tool for modeling internal link struc
 - 🚧 **v1.0 MVP** - Phases 0-3 (in progress)
 - 📋 **v1.1 Global Navigation** - Phases 4-5 (planned)
 - 📋 **v1.1 UX Polish** - Phases 6-7 (planned)
-- 📋 **v2.0 SEO Analysis Depth** - Phases 8-12 (planned)
+- 📋 **v2.0 SEO Analysis Depth** - Phases 8-14 (planned)
 
 ## Phases
 
@@ -30,7 +30,9 @@ Four phases deliver a browser-based visual tool for modeling internal link struc
 - [x] **Phase 9: Scenario Comparison** - Multi-scenario management with independent graph state, localStorage persistence (completed 2026-04-16)
 - [x] **Phase 10: Outbound Link Warning** - Per-node total outbound link calculation with threshold warning at >150 links on canvas and sidebar (completed 2026-04-17)
 - [ ] **Phase 11: Topical Cluster Tags** - Tag nodes by topic cluster, bonus weight for same-cluster edges, visual cluster color coding
-- [ ] **Phase 12: Anchor Text Type on Edge** - Label edges with anchor text type (exact/partial/branded/generic) and display inbound anchor diversity per node
+- [ ] **Phase 12: Unified Pages Panel** - Merge ScorePanel + HealthPanel into a single "Pages" panel with one row per page (score / depth / inbound / outbound / warnings), default sort by weakness, sortable/filterable
+- [ ] **Phase 13: Inbound/Outbound Highlight** - On node click, color inbound edges blue and outbound edges orange while dimming others, plus a Selected Node side panel listing inbound/outbound pages with click-to-navigate
+- [ ] **Phase 14: Anchor Text Type on Edge** - Label edges with anchor text type (exact/partial/branded/generic) and display inbound anchor diversity per node
 
 ## Phase Details
 
@@ -224,9 +226,37 @@ Plans:
 - [x] 11.1-01-PLAN.md — TDD: getHealthStatus + hasAnyWarning pure helpers in graph-utils.ts
 - [x] 11.1-02-PLAN.md — HealthPanel component + [Score|Health] tab wiring in ScoreSidebar
 
-### Phase 12: Anchor Text Type on Edge
-**Goal**: Users can label each edge with an anchor text type (exact match / partial match / branded / generic) and see inbound anchor diversity per node, surfacing topical relevance gaps
+### Phase 12: Unified Pages Panel
+**Goal**: PMs can see every page's score, depth, inbound, outbound, and health warnings in one ranked list — no more switching between Score and Health tabs to hunt for weak pages
 **Depends on**: Phase 11
+**Requirements**: TBD
+**Success Criteria** (what must be TRUE):
+  1. A single "Pages" panel replaces the separate Score and Health tabs; each row shows one page with URL template, score, depth, inbound count, outbound count, and warning badges (orphan / unreachable / weak / depth / outbound / tags)
+  2. Default sort surfaces the weakest pages first (orphan + unreachable at top, then low score with multiple warnings)
+  3. PM can switch sort to any column (score / depth / outbound / inbound) and filter to show only pages with warnings
+  4. Clicking a row highlights and pans to the node on canvas (preserves current behavior)
+**Plans**: 0 plans
+
+Plans:
+- [ ] TBD
+
+### Phase 13: Inbound/Outbound Highlight
+**Goal**: When a PM clicks a node, they can instantly see which pages link TO it and which pages it links FROM — both visually on the canvas and as clickable lists in a side panel
+**Depends on**: Phase 12
+**Requirements**: TBD
+**Success Criteria** (what must be TRUE):
+  1. Clicking a node colors its inbound edges blue and outbound edges orange; all other edges are dimmed
+  2. A "Selected Node" tab in the side panel shows the clicked node's URL template, score, and two sections: Inbound (pages linking to it) and Outbound (pages it links to)
+  3. Each row in the inbound/outbound list is clickable to select and pan to that node
+  4. Empty state: with no node selected, the Selected Node tab shows a helpful prompt
+  5. Inbound counts are memoized at App level (parallel to existing `outboundMap`)
+
+Plans:
+- [ ] TBD
+
+### Phase 14: Anchor Text Type on Edge
+**Goal**: Users can label each edge with an anchor text type (exact match / partial match / branded / generic) and see inbound anchor diversity per node, surfacing topical relevance gaps
+**Depends on**: Phase 13
 **Requirements**: TBD
 **Success Criteria** (what must be TRUE):
   1. User can set an anchor text type on any edge from the edge edit panel
@@ -239,7 +269,7 @@ Plans:
 
 ## Progress
 
-**Execution Order:** 0 -> 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9 -> 10 -> 11 -> 12
+**Execution Order:** 0 -> 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9 -> 10 -> 11 -> 12 -> 13 -> 14
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
@@ -255,7 +285,9 @@ Plans:
 | 9. Scenario Comparison | 2/2 | Complete   | 2026-04-16 |
 | 10. Outbound Link Warning | 2/2 | Complete    | 2026-04-17 |
 | 11. Topical Cluster Tags | 3/8 | In progress | - |
-| 12. Anchor Text Type on Edge | 0/0 | Not started | - |
+| 12. Unified Pages Panel | 0/0 | Not started | - |
+| 13. Inbound/Outbound Highlight | 0/0 | Not started | - |
+| 14. Anchor Text Type on Edge | 0/0 | Not started | - |
 
 ## Backlog
 

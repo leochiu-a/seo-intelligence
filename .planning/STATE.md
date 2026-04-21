@@ -7,7 +7,7 @@ stopped_at: Phase 11.2 context gathered
 last_updated: "2026-04-19T06:01:29.106Z"
 last_activity: 2026-04-19
 progress:
-  total_phases: 14
+  total_phases: 16
   completed_phases: 10
   total_plans: 25
   completed_plans: 25
@@ -82,6 +82,9 @@ Progress: [░░░░░░░░░░] 0%
 
 - Phase 11.1 inserted after Phase 11: PM 指標健診面板 — 在單一頁面檢查 Internal Link Deep Placement Text 是否達標並 filter warning 危險頁面 (URGENT)
 - Phase 11.2 inserted after Phase 11: Add score badge tooltip and improvement guidance for low/mid nodes (URGENT)
+- Phase 12 added: Unified Pages Panel — merge ScorePanel + HealthPanel into a single ranked "Pages" view (pushed original Anchor Text Type to Phase 14)
+- Phase 13 added: Inbound/Outbound Highlight — color-code directional edges on node click and add Selected Node side panel
+- Phase 14 (renumbered from 12): Anchor Text Type on Edge
 
 ### Decisions
 
