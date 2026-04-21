@@ -42,10 +42,19 @@ export function hasSameCluster(a: string[] | undefined, b: string[] | undefined)
  *       where totalWeightedOutbound(v) = sum of (linkCount(v->w) * pageCount(w)) for all w that v links to
  *    b. Check convergence: max absolute delta across all nodes < 0.0001
  * 3. Return Map<nodeId, score>
+ *
+ * @param rootId - Optional. When provided, the root node receives a synthetic
+ *   inbound link from every other node (linkCount=1). This ensures the root/homepage
+ *   is never classified as "low" — it models the real-web convention that the root
+ *   is the canonical entry point linked from all pages. Skipped when rootId is
+ *   null/undefined. If the root is a global node AND already has effective placement
+ *   links (totalPlacementLinks > 0), the global injection already boosts it, so the
+ *   root injection is skipped to avoid double-counting.
  */
 export function calculatePageRank(
   nodes: Node<UrlNodeData>[],
   edges: Edge<LinkCountEdgeData>[],
+  rootId: string | null | undefined = null,
 ): Map<string, number> {
   if (nodes.length === 0) return new Map();
 
@@ -103,6 +112,40 @@ export function calculatePageRank(
         linkCount: totalPlacementLinks,
         sameCluster,
       });
+    }
+  }
+
+  // Root node injection: every non-root node implicitly links to the root node.
+  // Rationale: the root/homepage is the canonical entry point — all crawls originate
+  // there. This mirrors the global-node injection pattern but uses a fixed linkCount=1
+  // (no placement-count weighting).
+  // Skipped when rootId is null/undefined.
+  // Also skipped if the root is a global node that already has effective placement links
+  // (totalPlacementLinks > 0) — in that case the global injection already provides boost.
+  if (rootId) {
+    const rootNode = nodes.find((n) => n.id === rootId);
+    if (rootNode) {
+      const rootAlreadyGlobalInjected =
+        rootNode.data.isGlobal === true &&
+        (rootNode.data.placements ?? []).reduce((s, p) => s + p.linkCount, 0) > 0;
+
+      if (!rootAlreadyGlobalInjected) {
+        const syntheticLinkCount = 1;
+        for (const sourceNode of nodes) {
+          if (sourceNode.id === rootId) continue; // skip self-link
+          const sameCluster = hasSameCluster(sourceNode.data.tags, rootNode.data.tags);
+          inbound.get(rootId)?.push({
+            sourceId: sourceNode.id,
+            linkCount: syntheticLinkCount,
+            sameCluster,
+          });
+          outbound.get(sourceNode.id)?.push({
+            targetId: rootId,
+            linkCount: syntheticLinkCount,
+            sameCluster,
+          });
+        }
+      }
     }
   }
 
