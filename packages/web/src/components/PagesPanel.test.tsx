@@ -1,0 +1,339 @@
+import { describe, it, expect, vi, beforeEach } from "vitest";
+import { render, screen, fireEvent, within } from "@testing-library/react";
+import { ReactFlowProvider } from "@xyflow/react";
+import type { Node } from "@xyflow/react";
+import type { UrlNodeData } from "../lib/graph-utils";
+import { PagesPanel } from "./PagesPanel";
+
+const mockSetNodes = vi.fn();
+const mockFitView = vi.fn();
+vi.mock("@xyflow/react", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@xyflow/react")>();
+  return {
+    ...actual,
+    useReactFlow: () => ({
+      setNodes: mockSetNodes,
+      fitView: mockFitView,
+      getNodes: () => [],
+    }),
+  };
+});
+
+function makeNode(
+  id: string,
+  urlTemplate: string,
+  overrides: Partial<UrlNodeData> = {},
+): Node<UrlNodeData> {
+  return {
+    id,
+    type: "urlNode",
+    position: { x: 0, y: 0 },
+    data: { urlTemplate, pageCount: 1, ...overrides },
+  };
+}
+
+interface RenderOpts {
+  nodes?: Node<UrlNodeData>[];
+  scores?: Map<string, number>;
+  allScoreValues?: number[];
+  weakNodes?: Set<string>;
+  orphanNodes?: Set<string>;
+  unreachableNodes?: Set<string>;
+  depthMap?: Map<string, number>;
+  outboundMap?: Map<string, number>;
+  inboundMap?: Map<string, number>;
+  rootId?: string | null;
+  onNodeHighlight?: (id: string | null) => void;
+}
+
+function renderPanel(opts: RenderOpts = {}) {
+  return render(
+    <ReactFlowProvider>
+      <PagesPanel
+        nodes={opts.nodes ?? []}
+        scores={opts.scores ?? new Map()}
+        allScoreValues={opts.allScoreValues ?? []}
+        weakNodes={opts.weakNodes ?? new Set()}
+        orphanNodes={opts.orphanNodes ?? new Set()}
+        unreachableNodes={opts.unreachableNodes ?? new Set()}
+        depthMap={opts.depthMap ?? new Map()}
+        outboundMap={opts.outboundMap ?? new Map()}
+        inboundMap={opts.inboundMap ?? new Map()}
+        rootId={opts.rootId ?? null}
+        onNodeHighlight={opts.onNodeHighlight}
+      />
+    </ReactFlowProvider>,
+  );
+}
+
+beforeEach(() => {
+  mockSetNodes.mockReset();
+  mockFitView.mockReset();
+});
+
+describe("PagesPanel", () => {
+  it("renders one row per node", () => {
+    const nodes = [makeNode("a", "/a"), makeNode("b", "/b"), makeNode("c", "/c")];
+    renderPanel({ nodes });
+    expect(screen.getAllByTestId("pages-row")).toHaveLength(3);
+  });
+
+  it("default sort orders orphan → unreachable-only → warning → clean, with score ascending inside each group", () => {
+    // clean-a (tier ok, tags set) score 5; warning-b (no tags) score 2;
+    // orphan-c score 1; unreachable-d score 3; warning-e (no tags) score 4.
+    const nodes = [
+      makeNode("a", "/clean-a", { tags: ["t"] }),
+      makeNode("b", "/warn-b"), // no tags → health warning
+      makeNode("c", "/orphan-c", { tags: ["t"] }),
+      makeNode("d", "/unreach-d", { tags: ["t"] }),
+      makeNode("e", "/warn-e"), // no tags → health warning
+    ];
+    const scores = new Map<string, number>([
+      ["a", 5],
+      ["b", 2],
+      ["c", 1],
+      ["d", 3],
+      ["e", 4],
+    ]);
+    renderPanel({
+      nodes,
+      scores,
+      orphanNodes: new Set(["c"]),
+      unreachableNodes: new Set(["d"]),
+    });
+    const rows = screen.getAllByTestId("pages-row");
+    const templates = rows.map((r) => r.getAttribute("data-node-id"));
+    // Expected order:
+    //  group 0 orphan: c
+    //  group 1 unreachable-only: d
+    //  group 2 warning: b (score 2) then e (score 4)
+    //  group 3 clean: a
+    expect(templates).toEqual(["c", "d", "b", "e", "a"]);
+  });
+
+  it("switching sort to 'score-hi' reorders rows by score descending", () => {
+    const nodes = [
+      makeNode("a", "/a", { tags: ["t"] }),
+      makeNode("b", "/b", { tags: ["t"] }),
+    ];
+    const scores = new Map<string, number>([
+      ["a", 1],
+      ["b", 9],
+    ]);
+    renderPanel({ nodes, scores });
+    fireEvent.change(screen.getByTestId("pages-sort"), { target: { value: "score-hi" } });
+    const ids = screen.getAllByTestId("pages-row").map((r) => r.getAttribute("data-node-id"));
+    expect(ids).toEqual(["b", "a"]);
+  });
+
+  it("switching sort to 'url-asc' sorts by URL template alphabetically", () => {
+    const nodes = [
+      makeNode("a", "/z", { tags: ["t"] }),
+      makeNode("b", "/a", { tags: ["t"] }),
+    ];
+    renderPanel({ nodes });
+    fireEvent.change(screen.getByTestId("pages-sort"), { target: { value: "url-asc" } });
+    const ids = screen.getAllByTestId("pages-row").map((r) => r.getAttribute("data-node-id"));
+    expect(ids).toEqual(["b", "a"]);
+  });
+
+  it("warnings-only checkbox hides clean rows", () => {
+    const nodes = [
+      makeNode("a", "/clean", { tags: ["t"] }),
+      makeNode("b", "/warn"), // no tags → warn
+      makeNode("c", "/orphan", { tags: ["t"] }),
+    ];
+    renderPanel({ nodes, orphanNodes: new Set(["c"]) });
+    expect(screen.getAllByTestId("pages-row")).toHaveLength(3);
+    fireEvent.click(screen.getByTestId("pages-warnings-only"));
+    expect(screen.getAllByTestId("pages-row")).toHaveLength(2);
+    expect(screen.queryByText("/clean")).toBeNull();
+  });
+
+  it("tier filter hides excluded tiers", () => {
+    const nodes = [
+      makeNode("n1", "/low-a", { tags: ["t"] }),
+      makeNode("n2", "/low-b", { tags: ["t"] }),
+      makeNode("n3", "/mid-a", { tags: ["t"] }),
+      makeNode("n4", "/mid-b", { tags: ["t"] }),
+      makeNode("n5", "/high-a", { tags: ["t"] }),
+      makeNode("n6", "/high-b", { tags: ["t"] }),
+    ];
+    const scores = new Map<string, number>([
+      ["n1", 1],
+      ["n2", 2],
+      ["n3", 3],
+      ["n4", 4],
+      ["n5", 5],
+      ["n6", 6],
+    ]);
+    const allScoreValues = [1, 2, 3, 4, 5, 6];
+    renderPanel({ nodes, scores, allScoreValues });
+    expect(screen.getAllByTestId("pages-row")).toHaveLength(6);
+    fireEvent.click(screen.getByTestId("pages-tier-low"));
+    expect(screen.getAllByTestId("pages-row")).toHaveLength(4);
+    fireEvent.click(screen.getByTestId("pages-tier-high"));
+    expect(screen.getAllByTestId("pages-row")).toHaveLength(2);
+  });
+
+  it("clicking a row calls setNodes, schedules fitView after 50ms, and calls onNodeHighlight", () => {
+    vi.useFakeTimers();
+    const onNodeHighlight = vi.fn();
+    const nodes = [makeNode("a", "/a", { tags: ["t"] })];
+    renderPanel({ nodes, onNodeHighlight });
+    fireEvent.click(screen.getByTestId("pages-row").querySelector("button")!);
+    expect(mockSetNodes).toHaveBeenCalledTimes(1);
+    expect(mockSetNodes.mock.calls[0][0]).toBeInstanceOf(Function);
+    expect(onNodeHighlight).toHaveBeenCalledWith("a");
+    // fitView is wrapped in setTimeout(..., 50) — not called yet.
+    expect(mockFitView).not.toHaveBeenCalled();
+    vi.advanceTimersByTime(50);
+    expect(mockFitView).toHaveBeenCalledWith({
+      nodes: [{ id: "a" }],
+      duration: 300,
+      padding: 0.5,
+    });
+    vi.useRealTimers();
+  });
+
+  it("empty state: 'Add nodes to see pages' when nodes is empty", () => {
+    renderPanel({ nodes: [] });
+    expect(screen.getByText(/Add nodes to see pages/)).toBeInTheDocument();
+    expect(screen.queryAllByTestId("pages-row")).toHaveLength(0);
+  });
+
+  it("filtered-empty state: 'No pages match current filters' when filters hide everything", () => {
+    const nodes = [makeNode("a", "/a", { tags: ["t"] })];
+    renderPanel({ nodes });
+    fireEvent.click(screen.getByTestId("pages-warnings-only"));
+    expect(screen.getByText(/No pages match current filters/)).toBeInTheDocument();
+    expect(screen.queryAllByTestId("pages-row")).toHaveLength(0);
+  });
+
+  it("orphan and unreachable section banners render when sort is default", () => {
+    const nodes = [
+      makeNode("a", "/orphan", { tags: ["t"] }),
+      makeNode("b", "/unreach", { tags: ["t"] }),
+      makeNode("c", "/clean", { tags: ["t"] }),
+    ];
+    renderPanel({
+      nodes,
+      orphanNodes: new Set(["a"]),
+      unreachableNodes: new Set(["b"]),
+    });
+    expect(screen.getByTestId("pages-banner-orphan")).toHaveTextContent("Orphan Pages (1)");
+    expect(screen.getByTestId("pages-banner-unreachable")).toHaveTextContent("Unreachable (1)");
+  });
+
+  it("section banners do NOT render when sort is not issue-tier", () => {
+    const nodes = [
+      makeNode("a", "/orphan", { tags: ["t"] }),
+      makeNode("b", "/unreach", { tags: ["t"] }),
+    ];
+    renderPanel({
+      nodes,
+      orphanNodes: new Set(["a"]),
+      unreachableNodes: new Set(["b"]),
+    });
+    fireEvent.change(screen.getByTestId("pages-sort"), { target: { value: "score-hi" } });
+    expect(screen.queryByTestId("pages-banner-orphan")).toBeNull();
+    expect(screen.queryByTestId("pages-banner-unreachable")).toBeNull();
+  });
+
+  it("row meta shows Depth/in/out and highlights outbound > 150 + depth > 3", () => {
+    const nodes = [makeNode("a", "/a", { tags: ["t"] })];
+    const rootId = "r";
+    renderPanel({
+      nodes,
+      rootId,
+      depthMap: new Map([["a", 5]]),
+      outboundMap: new Map([["a", 200]]),
+      inboundMap: new Map([["a", 3]]),
+    });
+    const row = screen.getByTestId("pages-row");
+    expect(within(row).getByText(/Depth 5/)).toBeInTheDocument();
+    expect(within(row).getByText(/in 3/)).toBeInTheDocument();
+    const outSegment = within(row).getByText(/out 200/);
+    expect(outSegment.className).toMatch(/text-red-500/);
+    const depthSegment = within(row).getByText(/Depth 5/);
+    expect(depthSegment.className).toMatch(/text-amber-500/);
+  });
+
+  it("Depth segment is NOT rendered when rootId is null", () => {
+    const nodes = [makeNode("a", "/a", { tags: ["t"] })];
+    renderPanel({ nodes, rootId: null });
+    const row = screen.getByTestId("pages-row");
+    expect(within(row).queryByText(/Depth /)).toBeNull();
+    expect(within(row).getByText(/in 0/)).toBeInTheDocument();
+    expect(within(row).getByText(/out 0/)).toBeInTheDocument();
+  });
+
+  it("tier summary shows 'X Low · Y Mid · Z High' counts", () => {
+    const nodes = [
+      makeNode("n1", "/1", { tags: ["t"] }),
+      makeNode("n2", "/2", { tags: ["t"] }),
+      makeNode("n3", "/3", { tags: ["t"] }),
+      makeNode("n4", "/4", { tags: ["t"] }),
+      makeNode("n5", "/5", { tags: ["t"] }),
+      makeNode("n6", "/6", { tags: ["t"] }),
+    ];
+    const scores = new Map<string, number>([
+      ["n1", 1],
+      ["n2", 2],
+      ["n3", 3],
+      ["n4", 4],
+      ["n5", 5],
+      ["n6", 6],
+    ]);
+    renderPanel({ nodes, scores, allScoreValues: [1, 2, 3, 4, 5, 6] });
+    expect(screen.getByTestId("pages-tier-summary")).toHaveTextContent("2 Low · 2 Mid · 2 High");
+  });
+
+  it("tier summary is omitted when allScoreValues is empty", () => {
+    const nodes = [makeNode("a", "/a", { tags: ["t"] })];
+    renderPanel({ nodes, allScoreValues: [] });
+    expect(screen.queryByTestId("pages-tier-summary")).toBeNull();
+  });
+
+  it("inbound count always renders, including zero", () => {
+    const nodes = [makeNode("a", "/a", { tags: ["t"] })];
+    renderPanel({ nodes, inboundMap: new Map([["a", 0]]) });
+    expect(screen.getByText(/in 0/)).toBeInTheDocument();
+  });
+
+  it("rootId-missing amber banner renders only when rootId is null and nodes.length > 0", () => {
+    const nodes = [makeNode("a", "/a", { tags: ["t"] })];
+    const { rerender } = renderPanel({ nodes, rootId: null });
+    expect(screen.getByText(/Set a root node to see crawl depth/)).toBeInTheDocument();
+    rerender(
+      <ReactFlowProvider>
+        <PagesPanel
+          nodes={nodes}
+          scores={new Map()}
+          allScoreValues={[]}
+          weakNodes={new Set()}
+          orphanNodes={new Set()}
+          unreachableNodes={new Set()}
+          depthMap={new Map()}
+          outboundMap={new Map()}
+          inboundMap={new Map()}
+          rootId={"a"}
+        />
+      </ReactFlowProvider>,
+    );
+    expect(screen.queryByText(/Set a root node to see crawl depth/)).toBeNull();
+  });
+
+  it("weak page row shows general warning trigger (pages-warn-general)", () => {
+    const nodes = [makeNode("a", "/a", { tags: ["t"] })];
+    renderPanel({ nodes, weakNodes: new Set(["a"]) });
+    expect(screen.getByTestId("pages-warn-general")).toBeInTheDocument();
+  });
+
+  it("orphan page row shows orphan trigger and NOT the general trigger", () => {
+    const nodes = [makeNode("a", "/a", { tags: ["t"] })];
+    renderPanel({ nodes, orphanNodes: new Set(["a"]) });
+    expect(screen.getByTestId("pages-warn-orphan")).toBeInTheDocument();
+    expect(screen.queryByTestId("pages-warn-general")).toBeNull();
+  });
+});
