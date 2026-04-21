@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: MVP
 status: executing
-last_updated: "2026-04-21T13:38:49.546Z"
-last_activity: "2026-04-19 - Completed quick task 260419-ppw: Refactor App.tsx phase 2 — 839→382 lines"
+last_updated: "2026-04-21T14:10:39.747Z"
+last_activity: 2026-04-21
 progress:
   total_phases: 17
   completed_phases: 10
-  total_plans: 25
-  completed_plans: 25
+  total_plans: 28
+  completed_plans: 26
   percent: 0
 ---
 
@@ -20,14 +20,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-16)
 
 **Core value:** Let PMs visually plan and simulate internal link structures — and immediately see which pages will rank highest — before any code is written or deployed.
-**Current focus:** Phase 11.2 — add-score-badge-tooltip-and-improvement-guidance-for-low-mid-nodes
+**Current focus:** Phase 12 — unified-pages-panel
 
 ## Current Position
 
-Phase: 12
-Plan: Not started
-Status: Executing Phase 11.2
-Last activity: 2026-04-19 - Completed quick task 260419-ppw: Refactor App.tsx phase 2 — 839→382 lines
+Phase: 12 (unified-pages-panel) — EXECUTING
+Plan: 2 of 3
+Status: Ready to execute
+Last activity: 2026-04-21
 
 Progress: [░░░░░░░░░░] 0%
 
@@ -74,6 +74,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 999.5-topical-cluster-tags P06 | 2 | 1 tasks | 2 files |
 | Phase 999.5-topical-cluster-tags P07 | 15 | 3 tasks | 7 files |
 | Phase 11.1-pm-internal-link-deep-placement-text-filter-warning P02 | 4 | 2 tasks | 4 files |
+| Phase 12-unified-pages-panel P01 | 3 | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -145,6 +146,9 @@ Recent decisions affecting current work:
 - [Phase 11.1-pm-internal-link-deep-placement-text-filter-warning]: data-testid on span wrapper around lucide icons (not SVG) — SVGAnimatedString className breaks .toMatch() in tests
 - [Phase 11.1-pm-internal-link-deep-placement-text-filter-warning]: Tab underline style (border-b-2 border-blue-500) chosen over pill tabs to match sidebar header aesthetic
 - [Quick 260419-uje]: HealthPanel composes warnings list and Score Tier section as independent sub-components with their own gating — the "Show warnings only" toggle scopes only the warnings list, Score Tier remains unaffected. Badge colors (red-100/red-700 Low, amber-100/amber-700 Mid) reused from UrlNode TONE_MAP for consistent tier vocabulary across canvas + sidebar + health panel.
+- [Phase 12-unified-pages-panel]: inboundMap uses edge-count semantics (not linkCount-weighted) — matches identifyOrphanNodes orphan definition; outbound stays linkCount-weighted, the two metrics are intentionally not unified
+- [Phase 12-unified-pages-panel]: identifyOrphanNodes NOT refactored to read from inboundMap (D-21 optional) — kept independent to preserve orphan test suite and minimize Plan 01 blast radius
+- [Phase 12-unified-pages-panel]: calculateInboundLinks placed in graph-analysis.ts (alongside identifyOrphanNodes), not graph-pagerank.ts — co-locates edge-count + synthetic-global formulas
 
 ### Pending Todos
 
@@ -182,6 +186,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-21T13:38:49.543Z
+Last session: 2026-04-21T14:10:39.744Z
 Last activity: 2026-04-20 - Completed quick task 260420-lwu: graph utils 整個檔案太長了，需要分割
-Resume file: .planning/phases/12-unified-pages-panel/12-CONTEXT.md
+Resume file: None
