@@ -152,6 +152,7 @@ function AppInner() {
     orphanNodes,
     unreachableNodes,
     outboundMap,
+    inboundMap,
     enrichedNodes,
   } = useGraphAnalytics(nodes, edges);
 
@@ -274,6 +275,7 @@ function AppInner() {
               unreachableNodes={unreachableNodes}
               depthMap={depthMap}
               outboundMap={outboundMap}
+              inboundMap={inboundMap}
               rootId={rootId}
               onNodeHighlight={handleNodeHighlight}
               activeFilters={activeFilters}
