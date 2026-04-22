@@ -14,7 +14,24 @@ import { classifyScoreTier, type ScoreTier } from "../lib/graph-pagerank";
 import { getClusterColor } from "../lib/cluster-colors";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { ScoreTierBadge } from "./ScoreTierBadge";
+
+const SORT_OPTIONS: { value: SortMode; label: string }[] = [
+  { value: "issue-tier", label: "Issue-tier (default)" },
+  { value: "score-hi", label: "Score (high → low)" },
+  { value: "score-lo", label: "Score (low → high)" },
+  { value: "depth-deep", label: "Depth (deep → shallow)" },
+  { value: "outbound-hi", label: "Outbound (high → low)" },
+  { value: "inbound-lo", label: "Inbound (low → high)" },
+  { value: "url-asc", label: "URL template (A → Z)" },
+];
 
 interface PagesPanelProps {
   nodes: Node<UrlNodeData>[];
@@ -38,8 +55,6 @@ type SortMode =
   | "outbound-hi"
   | "inbound-lo"
   | "url-asc";
-
-type FilterTier = "low" | "mid" | "high";
 
 interface PageRow {
   id: string;
@@ -102,13 +117,6 @@ function getSortComparator(mode: SortMode): (a: PageRow, b: PageRow) => number {
   }
 }
 
-const TIER_PILL_ACTIVE: Record<FilterTier, string> = {
-  low: "bg-red-100 text-red-700 border border-red-200",
-  mid: "bg-amber-100 text-amber-700 border border-amber-200",
-  high: "bg-green-100 text-green-700 border border-green-200",
-};
-const TIER_PILL_INACTIVE = "border border-border text-muted-fg bg-white";
-
 export function PagesPanel({
   nodes,
   scores,
@@ -126,9 +134,6 @@ export function PagesPanel({
 
   const [sortMode, setSortMode] = useState<SortMode>("issue-tier");
   const [warningsOnly, setWarningsOnly] = useState(false);
-  const [tierFilter, setTierFilter] = useState<Set<FilterTier>>(
-    () => new Set<FilterTier>(["low", "mid", "high"]),
-  );
 
   const rows = useMemo<PageRow[]>(() => {
     return nodes.map((n) => {
@@ -138,8 +143,7 @@ export function PagesPanel({
       const isWeak = weakNodes.has(n.id);
       const status = getHealthStatus(n, depthMap, outboundMap);
       const rawDepth = depthMap.get(n.id);
-      const depth =
-        rawDepth == null || rawDepth === Infinity ? undefined : rawDepth;
+      const depth = rawDepth == null || rawDepth === Infinity ? undefined : rawDepth;
       const inbound = inboundMap.get(n.id) ?? 0;
       const outbound = outboundMap.get(n.id) ?? 0;
       const tier = classifyScoreTier(score, allScoreValues);
@@ -185,27 +189,11 @@ export function PagesPanel({
   }, [rows, sortMode]);
 
   const visibleRows = useMemo(() => {
-    return sortedRows.filter((r) => {
-      if (r.tier !== "neutral" && !tierFilter.has(r.tier as FilterTier)) return false;
-      if (warningsOnly) {
-        const hasIssue = r.isOrphan || r.isUnreachable || hasAnyWarning(r.status) || r.isWeak;
-        if (!hasIssue) return false;
-      }
-      return true;
-    });
-  }, [sortedRows, tierFilter, warningsOnly]);
-
-  const tierCounts = useMemo(() => {
-    let low = 0,
-      mid = 0,
-      high = 0;
-    for (const r of rows) {
-      if (r.tier === "low") low++;
-      else if (r.tier === "mid") mid++;
-      else if (r.tier === "high") high++;
-    }
-    return { low, mid, high };
-  }, [rows]);
+    if (!warningsOnly) return sortedRows;
+    return sortedRows.filter(
+      (r) => r.isOrphan || r.isUnreachable || hasAnyWarning(r.status) || r.isWeak,
+    );
+  }, [sortedRows, warningsOnly]);
 
   const handleClick = (nodeId: string) => {
     setNodes((nds) => nds.map((n) => ({ ...n, selected: n.id === nodeId })));
@@ -213,15 +201,6 @@ export function PagesPanel({
       fitView({ nodes: [{ id: nodeId }], duration: 300, padding: 0.5 });
     }, 50);
     onNodeHighlight?.(nodeId);
-  };
-
-  const toggleTier = (tier: FilterTier) => {
-    setTierFilter((prev) => {
-      const next = new Set(prev);
-      if (next.has(tier)) next.delete(tier);
-      else next.add(tier);
-      return next;
-    });
   };
 
   const orphanSlice = visibleRows.filter((r) => r.issueGroup === 0);
@@ -289,10 +268,10 @@ export function PagesPanel({
       >
         <div className="flex items-center min-w-0">
           {renderClusterDots(r.tags)}
-          <span className="text-sm text-dark truncate flex-1 min-w-0">{r.urlTemplate}</span>
+          <span className="text-xs text-dark truncate flex-1 min-w-0">{r.urlTemplate}</span>
           <span className="ml-2 flex-shrink-0 inline-flex">{renderWarningBadge(r)}</span>
         </div>
-        <div className="flex items-center mt-0.5 text-xs text-muted-fg font-mono">
+        <div className="flex items-center mt-1 text-xs text-muted-fg font-mono">
           <span>{r.score.toFixed(4)}</span>
           {rootId !== null && r.depth !== undefined && (
             <>
@@ -325,34 +304,27 @@ export function PagesPanel({
         </div>
       )}
 
-      {allScoreValues.length > 0 && (
-        <p
-          className="px-3 pt-2 text-xs text-muted-fg"
-          data-testid="pages-tier-summary"
-        >
-          {tierCounts.low} Low · {tierCounts.mid} Mid · {tierCounts.high} High
-        </p>
-      )}
+      <div className="flex items-center gap-2 px-3 pt-2 pb-2 text-xs text-dark">
+        <span className="flex-shrink-0">Sort</span>
+        <Select value={sortMode} onValueChange={(v) => v && setSortMode(v as SortMode)}>
+          <SelectTrigger data-testid="pages-sort" size="sm" className="flex-1 min-w-0 text-xs">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {SORT_OPTIONS.map((opt) => (
+              <SelectItem
+                key={opt.value}
+                value={opt.value}
+                data-testid={`pages-sort-option-${opt.value}`}
+              >
+                {opt.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
 
-      <label className="block px-3 py-2 text-xs text-dark">
-        Sort by
-        <select
-          data-testid="pages-sort"
-          value={sortMode}
-          onChange={(e) => setSortMode(e.target.value as SortMode)}
-          className="mt-1 block w-full border border-border rounded px-2 py-1 text-xs bg-white"
-        >
-          <option value="issue-tier">Issue-tier (default)</option>
-          <option value="score-hi">Score (high → low)</option>
-          <option value="score-lo">Score (low → high)</option>
-          <option value="depth-deep">Depth (deep → shallow)</option>
-          <option value="outbound-hi">Outbound (high → low)</option>
-          <option value="inbound-lo">Inbound (low → high)</option>
-          <option value="url-asc">URL template (A → Z)</option>
-        </select>
-      </label>
-
-      <label className="flex items-center gap-2 px-3 pb-1 cursor-pointer">
+      <label className="flex items-center gap-2 px-3 pb-3 cursor-pointer">
         <Checkbox
           checked={warningsOnly}
           onCheckedChange={(c) => setWarningsOnly(c === true)}
@@ -360,24 +332,6 @@ export function PagesPanel({
         />
         <span className="text-xs text-dark select-none">Show warnings only</span>
       </label>
-
-      <div className="flex gap-1 px-3 pb-2">
-        {(["low", "mid", "high"] as FilterTier[]).map((tier) => {
-          const active = tierFilter.has(tier);
-          return (
-            <button
-              key={tier}
-              type="button"
-              data-testid={`pages-tier-${tier}`}
-              aria-pressed={active}
-              onClick={() => toggleTier(tier)}
-              className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${active ? TIER_PILL_ACTIVE[tier] : TIER_PILL_INACTIVE}`}
-            >
-              {tier.charAt(0).toUpperCase() + tier.slice(1)}
-            </button>
-          );
-        })}
-      </div>
 
       {nodes.length === 0 ? (
         <p className="px-3 py-4 text-xs text-muted-fg text-center">Add nodes to see pages</p>

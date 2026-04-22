@@ -1,5 +1,6 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, fireEvent, within } from "@testing-library/react";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import { render, screen, fireEvent, within, cleanup } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { ReactFlowProvider } from "@xyflow/react";
 import type { Node } from "@xyflow/react";
 import type { UrlNodeData } from "../lib/graph-utils";
@@ -66,9 +67,26 @@ function renderPanel(opts: RenderOpts = {}) {
   );
 }
 
+async function selectSortOption(value: string) {
+  const user = userEvent.setup({ pointerEventsCheck: 0, delay: null });
+  const trigger = screen.getByTestId("pages-sort");
+  await user.click(trigger);
+  const item = await screen.findByTestId(`pages-sort-option-${value}`);
+  await user.click(item);
+}
+
 beforeEach(() => {
   mockSetNodes.mockReset();
   mockFitView.mockReset();
+});
+
+afterEach(() => {
+  // Base UI Select renders its popup into document.body via a portal. RTL's
+  // automatic cleanup unmounts the React tree but leftover popup nodes can
+  // linger; explicitly cleanup then clear body.
+  cleanup();
+  document.body.innerHTML = "";
+  vi.useRealTimers();
 });
 
 describe("PagesPanel", () => {
@@ -111,28 +129,22 @@ describe("PagesPanel", () => {
     expect(templates).toEqual(["c", "d", "b", "e", "a"]);
   });
 
-  it("switching sort to 'score-hi' reorders rows by score descending", () => {
-    const nodes = [
-      makeNode("a", "/a", { tags: ["t"] }),
-      makeNode("b", "/b", { tags: ["t"] }),
-    ];
+  it("switching sort to 'score-hi' reorders rows by score descending", async () => {
+    const nodes = [makeNode("a", "/a", { tags: ["t"] }), makeNode("b", "/b", { tags: ["t"] })];
     const scores = new Map<string, number>([
       ["a", 1],
       ["b", 9],
     ]);
     renderPanel({ nodes, scores });
-    fireEvent.change(screen.getByTestId("pages-sort"), { target: { value: "score-hi" } });
+    await selectSortOption("score-hi");
     const ids = screen.getAllByTestId("pages-row").map((r) => r.getAttribute("data-node-id"));
     expect(ids).toEqual(["b", "a"]);
   });
 
-  it("switching sort to 'url-asc' sorts by URL template alphabetically", () => {
-    const nodes = [
-      makeNode("a", "/z", { tags: ["t"] }),
-      makeNode("b", "/a", { tags: ["t"] }),
-    ];
+  it("switching sort to 'url-asc' sorts by URL template alphabetically", async () => {
+    const nodes = [makeNode("a", "/z", { tags: ["t"] }), makeNode("b", "/a", { tags: ["t"] })];
     renderPanel({ nodes });
-    fireEvent.change(screen.getByTestId("pages-sort"), { target: { value: "url-asc" } });
+    await selectSortOption("url-asc");
     const ids = screen.getAllByTestId("pages-row").map((r) => r.getAttribute("data-node-id"));
     expect(ids).toEqual(["b", "a"]);
   });
@@ -148,32 +160,6 @@ describe("PagesPanel", () => {
     fireEvent.click(screen.getByTestId("pages-warnings-only"));
     expect(screen.getAllByTestId("pages-row")).toHaveLength(2);
     expect(screen.queryByText("/clean")).toBeNull();
-  });
-
-  it("tier filter hides excluded tiers", () => {
-    const nodes = [
-      makeNode("n1", "/low-a", { tags: ["t"] }),
-      makeNode("n2", "/low-b", { tags: ["t"] }),
-      makeNode("n3", "/mid-a", { tags: ["t"] }),
-      makeNode("n4", "/mid-b", { tags: ["t"] }),
-      makeNode("n5", "/high-a", { tags: ["t"] }),
-      makeNode("n6", "/high-b", { tags: ["t"] }),
-    ];
-    const scores = new Map<string, number>([
-      ["n1", 1],
-      ["n2", 2],
-      ["n3", 3],
-      ["n4", 4],
-      ["n5", 5],
-      ["n6", 6],
-    ]);
-    const allScoreValues = [1, 2, 3, 4, 5, 6];
-    renderPanel({ nodes, scores, allScoreValues });
-    expect(screen.getAllByTestId("pages-row")).toHaveLength(6);
-    fireEvent.click(screen.getByTestId("pages-tier-low"));
-    expect(screen.getAllByTestId("pages-row")).toHaveLength(4);
-    fireEvent.click(screen.getByTestId("pages-tier-high"));
-    expect(screen.getAllByTestId("pages-row")).toHaveLength(2);
   });
 
   it("clicking a row calls setNodes, schedules fitView after 50ms, and calls onNodeHighlight", () => {
@@ -225,7 +211,7 @@ describe("PagesPanel", () => {
     expect(screen.getByTestId("pages-banner-unreachable")).toHaveTextContent("Unreachable (1)");
   });
 
-  it("section banners do NOT render when sort is not issue-tier", () => {
+  it("section banners do NOT render when sort is not issue-tier", async () => {
     const nodes = [
       makeNode("a", "/orphan", { tags: ["t"] }),
       makeNode("b", "/unreach", { tags: ["t"] }),
@@ -235,7 +221,7 @@ describe("PagesPanel", () => {
       orphanNodes: new Set(["a"]),
       unreachableNodes: new Set(["b"]),
     });
-    fireEvent.change(screen.getByTestId("pages-sort"), { target: { value: "score-hi" } });
+    await selectSortOption("score-hi");
     expect(screen.queryByTestId("pages-banner-orphan")).toBeNull();
     expect(screen.queryByTestId("pages-banner-unreachable")).toBeNull();
   });
@@ -266,33 +252,6 @@ describe("PagesPanel", () => {
     expect(within(row).queryByText(/Depth /)).toBeNull();
     expect(within(row).getByText(/in 0/)).toBeInTheDocument();
     expect(within(row).getByText(/out 0/)).toBeInTheDocument();
-  });
-
-  it("tier summary shows 'X Low · Y Mid · Z High' counts", () => {
-    const nodes = [
-      makeNode("n1", "/1", { tags: ["t"] }),
-      makeNode("n2", "/2", { tags: ["t"] }),
-      makeNode("n3", "/3", { tags: ["t"] }),
-      makeNode("n4", "/4", { tags: ["t"] }),
-      makeNode("n5", "/5", { tags: ["t"] }),
-      makeNode("n6", "/6", { tags: ["t"] }),
-    ];
-    const scores = new Map<string, number>([
-      ["n1", 1],
-      ["n2", 2],
-      ["n3", 3],
-      ["n4", 4],
-      ["n5", 5],
-      ["n6", 6],
-    ]);
-    renderPanel({ nodes, scores, allScoreValues: [1, 2, 3, 4, 5, 6] });
-    expect(screen.getByTestId("pages-tier-summary")).toHaveTextContent("2 Low · 2 Mid · 2 High");
-  });
-
-  it("tier summary is omitted when allScoreValues is empty", () => {
-    const nodes = [makeNode("a", "/a", { tags: ["t"] })];
-    renderPanel({ nodes, allScoreValues: [] });
-    expect(screen.queryByTestId("pages-tier-summary")).toBeNull();
   });
 
   it("inbound count always renders, including zero", () => {
