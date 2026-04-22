@@ -12,7 +12,6 @@ import {
 } from "../lib/graph-analysis";
 import { classifyScoreTier, type ScoreTier } from "../lib/graph-pagerank";
 import { getClusterColor } from "../lib/cluster-colors";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import {
   Select,
@@ -133,7 +132,6 @@ export function PagesPanel({
   const { fitView, setNodes } = useReactFlow();
 
   const [sortMode, setSortMode] = useState<SortMode>("issue-tier");
-  const [warningsOnly, setWarningsOnly] = useState(false);
 
   const rows = useMemo<PageRow[]>(() => {
     return nodes.map((n) => {
@@ -188,12 +186,7 @@ export function PagesPanel({
     return [...rows].sort(cmp);
   }, [rows, sortMode]);
 
-  const visibleRows = useMemo(() => {
-    if (!warningsOnly) return sortedRows;
-    return sortedRows.filter(
-      (r) => r.isOrphan || r.isUnreachable || hasAnyWarning(r.status) || r.isWeak,
-    );
-  }, [sortedRows, warningsOnly]);
+  const visibleRows = sortedRows;
 
   const handleClick = (nodeId: string) => {
     setNodes((nds) => nds.map((n) => ({ ...n, selected: n.id === nodeId })));
@@ -324,21 +317,8 @@ export function PagesPanel({
         </Select>
       </div>
 
-      <label className="flex items-center gap-2 px-3 pb-3 cursor-pointer">
-        <Checkbox
-          checked={warningsOnly}
-          onCheckedChange={(c) => setWarningsOnly(c === true)}
-          data-testid="pages-warnings-only"
-        />
-        <span className="text-xs text-dark select-none">Show warnings only</span>
-      </label>
-
       {nodes.length === 0 ? (
         <p className="px-3 py-4 text-xs text-muted-fg text-center">Add nodes to see pages</p>
-      ) : visibleRows.length === 0 ? (
-        <p className="px-3 py-4 text-xs text-muted-fg text-center">
-          No pages match current filters
-        </p>
       ) : (
         <>
           {showBanners && orphanSlice.length > 0 && (

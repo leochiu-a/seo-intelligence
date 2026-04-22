@@ -149,19 +149,6 @@ describe("PagesPanel", () => {
     expect(ids).toEqual(["b", "a"]);
   });
 
-  it("warnings-only checkbox hides clean rows", () => {
-    const nodes = [
-      makeNode("a", "/clean", { tags: ["t"] }),
-      makeNode("b", "/warn"), // no tags → warn
-      makeNode("c", "/orphan", { tags: ["t"] }),
-    ];
-    renderPanel({ nodes, orphanNodes: new Set(["c"]) });
-    expect(screen.getAllByTestId("pages-row")).toHaveLength(3);
-    fireEvent.click(screen.getByTestId("pages-warnings-only"));
-    expect(screen.getAllByTestId("pages-row")).toHaveLength(2);
-    expect(screen.queryByText("/clean")).toBeNull();
-  });
-
   it("clicking a row calls setNodes, schedules fitView after 50ms, and calls onNodeHighlight", () => {
     vi.useFakeTimers();
     const onNodeHighlight = vi.fn();
@@ -185,14 +172,6 @@ describe("PagesPanel", () => {
   it("empty state: 'Add nodes to see pages' when nodes is empty", () => {
     renderPanel({ nodes: [] });
     expect(screen.getByText(/Add nodes to see pages/)).toBeInTheDocument();
-    expect(screen.queryAllByTestId("pages-row")).toHaveLength(0);
-  });
-
-  it("filtered-empty state: 'No pages match current filters' when filters hide everything", () => {
-    const nodes = [makeNode("a", "/a", { tags: ["t"] })];
-    renderPanel({ nodes });
-    fireEvent.click(screen.getByTestId("pages-warnings-only"));
-    expect(screen.getByText(/No pages match current filters/)).toBeInTheDocument();
     expect(screen.queryAllByTestId("pages-row")).toHaveLength(0);
   });
 
