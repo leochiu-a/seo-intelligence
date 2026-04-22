@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, useRef, useEffect } from "react";
 import { TriangleAlert, Unplug } from "lucide-react";
 import { useReactFlow } from "@xyflow/react";
 import type { Node } from "@xyflow/react";
@@ -8,6 +8,7 @@ import {
   hasAnyWarning,
   buildTooltipContent,
   OUTBOUND_WARNING_THRESHOLD,
+  DEPTH_WARNING_THRESHOLD,
   type HealthStatus,
 } from "../lib/graph-analysis";
 import { classifyScoreTier, type ScoreTier } from "../lib/graph-pagerank";
@@ -96,17 +97,23 @@ function renderClusterDots(tags: string[] | undefined) {
 function getSortComparator(mode: SortMode): (a: PageRow, b: PageRow) => number {
   switch (mode) {
     case "issue-tier":
-      return (a, b) =>
-        a.issueGroup - b.issueGroup ||
-        a.score - b.score ||
-        a.urlTemplate.localeCompare(b.urlTemplate);
+      return (a, b) => {
+        const byGroup = a.issueGroup - b.issueGroup;
+        if (byGroup !== 0) return byGroup;
+        const byScore = a.issueGroup === 3 ? b.score - a.score : a.score - b.score;
+        return byScore || a.urlTemplate.localeCompare(b.urlTemplate);
+      };
     case "score-hi":
       return (a, b) => b.score - a.score || a.urlTemplate.localeCompare(b.urlTemplate);
     case "score-lo":
       return (a, b) => a.score - b.score || a.urlTemplate.localeCompare(b.urlTemplate);
     case "depth-deep":
-      return (a, b) =>
-        (b.depth ?? -1) - (a.depth ?? -1) || a.urlTemplate.localeCompare(b.urlTemplate);
+      return (a, b) => {
+        const da = a.depth ?? Number.POSITIVE_INFINITY;
+        const db = b.depth ?? Number.POSITIVE_INFINITY;
+        if (da === db) return a.urlTemplate.localeCompare(b.urlTemplate);
+        return db - da;
+      };
     case "outbound-hi":
       return (a, b) => b.outbound - a.outbound || a.urlTemplate.localeCompare(b.urlTemplate);
     case "inbound-lo":
@@ -130,6 +137,14 @@ export function PagesPanel({
   onNodeHighlight,
 }: PagesPanelProps) {
   const { fitView, setNodes } = useReactFlow();
+
+  const fitTimerRef = useRef<number | null>(null);
+  useEffect(
+    () => () => {
+      if (fitTimerRef.current != null) window.clearTimeout(fitTimerRef.current);
+    },
+    [],
+  );
 
   const [sortMode, setSortMode] = useState<SortMode>("issue-tier");
 
@@ -186,19 +201,18 @@ export function PagesPanel({
     return [...rows].sort(cmp);
   }, [rows, sortMode]);
 
-  const visibleRows = sortedRows;
-
   const handleClick = (nodeId: string) => {
     setNodes((nds) => nds.map((n) => ({ ...n, selected: n.id === nodeId })));
-    setTimeout(() => {
+    if (fitTimerRef.current != null) window.clearTimeout(fitTimerRef.current);
+    fitTimerRef.current = window.setTimeout(() => {
       fitView({ nodes: [{ id: nodeId }], duration: 300, padding: 0.5 });
     }, 50);
     onNodeHighlight?.(nodeId);
   };
 
-  const orphanSlice = visibleRows.filter((r) => r.issueGroup === 0);
-  const unreachableSlice = visibleRows.filter((r) => r.issueGroup === 1);
-  const restSlice = visibleRows.filter((r) => r.issueGroup >= 2);
+  const orphanSlice = sortedRows.filter((r) => r.issueGroup === 0);
+  const unreachableSlice = sortedRows.filter((r) => r.issueGroup === 1);
+  const restSlice = sortedRows.filter((r) => r.issueGroup >= 2);
   const showBanners = sortMode === "issue-tier";
 
   const renderWarningBadge = (r: PageRow) => {
@@ -269,7 +283,9 @@ export function PagesPanel({
           {rootId !== null && r.depth !== undefined && (
             <>
               <span className="mx-1">·</span>
-              <span className={r.depth > 3 ? "text-amber-500" : ""}>Depth {r.depth}</span>
+              <span className={r.depth > DEPTH_WARNING_THRESHOLD ? "text-amber-500" : ""}>
+                Depth {r.depth}
+              </span>
             </>
           )}
           <span className="mx-1">·</span>
@@ -299,7 +315,7 @@ export function PagesPanel({
 
       <div className="flex items-center gap-2 px-3 pt-2 pb-2 text-xs text-dark">
         <span className="flex-shrink-0">Sort</span>
-        <Select value={sortMode} onValueChange={(v) => v && setSortMode(v as SortMode)}>
+        <Select value={sortMode} onValueChange={(v) => setSortMode(v as SortMode)}>
           <SelectTrigger data-testid="pages-sort" size="sm" className="flex-1 min-w-0 text-xs">
             <SelectValue />
           </SelectTrigger>
@@ -354,7 +370,7 @@ export function PagesPanel({
               <ul className="divide-y divide-border">{restSlice.map(renderRow)}</ul>
             )
           ) : (
-            <ul className="divide-y divide-border">{visibleRows.map(renderRow)}</ul>
+            <ul className="divide-y divide-border">{sortedRows.map(renderRow)}</ul>
           )}
         </>
       )}

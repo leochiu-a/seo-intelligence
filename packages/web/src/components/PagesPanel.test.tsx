@@ -288,4 +288,51 @@ describe("PagesPanel", () => {
     expect(screen.getByTestId("pages-warn-orphan")).toBeInTheDocument();
     expect(screen.queryByTestId("pages-warn-general")).toBeNull();
   });
+
+  it("'depth-deep' sorts deepest first; unreachable (no depth) sorts at the top", async () => {
+    const nodes = [
+      makeNode("shallow", "/a", { tags: ["t"] }),
+      makeNode("deep", "/b", { tags: ["t"] }),
+      makeNode("unreach", "/c", { tags: ["t"] }),
+    ];
+    renderPanel({
+      nodes,
+      depthMap: new Map([
+        ["shallow", 1],
+        ["deep", 5],
+      ]),
+      unreachableNodes: new Set(["unreach"]),
+    });
+    await selectSortOption("depth-deep");
+    const ids = screen.getAllByTestId("pages-row").map((r) => r.getAttribute("data-node-id"));
+    expect(ids).toEqual(["unreach", "deep", "shallow"]);
+  });
+
+  it("'outbound-hi' sorts by outbound descending", async () => {
+    const nodes = [makeNode("a", "/a", { tags: ["t"] }), makeNode("b", "/b", { tags: ["t"] })];
+    renderPanel({
+      nodes,
+      outboundMap: new Map([
+        ["a", 5],
+        ["b", 50],
+      ]),
+    });
+    await selectSortOption("outbound-hi");
+    const ids = screen.getAllByTestId("pages-row").map((r) => r.getAttribute("data-node-id"));
+    expect(ids).toEqual(["b", "a"]);
+  });
+
+  it("'inbound-lo' sorts by inbound ascending", async () => {
+    const nodes = [makeNode("a", "/a", { tags: ["t"] }), makeNode("b", "/b", { tags: ["t"] })];
+    renderPanel({
+      nodes,
+      inboundMap: new Map([
+        ["a", 10],
+        ["b", 1],
+      ]),
+    });
+    await selectSortOption("inbound-lo");
+    const ids = screen.getAllByTestId("pages-row").map((r) => r.getAttribute("data-node-id"));
+    expect(ids).toEqual(["b", "a"]);
+  });
 });
