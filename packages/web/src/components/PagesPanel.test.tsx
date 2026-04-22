@@ -103,7 +103,7 @@ describe("PagesPanel", () => {
     expect(screen.getAllByTestId("pages-row")).toHaveLength(3);
   });
 
-  it("default sort orders orphan → unreachable-only → warning → clean, with score ascending inside each group", () => {
+  it("default sort orders orphan → unreachable-only → warning → clean; issue groups sort score asc, clean group sorts score desc", () => {
     // clean-a (tier ok, tags set) score 5; warning-b (no tags) score 2;
     // orphan-c score 1; unreachable-d score 3; warning-e (no tags) score 4.
     const nodes = [
@@ -306,6 +306,20 @@ describe("PagesPanel", () => {
     await selectSortOption("depth-deep");
     const ids = screen.getAllByTestId("pages-row").map((r) => r.getAttribute("data-node-id"));
     expect(ids).toEqual(["unreach", "deep", "shallow"]);
+  });
+
+  it("'depth-deep' tiebreaks equal-depth nodes by URL ascending", async () => {
+    const nodes = [makeNode("b", "/z", { tags: ["t"] }), makeNode("a", "/a", { tags: ["t"] })];
+    renderPanel({
+      nodes,
+      depthMap: new Map([
+        ["a", 3],
+        ["b", 3],
+      ]),
+    });
+    await selectSortOption("depth-deep");
+    const ids = screen.getAllByTestId("pages-row").map((r) => r.getAttribute("data-node-id"));
+    expect(ids).toEqual(["a", "b"]);
   });
 
   it("'outbound-hi' sorts by outbound descending", async () => {
