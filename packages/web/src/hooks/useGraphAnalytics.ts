@@ -9,6 +9,7 @@ import {
 } from "../lib/graph-pagerank";
 import {
   calculateCrawlDepth,
+  calculateInboundLinks,
   identifyOrphanNodes,
   OUTBOUND_WARNING_THRESHOLD,
 } from "../lib/graph-analysis";
@@ -23,6 +24,7 @@ export interface GraphAnalyticsResult {
   orphanNodes: Set<string>;
   unreachableNodes: Set<string>;
   outboundMap: Map<string, number>;
+  inboundMap: Map<string, number>;
   enrichedNodes: Node<AppNodeData>[];
 }
 
@@ -61,6 +63,10 @@ export function useGraphAnalytics(
   // Compute total outbound links per node (explicit edges + implicit global contribution).
   // Global source nodes contribute 0 implicit per Phase 4 D-01 parity.
   const outboundMap = useMemo(() => calculateOutboundLinks(nodes, edges), [nodes, edges]);
+
+  // Total inbound links per node: explicit edges + implicit global inbound
+  // (every non-global implicitly links to every global; global->global excluded).
+  const inboundMap = useMemo(() => calculateInboundLinks(nodes, edges), [nodes, edges]);
 
   // Enrich nodes with score tier, weak flag, and crawl depth/orphan fields for UrlNode rendering
   const enrichedNodes = useMemo(() => {
@@ -120,6 +126,7 @@ export function useGraphAnalytics(
     orphanNodes,
     unreachableNodes,
     outboundMap,
+    inboundMap,
     enrichedNodes,
   };
 }

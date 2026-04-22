@@ -1,9 +1,8 @@
 import { useState } from "react";
 import type { Node } from "@xyflow/react";
 import type { UrlNodeData } from "../lib/graph-utils";
-import { HealthPanel } from "./HealthPanel";
 import { FilterPanel } from "./FilterPanel";
-import { ScorePanel } from "./ScorePanel";
+import { PagesPanel } from "./PagesPanel";
 
 interface SidePanelProps {
   nodes: Node<UrlNodeData>[];
@@ -14,12 +13,15 @@ interface SidePanelProps {
   unreachableNodes: Set<string>;
   depthMap: Map<string, number>;
   outboundMap: Map<string, number>;
+  inboundMap: Map<string, number>;
   rootId: string | null;
   onNodeHighlight?: (id: string | null) => void;
   activeFilters: Set<string>;
   onFilterToggle: (key: string) => void;
   onFilterClear: () => void;
 }
+
+type Tab = "filter" | "pages";
 
 export function SidePanel({
   nodes,
@@ -30,15 +32,16 @@ export function SidePanel({
   unreachableNodes,
   depthMap,
   outboundMap,
+  inboundMap,
   rootId,
   onNodeHighlight,
   activeFilters,
   onFilterToggle,
   onFilterClear,
 }: SidePanelProps) {
-  const [activeTab, setActiveTab] = useState<"filter" | "score" | "health">("filter");
+  const [activeTab, setActiveTab] = useState<Tab>("pages");
 
-  const tabClass = (tab: "filter" | "score" | "health") =>
+  const tabClass = (tab: Tab) =>
     `flex-1 px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.14em] transition-colors ${
       activeTab === tab
         ? "text-dark border-b-2 border-dark -mb-px"
@@ -58,19 +61,11 @@ export function SidePanel({
         </button>
         <button
           type="button"
-          data-testid="tab-score"
-          onClick={() => setActiveTab("score")}
-          className={tabClass("score")}
+          data-testid="tab-pages"
+          onClick={() => setActiveTab("pages")}
+          className={tabClass("pages")}
         >
-          Score
-        </button>
-        <button
-          type="button"
-          data-testid="tab-health"
-          onClick={() => setActiveTab("health")}
-          className={tabClass("health")}
-        >
-          Health
+          Pages
         </button>
       </div>
 
@@ -83,26 +78,19 @@ export function SidePanel({
             onClear={onFilterClear}
           />
         )}
-        {activeTab === "score" && (
-          <ScorePanel
+        {activeTab === "pages" && (
+          <PagesPanel
             nodes={nodes}
             scores={scores}
+            allScoreValues={allScoreValues}
             weakNodes={weakNodes}
             orphanNodes={orphanNodes}
             unreachableNodes={unreachableNodes}
             depthMap={depthMap}
             outboundMap={outboundMap}
+            inboundMap={inboundMap}
             rootId={rootId}
             onNodeHighlight={onNodeHighlight}
-          />
-        )}
-        {activeTab === "health" && (
-          <HealthPanel
-            nodes={nodes}
-            depthMap={depthMap}
-            outboundMap={outboundMap}
-            scores={scores}
-            allScoreValues={allScoreValues}
           />
         )}
       </div>
