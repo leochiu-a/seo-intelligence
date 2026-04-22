@@ -72,7 +72,14 @@ async function selectSortOption(value: string) {
   const trigger = screen.getByTestId("pages-sort");
   await user.click(trigger);
   const item = await screen.findByTestId(`pages-sort-option-${value}`);
-  await user.click(item);
+  // Base UI SelectItem's onClick bails early unless the item is highlighted
+  // OR the pointer type is "touch". Highlight relies on Floating UI's
+  // list-navigation hover tracking, which was flaky on GitHub Actions (fine
+  // locally). Seed pointerType=touch via a synthetic pointerdown so the
+  // click path commits regardless of highlight state.
+  fireEvent.pointerDown(item, { button: 0, pointerType: "touch" });
+  fireEvent.pointerUp(item, { button: 0, pointerType: "touch" });
+  fireEvent.click(item);
 }
 
 beforeEach(() => {
@@ -142,8 +149,15 @@ describe("PagesPanel", () => {
   });
 
   it("switching sort to 'url-asc' sorts by URL template alphabetically", async () => {
+    // Scores chosen so default issue-tier sort differs from url-asc: default
+    // ties on clean status then sorts by score asc → [a (/z, 1), b (/a, 9)];
+    // url-asc must re-sort to [b (/a), a (/z)] to pass.
     const nodes = [makeNode("a", "/z", { tags: ["t"] }), makeNode("b", "/a", { tags: ["t"] })];
-    renderPanel({ nodes });
+    const scores = new Map<string, number>([
+      ["a", 1],
+      ["b", 9],
+    ]);
+    renderPanel({ nodes, scores });
     await selectSortOption("url-asc");
     const ids = screen.getAllByTestId("pages-row").map((r) => r.getAttribute("data-node-id"));
     expect(ids).toEqual(["b", "a"]);
