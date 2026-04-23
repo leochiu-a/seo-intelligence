@@ -21,6 +21,7 @@ import {
   collectPlacementSuggestions,
   collectPlacementGroups,
   calculateCrawlDepth,
+  calculateInboundLinks,
   identifyOrphanNodes,
   OUTBOUND_WARNING_THRESHOLD,
   collectClusterSuggestions,
@@ -28,6 +29,7 @@ import {
   getHealthStatus,
   hasAnyWarning,
   getConnectedElements,
+  buildTooltipContent,
   type HealthStatus,
 } from "./graph-analysis";
 import { parseImportJson, HANDLE_IDS, getClosestHandleIds, buildCopyForAIText } from "./graph-io";
@@ -1336,6 +1338,88 @@ describe("calculateOutboundLinks", () => {
   });
 });
 
+describe("calculateInboundLinks", () => {
+  it("returns empty Map for empty nodes", () => {
+    const result = calculateInboundLinks([], []);
+    expect(result.size).toBe(0);
+  });
+
+  it("includes every node with default 0 when no edges and no globals", () => {
+    const nodes = [makeNode("a", 1), makeNode("b", 1)];
+    const result = calculateInboundLinks(nodes, []);
+    expect(result.size).toBe(2);
+    expect(result.get("a")).toBe(0);
+    expect(result.get("b")).toBe(0);
+  });
+
+  it("counts explicit edges by edge count (not linkCount)", () => {
+    const nodes = [makeNode("a", 1), makeNode("b", 1)];
+    const edges = [makeEdge("e1", "a", "b", 5), makeEdge("e2", "a", "b", 99)];
+    const result = calculateInboundLinks(nodes, edges);
+    expect(result.get("b")).toBe(2); // two edges → +2, linkCount ignored
+    expect(result.get("a")).toBe(0);
+  });
+
+  it("adds nonGlobalCount to every global node as implicit inbound", () => {
+    const nodes = [
+      makeNode("a", 1),
+      makeNode("b", 1),
+      makeNode("g", 1, {
+        isGlobal: true,
+        placements: [{ id: "p", name: "Header", linkCount: 10 }],
+      }),
+    ];
+    const result = calculateInboundLinks(nodes, []);
+    expect(result.get("g")).toBe(2); // two non-globals → +2
+    expect(result.get("a")).toBe(0);
+    expect(result.get("b")).toBe(0);
+  });
+
+  it("global source does NOT contribute implicit inbound to other globals (Phase 4 D-01 parity)", () => {
+    const nodes = [
+      makeNode("g1", 1, { isGlobal: true, placements: [] }),
+      makeNode("g2", 1, { isGlobal: true, placements: [] }),
+    ];
+    const result = calculateInboundLinks(nodes, []);
+    expect(result.get("g1")).toBe(0);
+    expect(result.get("g2")).toBe(0);
+  });
+
+  it("combines explicit and implicit correctly (2 non-globals + 1 global + explicit a→g)", () => {
+    const nodes = [
+      makeNode("a", 1),
+      makeNode("b", 1),
+      makeNode("g", 1, { isGlobal: true, placements: [] }),
+    ];
+    const edges = [makeEdge("e1", "a", "g", 1)];
+    const result = calculateInboundLinks(nodes, edges);
+    expect(result.get("g")).toBe(3); // 2 implicit + 1 explicit
+    expect(result.get("a")).toBe(0);
+    expect(result.get("b")).toBe(0);
+  });
+
+  it("implicit contribution is independent of placements.linkCount", () => {
+    const nodes = [
+      makeNode("a", 1),
+      makeNode("g", 1, {
+        isGlobal: true,
+        placements: [{ id: "p", name: "H", linkCount: 999 }],
+      }),
+    ];
+    const result = calculateInboundLinks(nodes, []);
+    expect(result.get("g")).toBe(1); // one non-global → +1 regardless of linkCount 999
+  });
+
+  it("silently ignores edges whose target is not in nodes", () => {
+    const nodes = [makeNode("a", 1)];
+    const edges = [makeEdge("e1", "a", "missing", 1)];
+    const result = calculateInboundLinks(nodes, edges);
+    expect(result.size).toBe(1);
+    expect(result.has("missing")).toBe(false);
+    expect(result.get("a")).toBe(0);
+  });
+});
+
 // =============================================================================
 // Phase 999.5: Topical Cluster Tags — RED tests (written before implementation)
 // =============================================================================
@@ -2246,5 +2330,37 @@ describe("buildCopyForAIText", () => {
       outboundMap,
     });
     expect(result).toMatchSnapshot();
+  });
+});
+
+describe("buildTooltipContent", () => {
+  it('returns "Outbound links > 150" for links warn', () => {
+    expect(buildTooltipContent({ links: "warn", depth: "ok", tags: "ok" })).toBe(
+      "Outbound links > 150",
+    );
+  });
+
+  it('returns "Crawl depth > 3" for depth warn', () => {
+    expect(buildTooltipContent({ links: "ok", depth: "warn", tags: "ok" })).toBe("Crawl depth > 3");
+  });
+
+  it('returns "No tags assigned" for tags warn', () => {
+    expect(buildTooltipContent({ links: "ok", depth: "ok", tags: "warn" })).toBe(
+      "No tags assigned",
+    );
+  });
+
+  it("joins multiple issues with newline", () => {
+    expect(buildTooltipContent({ links: "warn", depth: "warn", tags: "warn" })).toBe(
+      "Outbound links > 150\nCrawl depth > 3\nNo tags assigned",
+    );
+  });
+
+  it("returns empty string when all ok", () => {
+    expect(buildTooltipContent({ links: "ok", depth: "ok", tags: "ok" })).toBe("");
+  });
+
+  it("depth na does not produce a warning line", () => {
+    expect(buildTooltipContent({ links: "ok", depth: "na", tags: "ok" })).toBe("");
   });
 });

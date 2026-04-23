@@ -241,6 +241,48 @@ export function identifyOrphanNodes(
 }
 
 /**
+ * Total inbound links per node (edge count semantics — parallels identifyOrphanNodes):
+ *   - Explicit: +1 per edge where edge.target === n.id.
+ *   - Implicit global: for every global node G, +nonGlobalCount
+ *     (every non-global implicitly links to every global; global-to-global
+ *     is NOT synthetically injected, per Phase 4 D-01).
+ *
+ * `e.data?.linkCount` is NOT applied here — inbound is rendered as "in {N}" and
+ * a page-count concept, matching identifyOrphanNodes. Use calculateOutboundLinks
+ * for the linkCount-weighted outbound total.
+ *
+ * Returns Map<nodeId, totalInbound>. Every node in `nodes` is present (default 0).
+ * Edges whose target is not in `nodes` are silently ignored.
+ */
+export function calculateInboundLinks(
+  nodes: Node<UrlNodeData>[],
+  edges: Edge[],
+): Map<string, number> {
+  const result = new Map<string, number>();
+  for (const n of nodes) {
+    result.set(n.id, 0);
+  }
+
+  // Explicit inbound edges (edge count, not linkCount).
+  for (const e of edges) {
+    if (!result.has(e.target)) continue;
+    result.set(e.target, (result.get(e.target) ?? 0) + 1);
+  }
+
+  // Implicit global inbound: every non-global implicitly links to every global.
+  // Global-to-global is not synthetically injected (Phase 4 D-01).
+  const nonGlobalCount = nodes.filter((n) => !n.data.isGlobal).length;
+  if (nonGlobalCount > 0) {
+    for (const n of nodes) {
+      if (!n.data.isGlobal) continue;
+      result.set(n.id, (result.get(n.id) ?? 0) + nonGlobalCount);
+    }
+  }
+
+  return result;
+}
+
+/**
  * Collects unique, non-empty placement names from all global nodes
  * EXCEPT the node with the given currentNodeId.
  */

@@ -2,15 +2,14 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: MVP
-status: executing
-stopped_at: Phase 11.2 context gathered
-last_updated: "2026-04-19T06:01:29.106Z"
-last_activity: 2026-04-19
+status: verifying
+last_updated: "2026-04-21T14:28:42.522Z"
+last_activity: 2026-04-21
 progress:
-  total_phases: 14
-  completed_phases: 10
-  total_plans: 25
-  completed_plans: 25
+  total_phases: 17
+  completed_phases: 11
+  total_plans: 28
+  completed_plans: 28
   percent: 0
 ---
 
@@ -21,14 +20,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-16)
 
 **Core value:** Let PMs visually plan and simulate internal link structures — and immediately see which pages will rank highest — before any code is written or deployed.
-**Current focus:** Phase 11.2 — add-score-badge-tooltip-and-improvement-guidance-for-low-mid-nodes
+**Current focus:** Phase 12 — unified-pages-panel
 
 ## Current Position
 
-Phase: 12
+Phase: 13
 Plan: Not started
-Status: Executing Phase 11.2
-Last activity: 2026-04-19 - Completed quick task 260419-ppw: Refactor App.tsx phase 2 — 839→382 lines
+Status: Phase complete — ready for verification
+Last activity: 2026-04-21
 
 Progress: [░░░░░░░░░░] 0%
 
@@ -75,6 +74,9 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 999.5-topical-cluster-tags P06 | 2 | 1 tasks | 2 files |
 | Phase 999.5-topical-cluster-tags P07 | 15 | 3 tasks | 7 files |
 | Phase 11.1-pm-internal-link-deep-placement-text-filter-warning P02 | 4 | 2 tasks | 4 files |
+| Phase 12-unified-pages-panel P01 | 3 | 2 tasks | 3 files |
+| Phase 12-unified-pages-panel P02 | 4 | 3 tasks | 4 files |
+| Phase 12-unified-pages-panel P03 | 2 min | 2 tasks | 1 files |
 
 ## Accumulated Context
 
@@ -82,6 +84,9 @@ Progress: [░░░░░░░░░░] 0%
 
 - Phase 11.1 inserted after Phase 11: PM 指標健診面板 — 在單一頁面檢查 Internal Link Deep Placement Text 是否達標並 filter warning 危險頁面 (URGENT)
 - Phase 11.2 inserted after Phase 11: Add score badge tooltip and improvement guidance for low/mid nodes (URGENT)
+- Phase 12 added: Unified Pages Panel — merge ScorePanel + HealthPanel into a single ranked "Pages" view (pushed original Anchor Text Type to Phase 14)
+- Phase 13 added: Inbound/Outbound Highlight — color-code directional edges on node click and add Selected Node side panel
+- Phase 14 (renumbered from 12): Anchor Text Type on Edge
 
 ### Decisions
 
@@ -143,6 +148,15 @@ Recent decisions affecting current work:
 - [Phase 11.1-pm-internal-link-deep-placement-text-filter-warning]: data-testid on span wrapper around lucide icons (not SVG) — SVGAnimatedString className breaks .toMatch() in tests
 - [Phase 11.1-pm-internal-link-deep-placement-text-filter-warning]: Tab underline style (border-b-2 border-blue-500) chosen over pill tabs to match sidebar header aesthetic
 - [Quick 260419-uje]: HealthPanel composes warnings list and Score Tier section as independent sub-components with their own gating — the "Show warnings only" toggle scopes only the warnings list, Score Tier remains unaffected. Badge colors (red-100/red-700 Low, amber-100/amber-700 Mid) reused from UrlNode TONE_MAP for consistent tier vocabulary across canvas + sidebar + health panel.
+- [Phase 12-unified-pages-panel]: inboundMap uses edge-count semantics (not linkCount-weighted) — matches identifyOrphanNodes orphan definition; outbound stays linkCount-weighted, the two metrics are intentionally not unified
+- [Phase 12-unified-pages-panel]: identifyOrphanNodes NOT refactored to read from inboundMap (D-21 optional) — kept independent to preserve orphan test suite and minimize Plan 01 blast radius
+- [Phase 12-unified-pages-panel]: calculateInboundLinks placed in graph-analysis.ts (alongside identifyOrphanNodes), not graph-pagerank.ts — co-locates edge-count + synthetic-global formulas
+- [Phase 12-unified-pages-panel]: PagesPanel default tab = pages — open unified ranked view on session start (CONTEXT D-01 Claude's Discretion)
+- [Phase 12-unified-pages-panel]: PagesPanel uses native <select> for sort — @/components/ui/select primitive doesn't exist in repo (CONTEXT D-05 fallback)
+- [Phase 12-unified-pages-panel]: PagesPanel warning badge priority orphan > unreachable > general; weak appended to general tooltip rather than stacking icons (D-11)
+- [Phase 12-unified-pages-panel]: Sort runs on unfiltered rows; filters applied after — keeps within-group ordering stable across tier/warning toggles
+- [Phase 12-unified-pages-panel]: Re-home pure-function tests (buildTooltipContent) before deleting UI test file — preserves coverage independently of component lifecycle
+- [Phase 12-unified-pages-panel]: CONTEXT D-22 listed ScorePanel.test.tsx for deletion but pre-flight ls confirmed absence — plan only deletes files that actually exist
 
 ### Pending Todos
 
@@ -181,6 +195,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-21T07:15:00.000Z
-Last activity: 2026-04-21 - Completed quick task 260421-l3o: Fix /zh-tw root node classified as low score tier
-Resume file: .planning/phases/11.2-add-score-badge-tooltip-and-improvement-guidance-for-low-mid-nodes/11.2-CONTEXT.md
+Last session: 2026-04-21T14:23:08.570Z
+Last activity: 2026-04-20 - Completed quick task 260420-lwu: graph utils 整個檔案太長了，需要分割
+Resume file: None
