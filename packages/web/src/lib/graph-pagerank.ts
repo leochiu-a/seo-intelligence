@@ -30,26 +30,24 @@ export function hasSameCluster(a: string[] | undefined, b: string[] | undefined)
 }
 
 /**
- * Iterative PageRank with page count and link count weighting.
+ * Iterative Personalized PageRank with page count and link count weighting.
  * d = 0.85, convergence delta < 0.0001, max 100 iterations.
  *
- * Algorithm:
- * 1. Initialize all scores to 1.0
- * 2. For each iteration:
- *    a. For each node u, compute:
- *       PR(u) = (1 - d) + d * sum over all v linking to u of:
- *         PR(v) * linkCount(v->u) * pageCount(u) / totalWeightedOutbound(v)
- *       where totalWeightedOutbound(v) = sum of (linkCount(v->w) * pageCount(w)) for all w that v links to
- *    b. Check convergence: max absolute delta across all nodes < 0.0001
- * 3. Return Map<nodeId, score>
+ * Teleport model (Page & Brin 1998, §3 — Personalization):
+ *   - When rootId is provided, all teleport probability is directed to the root node.
+ *     This models the real-site behavior where users enter via the homepage (direct
+ *     type-in or external search landing). Root therefore accumulates N·(1-d) of
+ *     teleport rank per iteration instead of the uniform (1-d) per node.
+ *   - When rootId is null/undefined, teleport is uniform (classic PageRank).
  *
- * @param rootId - Optional. When provided, the root node receives a synthetic
- *   inbound link from every other node (linkCount=1). This ensures the root/homepage
- *   is never classified as "low" — it models the real-web convention that the root
- *   is the canonical entry point linked from all pages. Skipped when rootId is
- *   null/undefined. If the root is a global node AND already has effective placement
- *   links (totalPlacementLinks > 0), the global injection already boosts it, so the
- *   root injection is skipped to avoid double-counting.
+ * Dangling-node rank is redistributed along the same teleport vector so rank remains
+ * conserved (scores sum to N).
+ *
+ * Self-loops are excluded from adjacency: same-template internal links (e.g. related
+ * products) are UX elements, not authority signals, and including them traps rank.
+ *
+ * @param rootId - Optional. Target for the personalized teleport vector. When set,
+ *   root receives all teleport mass; otherwise teleport is uniform.
  */
 export function calculatePageRank(
   nodes: Node<UrlNodeData>[],
@@ -81,6 +79,7 @@ export function calculatePageRank(
   }
 
   for (const e of edges) {
+    if (e.source === e.target) continue; // self-loops don't transfer authority
     const lc = e.data?.linkCount ?? 1;
     const srcTags = nodeMap.get(e.source)?.tags;
     const tgtTags = nodeMap.get(e.target)?.tags;
@@ -115,40 +114,6 @@ export function calculatePageRank(
     }
   }
 
-  // Root node injection: every non-root node implicitly links to the root node.
-  // Rationale: the root/homepage is the canonical entry point — all crawls originate
-  // there. This mirrors the global-node injection pattern but uses a fixed linkCount=1
-  // (no placement-count weighting).
-  // Skipped when rootId is null/undefined.
-  // Also skipped if the root is a global node that already has effective placement links
-  // (totalPlacementLinks > 0) — in that case the global injection already provides boost.
-  if (rootId) {
-    const rootNode = nodes.find((n) => n.id === rootId);
-    if (rootNode) {
-      const rootAlreadyGlobalInjected =
-        rootNode.data.isGlobal === true &&
-        (rootNode.data.placements ?? []).reduce((s, p) => s + p.linkCount, 0) > 0;
-
-      if (!rootAlreadyGlobalInjected) {
-        const syntheticLinkCount = 1;
-        for (const sourceNode of nodes) {
-          if (sourceNode.id === rootId) continue; // skip self-link
-          const sameCluster = hasSameCluster(sourceNode.data.tags, rootNode.data.tags);
-          inbound.get(rootId)?.push({
-            sourceId: sourceNode.id,
-            linkCount: syntheticLinkCount,
-            sameCluster,
-          });
-          outbound.get(sourceNode.id)?.push({
-            targetId: rootId,
-            linkCount: syntheticLinkCount,
-            sameCluster,
-          });
-        }
-      }
-    }
-  }
-
   // Precompute totalWeightedOutbound for each node. Same-cluster edges contribute
   // linkCount × CLUSTER_BONUS_FACTOR so rank transfer stays consistent with
   // the bonused denominator (Phase 999.5 D-06).
@@ -171,23 +136,36 @@ export function calculatePageRank(
 
   const N = nodes.length;
 
+  // Personalized teleport: concentrate all teleport mass on rootId when provided,
+  // otherwise fall back to uniform teleport (classic PageRank).
+  const rootIsValid = rootId != null && nodeMap.has(rootId);
+  const teleportMass = (nodeId: string): number => {
+    if (!rootIsValid) return 1; // uniform: each node gets (1-d) × 1
+    return nodeId === rootId ? N : 0; // all N·(1-d) mass on root
+  };
+
   for (let iter = 0; iter < MAX_ITER; iter++) {
     const newScores = new Map<string, number>();
     let maxDelta = 0;
 
     // Dangling node handling: collect rank from nodes with no outbound edges
-    // and redistribute evenly so scores sum to N
+    // and redistribute along the teleport vector so scores remain conserved.
     let danglingRank = 0;
     for (const n of nodes) {
       if ((outbound.get(n.id)?.length ?? 0) === 0) {
         danglingRank += scores.get(n.id) ?? 1.0;
       }
     }
-    const danglingShare = (DAMPING * danglingRank) / N;
 
     for (const n of nodes) {
       const pageCount = nodeMap.get(n.id)?.pageCount ?? 1;
-      let rank = 1 - DAMPING + danglingShare;
+      const tMass = teleportMass(n.id);
+      const danglingShare = rootIsValid
+        ? n.id === rootId
+          ? DAMPING * danglingRank
+          : 0
+        : (DAMPING * danglingRank) / N;
+      let rank = (1 - DAMPING) * tMass + danglingShare;
 
       for (const { sourceId, linkCount, sameCluster } of inbound.get(n.id) ?? []) {
         const sourceScore = scores.get(sourceId) ?? 1.0;

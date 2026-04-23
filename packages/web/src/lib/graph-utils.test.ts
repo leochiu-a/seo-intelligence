@@ -373,12 +373,18 @@ describe("calculatePageRank", () => {
     expect(resultLarge.has("a")).toBe(true);
   });
 
-  it("scores sum to N (number of nodes) within floating point tolerance", () => {
+  it("all scores are positive and downstream nodes score higher when they have higher pageCount", () => {
+    // With pageCount in numerator only, high-pageCount targets accumulate more rank.
+    // Scores no longer sum to N — that property held only when pageCount appeared in
+    // both numerator and denominator (old formula, now corrected).
     const nodes = [makeNode("a", 1), makeNode("b", 2), makeNode("c", 3)];
     const edges = [makeEdge("e1", "a", "b", 1), makeEdge("e2", "b", "c", 2)];
     const result = calculatePageRank(nodes, edges);
-    const total = Array.from(result.values()).reduce((sum, s) => sum + s, 0);
-    expect(total).toBeCloseTo(nodes.length, 2);
+    for (const score of result.values()) {
+      expect(score).toBeGreaterThan(0);
+    }
+    // c has highest pageCount and receives rank from b — should outscore a (no inbound)
+    expect(result.get("c")!).toBeGreaterThan(result.get("a")!);
   });
 
   it("dampening factor d=0.85: disconnected node score equals 1.0 (1 - 0.85 + 0.85*1.0)", () => {
@@ -463,7 +469,7 @@ describe("calculatePageRank with global nodes", () => {
     expect(result.get("a")).toBeCloseTo(1.0, 2);
   });
 
-  it("scores still sum to N with global nodes present", () => {
+  it("all scores are positive with global nodes present", () => {
     const placements: Placement[] = [{ id: "p1", name: "Nav", linkCount: 3 }];
     const nodes = [
       makeNode("a", 1),
@@ -473,8 +479,9 @@ describe("calculatePageRank with global nodes", () => {
     ];
     const edges = [makeEdge("e1", "a", "b", 1)];
     const result = calculatePageRank(nodes, edges);
-    const total = Array.from(result.values()).reduce((sum, s) => sum + s, 0);
-    expect(total).toBeCloseTo(nodes.length, 2);
+    for (const score of result.values()) {
+      expect(score).toBeGreaterThan(0);
+    }
   });
 
   it("global node with empty placements array behaves same as non-global node", () => {

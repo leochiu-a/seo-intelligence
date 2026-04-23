@@ -15,75 +15,90 @@ function makeNode(id: string, overrides: Partial<UrlNodeData> = {}): Node<UrlNod
   };
 }
 
-describe("calculatePageRank - rootId parameter", () => {
-  it("Test A: root node score is higher than non-root nodes when rootId is provided (3 nodes, no edges)", () => {
-    // 3 nodes: root + 2 others, no edges, no global nodes
-    // Root should receive synthetic inbound from the 2 others -> higher score
+function makeEdge(source: string, target: string, linkCount = 1): Edge<LinkCountEdgeData> {
+  return { id: `e-${source}-${target}`, source, target, data: { linkCount } };
+}
+
+describe("calculatePageRank - self-loop exclusion", () => {
+  it("self-loop does not affect scores — two nodes with and without self-loop produce equal results", () => {
+    const nodesWithLoop = [makeNode("a"), makeNode("b")];
+    const nodesWithoutLoop = [makeNode("a"), makeNode("b")];
+    const selfLoop = makeEdge("a", "a", 10);
+
+    const scoresWithLoop = calculatePageRank(nodesWithLoop, [selfLoop]);
+    const scoresWithoutLoop = calculatePageRank(nodesWithoutLoop, []);
+
+    expect(scoresWithLoop.get("a")).toBeCloseTo(scoresWithoutLoop.get("a")!, 5);
+    expect(scoresWithLoop.get("b")).toBeCloseTo(scoresWithoutLoop.get("b")!, 5);
+  });
+
+  it("self-loop on high-pageCount node does not trap rank — rank flows to other nodes", () => {
+    const nodes = [makeNode("source"), makeNode("sink", { pageCount: 1000 }), makeNode("other")];
+    const edges = [
+      makeEdge("source", "sink", 10),
+      makeEdge("source", "other", 10),
+      makeEdge("sink", "sink", 6),
+    ];
+
+    const scores = calculatePageRank(nodes, edges);
+    expect(scores.get("other")!).toBeGreaterThan(1 - 0.85);
+  });
+});
+
+describe("calculatePageRank - Personalized PageRank (root-biased teleport)", () => {
+  it("root receives N·(1-d) teleport mass — far above non-root disconnected nodes", () => {
+    // 3 disconnected nodes: root + a + b. With root-biased teleport, root gets
+    // N·(1-d) = 3·0.15 = 0.45 teleport, others get 0. Dangling rank also flows to root.
+    // Non-root disconnected nodes converge to near-zero rather than 1.0.
     const nodes = [makeNode("root", { isRoot: true }), makeNode("a"), makeNode("b")];
     const edges: Edge<LinkCountEdgeData>[] = [];
 
     const scores = calculatePageRank(nodes, edges, "root");
 
-    const rootScore = scores.get("root")!;
-    const aScore = scores.get("a")!;
-    const bScore = scores.get("b")!;
-
-    expect(rootScore).toBeGreaterThan(aScore);
-    expect(rootScore).toBeGreaterThan(bScore);
+    expect(scores.get("root")!).toBeGreaterThan(scores.get("a")!);
+    expect(scores.get("root")!).toBeGreaterThan(scores.get("b")!);
+    // Scores still sum to N (conservation preserved under personalized teleport)
+    const total = [...scores.values()].reduce((s, v) => s + v, 0);
+    expect(total).toBeCloseTo(nodes.length, 1);
   });
 
-  it("Test B: root node that is also global but has no placements escapes 'low' tier when there are 3+ nodes", () => {
-    // Root is global but has no placements — global injection skips it (totalPlacementLinks=0)
-    // Root injection should still fire
+  it("root is not classified as 'low' even when isolated with no explicit inbound", () => {
     const nodes = [
-      makeNode("root", { isRoot: true, isGlobal: true, placements: [] }),
-      makeNode("a"),
-      makeNode("b"),
+      makeNode("root", {
+        isRoot: true,
+        isGlobal: true,
+        placements: [{ id: "p1", name: "Header", linkCount: 1 }],
+        pageCount: 1,
+      }),
+      makeNode("a", { pageCount: 500 }),
+      makeNode("b", { pageCount: 500 }),
     ];
     const edges: Edge<LinkCountEdgeData>[] = [];
 
     const scores = calculatePageRank(nodes, edges, "root");
-
-    const allScores = [...scores.values()];
-    const rootScore = scores.get("root")!;
-    const tier = classifyScoreTier(rootScore, allScores);
+    const tier = classifyScoreTier(scores.get("root")!, [...scores.values()]);
 
     expect(tier).not.toBe("low");
   });
 
-  it("Test C: non-root, non-global nodes are unaffected by root injection (do not receive extra synthetic inbound)", () => {
-    // In a 3-node graph with a root, only root gets synthetic inbound from others.
-    // Non-root nodes "a" and "b" should NOT receive synthetic inbound from root injection.
-    const nodes = [makeNode("root", { isRoot: true }), makeNode("a"), makeNode("b")];
-    const edges: Edge<LinkCountEdgeData>[] = [];
+  it("rootId=null falls back to uniform teleport (classic PageRank)", () => {
+    // Without rootId, three disconnected nodes should have equal scores.
+    const nodes = [makeNode("a"), makeNode("b"), makeNode("c")];
+    const scoresNull = calculatePageRank(nodes, [], null);
+    const scoresNoArg = calculatePageRank(nodes, []);
 
-    const scores = calculatePageRank(nodes, edges, "root");
-
-    // "a" and "b" should have equal scores (no asymmetry introduced between them)
-    const aScore = scores.get("a")!;
-    const bScore = scores.get("b")!;
-    expect(aScore).toBeCloseTo(bScore, 5);
+    for (const id of ["a", "b", "c"]) {
+      expect(scoresNull.get(id)).toBeCloseTo(scoresNoArg.get(id)!, 5);
+    }
+    expect(scoresNull.get("a")).toBeCloseTo(scoresNull.get("b")!, 5);
+    expect(scoresNull.get("b")).toBeCloseTo(scoresNull.get("c")!, 5);
   });
 
-  it("Test D: rootId=null — behavior is unchanged, no root injection", () => {
-    // Without rootId, scores should match classic 3-node graph output (no injection)
-    const nodes = [makeNode("root"), makeNode("a"), makeNode("b")];
-    const edges: Edge<LinkCountEdgeData>[] = [];
+  it("non-root nodes are not directly boosted by the teleport vector", () => {
+    // a and b both receive 0 teleport mass; their scores only come from inbound rank.
+    const nodes = [makeNode("root", { isRoot: true }), makeNode("a"), makeNode("b")];
+    const scores = calculatePageRank(nodes, [], "root");
 
-    const scoresWithNull = calculatePageRank(nodes, edges, null);
-    const scoresWithoutArg = calculatePageRank(nodes, edges);
-
-    // All three nodes should have equal scores when no root injection and no edges
-    const rootScore = scoresWithNull.get("root")!;
-    const aScore = scoresWithNull.get("a")!;
-    const bScore = scoresWithNull.get("b")!;
-
-    expect(rootScore).toBeCloseTo(aScore, 5);
-    expect(rootScore).toBeCloseTo(bScore, 5);
-
-    // Should match output of calling without rootId
-    for (const [id, score] of scoresWithNull) {
-      expect(score).toBeCloseTo(scoresWithoutArg.get(id)!, 5);
-    }
+    expect(scores.get("a")).toBeCloseTo(scores.get("b")!, 5);
   });
 });
