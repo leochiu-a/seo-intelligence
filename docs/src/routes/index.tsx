@@ -1,10 +1,10 @@
-import { createFileRoute, redirect } from '@tanstack/react-router';
+import { createFileRoute, redirect } from "@tanstack/react-router";
 
-export const Route = createFileRoute('/')({
+export const Route = createFileRoute("/")({
   beforeLoad: () => {
     throw redirect({
-      to: '/docs/$',
-      params: { _splat: 'features' },
+      to: "/$",
+      params: { _splat: "features" },
       statusCode: 301,
     });
   },

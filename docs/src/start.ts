@@ -1,7 +1,7 @@
-import { createMiddleware, createStart } from '@tanstack/react-start';
-import { isMarkdownPreferred, rewritePath } from 'fumadocs-core/negotiation';
-import { redirect } from '@tanstack/react-router';
-import { docsContentRoute, docsRoute } from '@/lib/shared';
+import { createMiddleware, createStart } from "@tanstack/react-start";
+import { isMarkdownPreferred, rewritePath } from "fumadocs-core/negotiation";
+import { redirect } from "@tanstack/react-router";
+import { docsContentRoute, docsRoute } from "@/lib/shared";
 
 const { rewrite: rewriteDocs } = rewritePath(
   `${docsRoute}{/*path}`,
@@ -21,9 +21,13 @@ const llmMiddleware = createMiddleware().server(({ next, request }) => {
   }
 
   if (isMarkdownPreferred(request)) {
-    const docsPath = rewriteDocs(url.pathname);
-    if (docsPath) {
-      throw redirect(new URL(docsPath, url));
+    const { pathname } = url;
+    // Exclude API routes and LLM utility routes from docs rewrite
+    if (!pathname.startsWith("/api") && !pathname.startsWith("/llms")) {
+      const docsPath = rewriteDocs(pathname);
+      if (docsPath) {
+        throw redirect(new URL(docsPath, url));
+      }
     }
   }
 
