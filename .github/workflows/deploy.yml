@@ -28,14 +28,25 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Build
-        run: pnpm build
+      - name: Build web
+        run: pnpm --filter @seo-intelligence/web build
         env:
           GITHUB_PAGES: true
 
+      - name: Build docs
+        run: pnpm --filter @seo-intelligence/docs build
+        env:
+          GITHUB_PAGES: true
+
+      - name: Merge build artifacts
+        run: |
+          mkdir -p deploy/docs
+          cp -r packages/web/dist/. deploy/
+          cp -r docs/.vercel/output/static/. deploy/docs/
+
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: packages/web/dist
+          path: deploy
 
   deploy:
     needs: build
