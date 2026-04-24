@@ -17,17 +17,25 @@ icon: BookOpen
 
 ## PageRank 演算法
 
-每次編輯 graph 都會重新計算，公式為：
+本工具採用 **Personalized PageRank**（Page & Brin 1998, §3 Personalization），每次編輯 graph 都會重新計算。公式為：
 
 $$
-PR(u) = (1 - d) + d \sum_{v \in B(u)} \frac{PR(v) \cdot \mathrm{linkCount}(v \to u) \cdot \mathrm{pageCount}(u)}{\mathrm{totalOut}(v)}
+PR(u) = (1 - d) \cdot t(u) \cdot N + d \sum_{v \in B(u)} \frac{PR(v) \cdot \mathrm{linkCount}(v \to u) \cdot \mathrm{pageCount}(u)}{\mathrm{totalOut}(v)}
 $$
 
 $$
-\mathrm{totalOut}(v) = \sum_{w \in F(v)} \mathrm{linkCount}(v \to w) \cdot \mathrm{pageCount}(w)
+\mathrm{totalOut}(v) = \sum_{w \in F(v),\ w \neq v} \mathrm{linkCount}(v \to w) \cdot \mathrm{pageCount}(w)
 $$
 
-其中 $B(u)$ 為所有指向 $u$ 的節點集合，$F(v)$ 為所有 $v$ 指出的節點集合。
+其中 $B(u)$ 為所有指向 $u$ 的節點集合，$F(v)$ 為所有 $v$ 指出的節點集合（**不含 self-loop**）。$t(u)$ 是 teleport vector：
+
+$$
+t(u) = \begin{cases}
+1 & u = \text{root}\ (\text{root-biased}) \\
+0 & u \neq \text{root}
+\end{cases}
+\quad\text{若無 root，fallback:}\quad t(u) = 1/N
+$$
 
 | 參數 | 值 | 意義 |
 |------|----|----|
@@ -35,12 +43,17 @@ $$
 | `max_iter` | `100` | 最多迭代次數 |
 | `ε` | `0.0001` | 收斂條件：最大 delta 小於此值即停止 |
 
-### 四個關鍵的 SEO 調整
+### 五個關鍵的 SEO 調整
 
-1. **Page count 加權**：一個 template 代表 100 頁時，它獲得的權重比代表 1 頁的 template 高
-2. **Link count 加權**：邊的 link count 越大，傳遞的權重越多
-3. **Dangling node 處理**：沒有 outbound edge 的節點會把自己的 rank **平均分配** 給所有節點，避免權重「漏光」
-4. **Cluster bonus（同主題加成）**：當來源節點與目標節點共享至少一個 cluster tag 時，該邊的 link weight 乘以 `1.5`。這反映了主題一致的內部連結（例如 SEO 文章互相引用）在實際 SEO 上比跨主題連結傳遞更多 authority 的現象。計算式中 $\mathrm{linkCount}(v \to u)$ 替換為 $\mathrm{linkCount}(v \to u) \times 1.5$ 當兩端 tags 有交集時。
+1. **Personalized teleport（首頁集中）**：站內分析的 teleport 機率全部灌在 root —— 模擬使用者「直接輸入網址」或「從搜尋結果點進來」幾乎都是落到首頁。這讓首頁天然具有最高基底分，反映它作為站內唯一入口的結構重要性，不需要後處理修正。
+2. **Self-loop 排除**：節點連到自己（例如 product 頁面的「相關商品」推薦）**不進入計算**。這類 UX 連結不傳遞 authority，若納入會讓高 pageCount 節點的 self-loop 完全主導外連分母，把 rank 鎖死在自己身上。
+3. **Page count 加權**：一個 template 代表 100 頁時，它獲得的權重比代表 1 頁的 template 高（反映 crawl budget 的語意）。
+4. **Link count 加權**：邊的 link count 越大，傳遞的權重越多。
+5. **Cluster bonus（同主題加成）**：當來源節點與目標節點共享至少一個 cluster tag 時，該邊的 link weight 乘以 `1.5`。這反映了主題一致的內部連結（例如 SEO 文章互相引用）在實際 SEO 上比跨主題連結傳遞更多 authority 的現象。計算式中 $\mathrm{linkCount}(v \to u)$ 替換為 $\mathrm{linkCount}(v \to u) \times 1.5$ 當兩端 tags 有交集時。
+
+### Dangling node 處理
+
+沒有 outbound edge 的節點（例如只有 inbound 的 landing page），其 rank 依照 teleport vector 重新分配 —— 有 root 時全部回到 root，沒 root 時均分。這既避免 rank「漏光」，也維持「分數總和 = N」的守恆特性。
 
 ### 分數 tier 劃分
 

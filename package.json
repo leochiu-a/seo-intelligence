@@ -20,7 +20,8 @@
     "lint": "pnpm -r lint",
     "preview": "pnpm --filter @seo-intelligence/web preview",
     "type-check": "pnpm -r type-check",
-    "prepare": "husky"
+    "prepare": "husky",
+    "docs:dev": "pnpm --filter @seo-intelligence/docs dev"
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": [
