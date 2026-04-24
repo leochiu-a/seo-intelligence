@@ -20,6 +20,7 @@ export const DEFAULT_SCENARIO_NODES: SerializedNode[] = [
       urlTemplate: "/category/{slug}",
       pageCount: 8,
       isGlobal: true,
+      tags: ["category"],
     },
   },
   {
@@ -30,6 +31,7 @@ export const DEFAULT_SCENARIO_NODES: SerializedNode[] = [
       urlTemplate: "/blog",
       pageCount: 1,
       isGlobal: true,
+      tags: ["blog"],
     },
   },
   {
@@ -39,6 +41,7 @@ export const DEFAULT_SCENARIO_NODES: SerializedNode[] = [
     data: {
       urlTemplate: "/product/{slug}",
       pageCount: 200,
+      tags: ["category"],
     },
   },
   {
@@ -48,6 +51,7 @@ export const DEFAULT_SCENARIO_NODES: SerializedNode[] = [
     data: {
       urlTemplate: "/blog/{slug}",
       pageCount: 50,
+      tags: ["blog"],
     },
   },
 ];

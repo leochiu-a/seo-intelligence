@@ -26,6 +26,7 @@ function serializeNodes(nodes: object[]): SerializedNode[] {
       ...(n.data?.isGlobal != null && { isGlobal: n.data.isGlobal }),
       ...(n.data?.placements?.length && { placements: n.data.placements }),
       ...(n.data?.isRoot != null && { isRoot: n.data.isRoot }),
+      ...(n.data?.tags?.length && { tags: n.data.tags }),
     },
   }));
 }

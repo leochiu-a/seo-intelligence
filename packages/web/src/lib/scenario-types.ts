@@ -11,6 +11,7 @@ export interface SerializedNode {
     isGlobal?: boolean;
     placements?: { id: string; name: string; linkCount: number }[];
     isRoot?: boolean;
+    tags?: string[];
   };
 }
 
