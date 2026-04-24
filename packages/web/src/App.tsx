@@ -265,7 +265,7 @@ function AppInner() {
       />
       <div className="flex-1 min-h-0 overflow-hidden">
         <ResizablePanelGroup orientation="horizontal" className="h-full">
-          <ResizablePanel defaultSize="20%" minSize="15%" maxSize="40%">
+          <ResizablePanel defaultSize="28%" minSize="18%" maxSize="45%">
             <SidePanel
               nodes={nodes}
               scores={scores}
@@ -286,7 +286,7 @@ function AppInner() {
 
           <ResizableHandle />
 
-          <ResizablePanel defaultSize="80%" minSize="50%">
+          <ResizablePanel defaultSize="72%" minSize="50%">
             <div className="h-full" ref={reactFlowWrapper}>
               <ReactFlow<Node<AppNodeData>, Edge<LinkCountEdgeData>>
                 nodes={styledNodes}

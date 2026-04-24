@@ -32,15 +32,18 @@ export function useGraphAnalytics(
   nodes: Node<AppNodeData>[],
   edges: Edge<LinkCountEdgeData>[],
 ): GraphAnalyticsResult {
-  // Recalculate scores on every graph change (per D-13, SCORE-02)
-  const scores = useMemo(() => calculatePageRank(nodes, edges), [nodes, edges]);
+  // Derive root node ID — used as both teleport target for Personalized PageRank
+  // and as the BFS origin for crawl depth below.
+  const rootId = useMemo(() => nodes.find((n) => n.data.isRoot)?.id ?? null, [nodes]);
+
+  // Recalculate scores on every graph change (per D-13, SCORE-02).
+  // Personalized PageRank: teleport biased to root so homepage accumulates rank
+  // reflecting its role as the canonical entry point.
+  const scores = useMemo(() => calculatePageRank(nodes, edges, rootId), [nodes, edges, rootId]);
 
   const weakNodes = useMemo(() => identifyWeakNodes(scores), [scores]);
 
   const allScoreValues = useMemo(() => [...scores.values()], [scores]);
-
-  // Derive root node ID from nodes state
-  const rootId = useMemo(() => nodes.find((n) => n.data.isRoot)?.id ?? null, [nodes]);
 
   // Compute crawl depth map using BFS from root
   const depthMap = useMemo(() => calculateCrawlDepth(nodes, edges, rootId), [nodes, edges, rootId]);

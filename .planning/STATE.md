@@ -191,6 +191,7 @@ None yet.
 | 260420-iaj | Fix Add Node graph explosion bug (nodeIdCounter id collision after reload) | 2026-04-20 | fbef292 | [260420-iaj-add-node-bug-node](./quick/260420-iaj-add-node-bug-node/) |
 | 260420-k5m | fix copy-to-ai score showing node score instead of link score | 2026-04-20 | 9741caa | [260420-k5m-fix-copy-to-ai-score-showing-node-score-](./quick/260420-k5m-fix-copy-to-ai-score-showing-node-score-/) |
 | 260420-lwu | Split graph-utils.ts 1032→134 lines into graph-pagerank, graph-analysis, graph-io modules | 2026-04-20 | a2b15c3 | [260420-lwu-graph-utils](./quick/260420-lwu-graph-utils/) |
+| 260421-l3o | Fix /zh-tw root node classified as "low" score tier (root node synthetic inbound injection in PageRank) | 2026-04-21 | 7357c37 | [260421-l3o-zh-tw-low-global-root](./quick/260421-l3o-zh-tw-low-global-root/) |
 
 ## Session Continuity
 

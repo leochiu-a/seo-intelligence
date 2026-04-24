@@ -27,9 +27,6 @@ const SORT_OPTIONS: { value: SortMode; label: string }[] = [
   { value: "issue-tier", label: "Issue-tier (default)" },
   { value: "score-hi", label: "Score (high → low)" },
   { value: "score-lo", label: "Score (low → high)" },
-  { value: "depth-deep", label: "Depth (deep → shallow)" },
-  { value: "outbound-hi", label: "Outbound (high → low)" },
-  { value: "inbound-lo", label: "Inbound (low → high)" },
   { value: "url-asc", label: "URL template (A → Z)" },
 ];
 
@@ -47,14 +44,7 @@ interface PagesPanelProps {
   onNodeHighlight?: (id: string | null) => void;
 }
 
-type SortMode =
-  | "issue-tier"
-  | "score-hi"
-  | "score-lo"
-  | "depth-deep"
-  | "outbound-hi"
-  | "inbound-lo"
-  | "url-asc";
+type SortMode = "issue-tier" | "score-hi" | "score-lo" | "url-asc";
 
 interface PageRow {
   id: string;
@@ -100,24 +90,13 @@ function getSortComparator(mode: SortMode): (a: PageRow, b: PageRow) => number {
       return (a, b) => {
         const byGroup = a.issueGroup - b.issueGroup;
         if (byGroup !== 0) return byGroup;
-        const byScore = a.issueGroup === 3 ? b.score - a.score : a.score - b.score;
+        const byScore = a.score - b.score;
         return byScore || a.urlTemplate.localeCompare(b.urlTemplate);
       };
     case "score-hi":
       return (a, b) => b.score - a.score || a.urlTemplate.localeCompare(b.urlTemplate);
     case "score-lo":
       return (a, b) => a.score - b.score || a.urlTemplate.localeCompare(b.urlTemplate);
-    case "depth-deep":
-      return (a, b) => {
-        const da = a.depth ?? Number.POSITIVE_INFINITY;
-        const db = b.depth ?? Number.POSITIVE_INFINITY;
-        if (da === db) return a.urlTemplate.localeCompare(b.urlTemplate);
-        return db - da;
-      };
-    case "outbound-hi":
-      return (a, b) => b.outbound - a.outbound || a.urlTemplate.localeCompare(b.urlTemplate);
-    case "inbound-lo":
-      return (a, b) => a.inbound - b.inbound || a.urlTemplate.localeCompare(b.urlTemplate);
     case "url-asc":
       return (a, b) => a.urlTemplate.localeCompare(b.urlTemplate);
   }

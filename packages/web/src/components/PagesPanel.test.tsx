@@ -103,15 +103,17 @@ describe("PagesPanel", () => {
     expect(screen.getAllByTestId("pages-row")).toHaveLength(3);
   });
 
-  it("default sort orders orphan → unreachable-only → warning → clean; issue groups sort score asc, clean group sorts score desc", () => {
+  it("default sort orders orphan → unreachable-only → warning → clean; every group sorts score ascending so LOW-tier surfaces first", () => {
     // clean-a (tier ok, tags set) score 5; warning-b (no tags) score 2;
-    // orphan-c score 1; unreachable-d score 3; warning-e (no tags) score 4.
+    // orphan-c score 1; unreachable-d score 3; warning-e (no tags) score 4;
+    // clean-f (tier ok, tags set) score 6.
     const nodes = [
       makeNode("a", "/clean-a", { tags: ["t"] }),
       makeNode("b", "/warn-b"), // no tags → health warning
       makeNode("c", "/orphan-c", { tags: ["t"] }),
       makeNode("d", "/unreach-d", { tags: ["t"] }),
       makeNode("e", "/warn-e"), // no tags → health warning
+      makeNode("f", "/clean-f", { tags: ["t"] }),
     ];
     const scores = new Map<string, number>([
       ["a", 5],
@@ -119,6 +121,7 @@ describe("PagesPanel", () => {
       ["c", 1],
       ["d", 3],
       ["e", 4],
+      ["f", 6],
     ]);
     renderPanel({
       nodes,
@@ -132,8 +135,8 @@ describe("PagesPanel", () => {
     //  group 0 orphan: c
     //  group 1 unreachable-only: d
     //  group 2 warning: b (score 2) then e (score 4)
-    //  group 3 clean: a
-    expect(templates).toEqual(["c", "d", "b", "e", "a"]);
+    //  group 3 clean: a (score 5) then f (score 6) — ascending so LOW tier appears first
+    expect(templates).toEqual(["c", "d", "b", "e", "a", "f"]);
   });
 
   it("switching sort to 'score-hi' reorders rows by score descending", async () => {
@@ -287,66 +290,5 @@ describe("PagesPanel", () => {
     renderPanel({ nodes, orphanNodes: new Set(["a"]) });
     expect(screen.getByTestId("pages-warn-orphan")).toBeInTheDocument();
     expect(screen.queryByTestId("pages-warn-general")).toBeNull();
-  });
-
-  it("'depth-deep' sorts deepest first; unreachable (no depth) sorts at the top", async () => {
-    const nodes = [
-      makeNode("shallow", "/a", { tags: ["t"] }),
-      makeNode("deep", "/b", { tags: ["t"] }),
-      makeNode("unreach", "/c", { tags: ["t"] }),
-    ];
-    renderPanel({
-      nodes,
-      depthMap: new Map([
-        ["shallow", 1],
-        ["deep", 5],
-      ]),
-      unreachableNodes: new Set(["unreach"]),
-    });
-    await selectSortOption("depth-deep");
-    const ids = screen.getAllByTestId("pages-row").map((r) => r.getAttribute("data-node-id"));
-    expect(ids).toEqual(["unreach", "deep", "shallow"]);
-  });
-
-  it("'depth-deep' tiebreaks equal-depth nodes by URL ascending", async () => {
-    const nodes = [makeNode("b", "/z", { tags: ["t"] }), makeNode("a", "/a", { tags: ["t"] })];
-    renderPanel({
-      nodes,
-      depthMap: new Map([
-        ["a", 3],
-        ["b", 3],
-      ]),
-    });
-    await selectSortOption("depth-deep");
-    const ids = screen.getAllByTestId("pages-row").map((r) => r.getAttribute("data-node-id"));
-    expect(ids).toEqual(["a", "b"]);
-  });
-
-  it("'outbound-hi' sorts by outbound descending", async () => {
-    const nodes = [makeNode("a", "/a", { tags: ["t"] }), makeNode("b", "/b", { tags: ["t"] })];
-    renderPanel({
-      nodes,
-      outboundMap: new Map([
-        ["a", 5],
-        ["b", 50],
-      ]),
-    });
-    await selectSortOption("outbound-hi");
-    const ids = screen.getAllByTestId("pages-row").map((r) => r.getAttribute("data-node-id"));
-    expect(ids).toEqual(["b", "a"]);
-  });
-
-  it("'inbound-lo' sorts by inbound ascending", async () => {
-    const nodes = [makeNode("a", "/a", { tags: ["t"] }), makeNode("b", "/b", { tags: ["t"] })];
-    renderPanel({
-      nodes,
-      inboundMap: new Map([
-        ["a", 10],
-        ["b", 1],
-      ]),
-    });
-    await selectSortOption("inbound-lo");
-    const ids = screen.getAllByTestId("pages-row").map((r) => r.getAttribute("data-node-id"));
-    expect(ids).toEqual(["b", "a"]);
   });
 });
