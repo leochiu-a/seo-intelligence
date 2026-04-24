@@ -100,7 +100,7 @@ function getSortComparator(mode: SortMode): (a: PageRow, b: PageRow) => number {
       return (a, b) => {
         const byGroup = a.issueGroup - b.issueGroup;
         if (byGroup !== 0) return byGroup;
-        const byScore = a.issueGroup === 3 ? b.score - a.score : a.score - b.score;
+        const byScore = a.score - b.score;
         return byScore || a.urlTemplate.localeCompare(b.urlTemplate);
       };
     case "score-hi":
