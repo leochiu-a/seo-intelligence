@@ -40,12 +40,12 @@ describe("loadOrMigrate", () => {
     localStorage.clear();
   });
 
-  it("fresh start: no localStorage → single Scenario 1 with empty nodes/edges", () => {
+  it("fresh start: no localStorage → single Scenario 1 seeded with default nodes/edges", () => {
     const store = loadOrMigrate();
     expect(store.scenarios).toHaveLength(1);
     expect(store.scenarios[0].name).toBe("Scenario 1");
-    expect(store.scenarios[0].nodes).toEqual([]);
-    expect(store.scenarios[0].edges).toEqual([]);
+    expect(store.scenarios[0].nodes.length).toBeGreaterThan(0);
+    expect(store.scenarios[0].edges.length).toBeGreaterThan(0);
     expect(store.activeScenarioId).toBe(store.scenarios[0].id);
   });
 
@@ -195,6 +195,8 @@ describe("useScenarios", () => {
   it("renameScenario updates only the name, not nodes/edges", () => {
     const { result } = renderHook(() => useScenarios());
     const id = result.current.store.activeScenarioId;
+    const nodesBefore = result.current.store.scenarios.find((s) => s.id === id)!.nodes;
+    const edgesBefore = result.current.store.scenarios.find((s) => s.id === id)!.edges;
 
     act(() => {
       result.current.renameScenario(id, "My Custom Name");
@@ -202,8 +204,8 @@ describe("useScenarios", () => {
 
     const scenario = result.current.store.scenarios.find((s) => s.id === id)!;
     expect(scenario.name).toBe("My Custom Name");
-    expect(scenario.nodes).toEqual([]);
-    expect(scenario.edges).toEqual([]);
+    expect(scenario.nodes).toEqual(nodesBefore);
+    expect(scenario.edges).toEqual(edgesBefore);
   });
 
   it("deleteScenario removes scenario; active switches to first remaining", () => {

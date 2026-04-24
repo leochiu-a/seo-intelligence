@@ -7,6 +7,7 @@ import {
   type SerializedNode,
   type SerializedEdge,
 } from "../lib/scenario-types";
+import { DEFAULT_SCENARIO_NODES, DEFAULT_SCENARIO_EDGES } from "../lib/default-scenario";
 
 // ---------------------------------------------------------------------------
 // Serialization helpers (mirrors serializeGraph in App.tsx, but works with
@@ -89,11 +90,13 @@ export function loadOrMigrate(): ScenariosStore {
     }
   }
 
-  // 3. Fresh start
+  // 3. Fresh start — seed with a default example scenario
   const id = crypto.randomUUID();
   return {
     activeScenarioId: id,
-    scenarios: [{ id, name: "Scenario 1", nodes: [], edges: [] }],
+    scenarios: [
+      { id, name: "Scenario 1", nodes: DEFAULT_SCENARIO_NODES, edges: DEFAULT_SCENARIO_EDGES },
+    ],
   };
 }
 
