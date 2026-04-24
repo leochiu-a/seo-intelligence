@@ -265,7 +265,7 @@ function AppInner() {
       />
       <div className="flex-1 min-h-0 overflow-hidden">
         <ResizablePanelGroup orientation="horizontal" className="h-full">
-          <ResizablePanel defaultSize="28%" minSize="18%" maxSize="45%">
+          <ResizablePanel defaultSize="22%" minSize="15%" maxSize="45%">
             <SidePanel
               nodes={nodes}
               scores={scores}
