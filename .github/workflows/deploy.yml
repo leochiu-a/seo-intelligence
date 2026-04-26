@@ -42,7 +42,7 @@ jobs:
         run: |
           mkdir -p deploy/docs
           cp -r packages/web/dist/. deploy/
-          cp -r docs/.vercel/output/static/. deploy/docs/
+          cp -r docs/.vitepress/dist/. deploy/docs/
 
       - uses: actions/upload-pages-artifact@v3
         with:

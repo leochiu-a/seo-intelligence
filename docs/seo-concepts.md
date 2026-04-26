@@ -1,7 +1,6 @@
 ---
 title: SEO 觀念與演算法
 description: PageRank、Crawl Depth、Orphan、Global Node 背後的 SEO 原理
-icon: BookOpen
 ---
 
 本頁說明工具背後的 SEO 原理，幫助你解讀每個指標、判斷什麼時候該警示。

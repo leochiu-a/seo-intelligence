@@ -1,7 +1,6 @@
 ---
 title: 核心功能
 description: Canvas、PageRank、Global Nodes、Cluster Tags、Scenario 等主要功能說明
-icon: Layers
 ---
 
 以下是目前專案已實作的主要功能，依使用流程分類。
@@ -26,7 +25,7 @@ icon: Layers
 - **Weak page 警示**：分數低於 `mean − 1 stddev` 的節點會標註警告
 - 點擊 sidebar 項目會高亮對應的 canvas 節點
 
-演算法細節請看 [SEO 觀念與演算法](/seo-concepts#pagerank-演算法)。
+演算法細節請看 [SEO 觀念與演算法](./seo-concepts.md#pagerank-演算法)。
 
 ## 3. Global Nodes & Placements（全站節點與版位）
 

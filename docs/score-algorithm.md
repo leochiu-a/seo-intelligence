@@ -1,7 +1,6 @@
 ---
 title: Score 計算流程說明
 description: 用白話文解釋 PageRank 評分、Tier 分類、Weak Node 偵測等核心計算邏輯
-icon: Calculator
 ---
 
 本文用白話文說明每次你編輯 graph 後，系統在背後做了哪些事。對應實作在 `packages/web/src/lib/graph-utils.ts`。
