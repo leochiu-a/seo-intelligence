@@ -24,7 +24,12 @@ export default defineConfig({
   },
   themeConfig: {
     logoLink: '/features',
-    nav: [],
+    nav: [
+      { text: 'Web', link: 'https://leochiu-a.github.io/seo-intelligence/' },
+    ],
+    socialLinks: [
+      { icon: 'github', link: 'https://github.com/leochiu-a/seo-intelligence' },
+    ],
     sidebar: [
       {
         text: '文件',
