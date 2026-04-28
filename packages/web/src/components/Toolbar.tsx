@@ -111,14 +111,12 @@ export function Toolbar({
         <Button
           render={
             <a
-              href="https://leochiu-a.github.io/seo-intelligence/docs/"
+              href="https://leochiu-a.github.io/seo-intelligence/docs/features"
               target="_blank"
               rel="noopener noreferrer"
             />
           }
           variant="ghost"
-          size="sm"
-          className="text-xs text-muted-foreground"
         >
           <BookOpen size={14} />
           Docs
@@ -132,8 +130,6 @@ export function Toolbar({
             />
           }
           variant="ghost"
-          size="icon"
-          className="text-muted-foreground"
           aria-label="GitHub"
         >
           <svg viewBox="0 0 24 24" width={16} height={16} fill="currentColor">
